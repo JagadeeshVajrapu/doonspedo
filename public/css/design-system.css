@@ -1,0 +1,1214 @@
+/**
+ * Doonspedo Design System — Phase 1
+ * Shared tokens + reusable UI primitives.
+ * Lime is an accent only — never the full canvas.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. Design tokens                                                     */
+/* ------------------------------------------------------------------ */
+:root {
+    /* Brand */
+    --ds-brand: #cddc29;
+    --ds-brand-hover: #d8e640;
+    --ds-brand-pressed: #b8c61f;
+    --ds-brand-soft: rgba(205, 220, 41, 0.12);
+    --ds-brand-ring: rgba(205, 220, 41, 0.28);
+    --ds-brand-ink: #111111;
+
+    /* Surfaces — charcoal / ink / light */
+    --ds-ink: #0b0d10;
+    --ds-charcoal: #14171c;
+    --ds-charcoal-elevated: #1c2128;
+    --ds-surface: #ffffff;
+    --ds-surface-muted: #f5f6f8;
+    --ds-surface-subtle: #eef0f3;
+    --ds-page-light: #f3f5f7;
+    --ds-page-dark: #0b0d10;
+
+    /* Text */
+    --ds-text: #12151a;
+    --ds-text-secondary: #5c6570;
+    --ds-text-muted: #8a93a0;
+    --ds-text-on-dark: #f4f5f7;
+    --ds-text-on-dark-secondary: #a8b0bc;
+    --ds-text-on-brand: #111111;
+
+    /* Borders */
+    --ds-border: #e2e6eb;
+    --ds-border-strong: #cfd5dd;
+    --ds-border-dark: rgba(255, 255, 255, 0.1);
+
+    /* Status */
+    --ds-success: #1f9d55;
+    --ds-success-soft: rgba(31, 157, 85, 0.12);
+    --ds-warning: #d97706;
+    --ds-warning-soft: rgba(217, 119, 6, 0.12);
+    --ds-danger: #dc3545;
+    --ds-danger-soft: rgba(220, 53, 69, 0.12);
+    --ds-info: #2563eb;
+    --ds-info-soft: rgba(37, 99, 235, 0.12);
+
+    /* Legacy aliases (keep existing Blade/CSS working) */
+    --primary-color: var(--ds-brand);
+    --admin-primary: var(--ds-brand);
+    --dark-bg: var(--ds-page-dark);
+    --dark-card: var(--ds-charcoal-elevated);
+    --secondary-text: var(--ds-text-on-dark-secondary);
+    --admin-bg: var(--ds-page-light);
+    --admin-sidebar: var(--ds-charcoal);
+
+    /* Typography */
+    --ds-font: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --ds-fw-regular: 400;
+    --ds-fw-medium: 500;
+    --ds-fw-semibold: 600;
+    --ds-fw-bold: 700;
+    --ds-lh-tight: 1.2;
+    --ds-lh-snug: 1.35;
+    --ds-lh-normal: 1.55;
+    --ds-tracking-tight: -0.02em;
+    --ds-tracking-wide: 0.04em;
+
+    --ds-text-hero: clamp(2.25rem, 4vw, 3.5rem);
+    --ds-text-page: clamp(1.5rem, 2.5vw, 2rem);
+    --ds-text-section: clamp(1.35rem, 2vw, 1.75rem);
+    --ds-text-card: 1.125rem;
+    --ds-text-body: 1rem;
+    --ds-text-label: 0.875rem;
+    --ds-text-caption: 0.75rem;
+    --ds-text-number: clamp(1.5rem, 2vw, 2rem);
+
+    /* Spacing scale (4px base) */
+    --ds-space-1: 0.25rem;
+    --ds-space-2: 0.5rem;
+    --ds-space-3: 0.75rem;
+    --ds-space-4: 1rem;
+    --ds-space-5: 1.25rem;
+    --ds-space-6: 1.5rem;
+    --ds-space-8: 2rem;
+    --ds-space-10: 2.5rem;
+    --ds-space-12: 3rem;
+    --ds-space-16: 4rem;
+
+    /* Radius */
+    --ds-radius-sm: 8px;
+    --ds-radius-md: 12px;
+    --ds-radius-lg: 16px;
+    --ds-radius-xl: 20px;
+    --ds-radius-2xl: 24px;
+    --ds-radius-pill: 999px;
+
+    /* Shadows */
+    --ds-shadow-xs: 0 1px 2px rgba(11, 13, 16, 0.04);
+    --ds-shadow-sm: 0 2px 8px rgba(11, 13, 16, 0.06);
+    --ds-shadow-md: 0 8px 24px rgba(11, 13, 16, 0.08);
+    --ds-shadow-lg: 0 16px 40px rgba(11, 13, 16, 0.12);
+    --ds-shadow-brand: 0 10px 28px rgba(205, 220, 41, 0.28);
+
+    /* Motion */
+    --ds-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --ds-duration-fast: 150ms;
+    --ds-duration: 220ms;
+    --ds-duration-slow: 320ms;
+
+    /* Layout */
+    --ds-sidebar-width: 280px;
+    --ds-header-height: 64px;
+    --ds-container: 1140px;
+    --ds-focus-ring: 0 0 0 3px var(--ds-brand-ring);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Base                                                              */
+/* ------------------------------------------------------------------ */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--ds-font);
+    font-weight: var(--ds-fw-regular);
+    line-height: var(--ds-lh-normal);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+a {
+    transition: color var(--ds-duration) var(--ds-ease);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+:focus-visible {
+    outline: none;
+    box-shadow: var(--ds-focus-ring);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Typography utilities                                              */
+/* ------------------------------------------------------------------ */
+.ds-hero-title {
+    font-size: var(--ds-text-hero);
+    font-weight: var(--ds-fw-bold);
+    line-height: var(--ds-lh-tight);
+    letter-spacing: var(--ds-tracking-tight);
+}
+
+.ds-page-title {
+    font-size: var(--ds-text-page);
+    font-weight: var(--ds-fw-bold);
+    line-height: var(--ds-lh-tight);
+    letter-spacing: var(--ds-tracking-tight);
+}
+
+.ds-section-title {
+    font-size: var(--ds-text-section);
+    font-weight: var(--ds-fw-bold);
+    line-height: var(--ds-lh-snug);
+}
+
+.ds-card-title {
+    font-size: var(--ds-text-card);
+    font-weight: var(--ds-fw-semibold);
+    line-height: var(--ds-lh-snug);
+}
+
+.ds-body {
+    font-size: var(--ds-text-body);
+    line-height: var(--ds-lh-normal);
+}
+
+.ds-label {
+    font-size: var(--ds-text-label);
+    font-weight: var(--ds-fw-medium);
+    letter-spacing: 0.01em;
+}
+
+.ds-caption {
+    font-size: var(--ds-text-caption);
+    color: var(--ds-text-muted);
+    letter-spacing: var(--ds-tracking-wide);
+    text-transform: uppercase;
+    font-weight: var(--ds-fw-semibold);
+}
+
+.ds-number {
+    font-size: var(--ds-text-number);
+    font-weight: var(--ds-fw-bold);
+    letter-spacing: var(--ds-tracking-tight);
+    font-variant-numeric: tabular-nums;
+}
+
+.text-brand {
+    color: var(--ds-brand) !important;
+}
+
+.bg-brand {
+    background-color: var(--ds-brand) !important;
+}
+
+.bg-brand-soft {
+    background-color: var(--ds-brand-soft) !important;
+}
+
+.border-brand {
+    border-color: var(--ds-brand) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Buttons                                                           */
+/* ------------------------------------------------------------------ */
+.btn-brand,
+.ds-btn-primary {
+    background-color: var(--ds-brand);
+    color: var(--ds-text-on-brand);
+    font-weight: var(--ds-fw-bold);
+    border: none;
+    border-radius: var(--ds-radius-pill);
+    padding: 0.75rem 1.5rem;
+    transition: background-color var(--ds-duration) var(--ds-ease),
+                transform var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease),
+                color var(--ds-duration) var(--ds-ease);
+}
+
+.btn-brand:hover,
+.btn-brand:focus,
+.ds-btn-primary:hover,
+.ds-btn-primary:focus {
+    background-color: var(--ds-brand-hover);
+    color: var(--ds-text-on-brand);
+    box-shadow: var(--ds-shadow-brand);
+    transform: translateY(-1px);
+}
+
+.btn-brand:active,
+.ds-btn-primary:active {
+    background-color: var(--ds-brand-pressed);
+    transform: translateY(0);
+}
+
+.btn-outline-brand,
+.ds-btn-outline {
+    background-color: transparent;
+    color: var(--ds-brand);
+    border: 2px solid var(--ds-brand);
+    font-weight: var(--ds-fw-bold);
+    border-radius: var(--ds-radius-pill);
+    padding: 0.625rem 1.5rem;
+    transition: background-color var(--ds-duration) var(--ds-ease),
+                color var(--ds-duration) var(--ds-ease),
+                transform var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.btn-outline-brand:hover,
+.ds-btn-outline:hover {
+    background-color: var(--ds-brand);
+    color: var(--ds-text-on-brand);
+    transform: translateY(-1px);
+    box-shadow: var(--ds-shadow-brand);
+}
+
+.ds-btn-dark {
+    background-color: var(--ds-ink);
+    color: #fff;
+    font-weight: var(--ds-fw-bold);
+    border: none;
+    border-radius: var(--ds-radius-pill);
+    padding: 0.75rem 1.5rem;
+    transition: background-color var(--ds-duration) var(--ds-ease),
+                transform var(--ds-duration) var(--ds-ease);
+}
+
+.ds-btn-dark:hover {
+    background-color: #000;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.ds-btn-ghost {
+    background: transparent;
+    border: 1px solid var(--ds-border);
+    color: var(--ds-text);
+    font-weight: var(--ds-fw-semibold);
+    border-radius: var(--ds-radius-pill);
+    padding: 0.65rem 1.25rem;
+    transition: border-color var(--ds-duration) var(--ds-ease),
+                background-color var(--ds-duration) var(--ds-ease);
+}
+
+.ds-btn-ghost:hover {
+    border-color: var(--ds-brand);
+    background: var(--ds-brand-soft);
+}
+
+.btn:disabled,
+.ds-btn-primary:disabled,
+.btn-brand:disabled {
+    opacity: 0.55;
+    transform: none !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+.active-scale:active {
+    transform: scale(0.97);
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Forms                                                             */
+/* ------------------------------------------------------------------ */
+.ds-input,
+.ds-select {
+    width: 100%;
+    border-radius: var(--ds-radius-md);
+    border: 1px solid var(--ds-border);
+    background: var(--ds-surface);
+    color: var(--ds-text);
+    padding: 0.75rem 1rem;
+    font-size: var(--ds-text-body);
+    transition: border-color var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease),
+                background-color var(--ds-duration) var(--ds-ease);
+}
+
+.ds-input:focus,
+.ds-select:focus {
+    border-color: var(--ds-brand);
+    box-shadow: var(--ds-focus-ring);
+    outline: none;
+}
+
+.ds-input::placeholder {
+    color: var(--ds-text-muted);
+}
+
+.ds-label-field {
+    display: block;
+    margin-bottom: var(--ds-space-2);
+    font-size: var(--ds-text-label);
+    font-weight: var(--ds-fw-semibold);
+    color: var(--ds-text-secondary);
+}
+
+.ds-form-hint {
+    font-size: var(--ds-text-caption);
+    color: var(--ds-text-muted);
+    margin-top: var(--ds-space-2);
+}
+
+.ds-form-error {
+    font-size: var(--ds-text-caption);
+    color: var(--ds-danger);
+    margin-top: var(--ds-space-2);
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Cards                                                             */
+/* ------------------------------------------------------------------ */
+.ds-card,
+.card-premium {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    box-shadow: var(--ds-shadow-sm);
+    transition: transform var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease),
+                border-color var(--ds-duration) var(--ds-ease);
+}
+
+.ds-card:hover,
+.card-premium:hover {
+    box-shadow: var(--ds-shadow-md);
+}
+
+.ds-card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgba(205, 220, 41, 0.45);
+}
+
+.ds-stat-card {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-5);
+    box-shadow: var(--ds-shadow-xs);
+    height: 100%;
+    transition: transform var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.ds-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ds-shadow-sm);
+}
+
+.ds-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--ds-radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-brand-soft);
+    color: var(--ds-brand-ink);
+    flex-shrink: 0;
+}
+
+.ds-stat-label {
+    font-size: var(--ds-text-caption);
+    font-weight: var(--ds-fw-bold);
+    letter-spacing: var(--ds-tracking-wide);
+    text-transform: uppercase;
+    color: var(--ds-text-muted);
+    margin-bottom: var(--ds-space-2);
+}
+
+.ds-stat-value {
+    font-size: var(--ds-text-number);
+    font-weight: var(--ds-fw-bold);
+    color: var(--ds-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Dark-surface cards (marketing) */
+.ds-card-dark {
+    background: var(--ds-charcoal-elevated);
+    border: 1px solid var(--ds-border-dark);
+    border-radius: var(--ds-radius-xl);
+    color: var(--ds-text-on-dark);
+    box-shadow: var(--ds-shadow-md);
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Status badges                                                     */
+/* ------------------------------------------------------------------ */
+.ds-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--ds-radius-pill);
+    font-size: 0.75rem;
+    font-weight: var(--ds-fw-semibold);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ds-badge-brand {
+    background: var(--ds-brand-soft);
+    color: #5a6408;
+    border: 1px solid rgba(205, 220, 41, 0.35);
+}
+
+.ds-badge-success {
+    background: var(--ds-success-soft);
+    color: var(--ds-success);
+    border: 1px solid rgba(31, 157, 85, 0.25);
+}
+
+.ds-badge-warning {
+    background: var(--ds-warning-soft);
+    color: var(--ds-warning);
+    border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+.ds-badge-danger {
+    background: var(--ds-danger-soft);
+    color: var(--ds-danger);
+    border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+.ds-badge-info {
+    background: var(--ds-info-soft);
+    color: var(--ds-info);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.ds-badge-neutral {
+    background: var(--ds-surface-subtle);
+    color: var(--ds-text-secondary);
+    border: 1px solid var(--ds-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Alerts / empty / loading                                          */
+/* ------------------------------------------------------------------ */
+.ds-alert {
+    border: 1px solid transparent;
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-4) var(--ds-space-5);
+    display: flex;
+    gap: var(--ds-space-3);
+    align-items: flex-start;
+}
+
+.ds-alert-success {
+    background: var(--ds-success-soft);
+    border-color: rgba(31, 157, 85, 0.2);
+    color: #146c3a;
+}
+
+.ds-alert-warning {
+    background: var(--ds-warning-soft);
+    border-color: rgba(217, 119, 6, 0.2);
+    color: #9a5b04;
+}
+
+.ds-alert-danger {
+    background: var(--ds-danger-soft);
+    border-color: rgba(220, 53, 69, 0.2);
+    color: #a71d2a;
+}
+
+.ds-alert-info {
+    background: var(--ds-info-soft);
+    border-color: rgba(37, 99, 235, 0.2);
+    color: #1d4ed8;
+}
+
+.ds-empty {
+    text-align: center;
+    padding: var(--ds-space-12) var(--ds-space-6);
+    border: 1px dashed var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    background: var(--ds-surface-muted);
+}
+
+.ds-empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--ds-space-4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-brand-soft);
+    color: var(--ds-brand-ink);
+    font-size: 1.75rem;
+}
+
+.ds-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ds-surface-subtle) 25%,
+        #e8ebf0 37%,
+        var(--ds-surface-subtle) 63%
+    );
+    background-size: 400% 100%;
+    animation: ds-skeleton 1.4s ease infinite;
+    border-radius: var(--ds-radius-sm);
+}
+
+@keyframes ds-skeleton {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. Tables                                                            */
+/* ------------------------------------------------------------------ */
+.ds-table-wrap {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--ds-shadow-xs);
+}
+
+.ds-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ds-table thead th {
+    background: var(--ds-surface-muted);
+    color: var(--ds-text-secondary);
+    font-size: var(--ds-text-caption);
+    font-weight: var(--ds-fw-bold);
+    letter-spacing: var(--ds-tracking-wide);
+    text-transform: uppercase;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--ds-border);
+    white-space: nowrap;
+}
+
+.ds-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--ds-border);
+    color: var(--ds-text);
+    vertical-align: middle;
+}
+
+.ds-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ds-table tbody tr {
+    transition: background-color var(--ds-duration-fast) var(--ds-ease);
+}
+
+.ds-table tbody tr:hover {
+    background: var(--ds-surface-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* 10. Tabs / nav chips                                                 */
+/* ------------------------------------------------------------------ */
+.ds-tabs {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--ds-surface-subtle);
+    border-radius: var(--ds-radius-lg);
+}
+
+.ds-tab {
+    border: none;
+    background: transparent;
+    color: var(--ds-text-secondary);
+    font-weight: var(--ds-fw-semibold);
+    font-size: var(--ds-text-label);
+    padding: 0.55rem 1rem;
+    border-radius: var(--ds-radius-md);
+    transition: background-color var(--ds-duration) var(--ds-ease),
+                color var(--ds-duration) var(--ds-ease);
+}
+
+.ds-tab:hover {
+    color: var(--ds-text);
+}
+
+.ds-tab.is-active,
+.ds-tab.active {
+    background: var(--ds-brand);
+    color: var(--ds-text-on-brand);
+}
+
+/* ------------------------------------------------------------------ */
+/* 11. Modals / toasts helpers                                          */
+/* ------------------------------------------------------------------ */
+.ds-modal .modal-content {
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    box-shadow: var(--ds-shadow-lg);
+    overflow: hidden;
+}
+
+.ds-modal .modal-header {
+    border-bottom: 1px solid var(--ds-border);
+    padding: var(--ds-space-5) var(--ds-space-6);
+}
+
+.ds-modal .modal-footer {
+    border-top: 1px solid var(--ds-border);
+    padding: var(--ds-space-4) var(--ds-space-6);
+}
+
+.ds-toast {
+    border-radius: var(--ds-radius-lg);
+    border: 1px solid var(--ds-border);
+    box-shadow: var(--ds-shadow-md);
+    background: var(--ds-surface);
+}
+
+/* ------------------------------------------------------------------ */
+/* 12. Sidebar shell (admin / driver / branch)                          */
+/* Dark charcoal canvas + lime for active / accents only                */
+/* ------------------------------------------------------------------ */
+.ds-sidebar,
+.sidebar {
+    min-width: var(--ds-sidebar-width);
+    max-width: var(--ds-sidebar-width);
+    min-height: 100vh;
+    background: var(--ds-charcoal) !important;
+    color: var(--ds-text-on-dark) !important;
+    border-right: 1px solid var(--ds-border-dark) !important;
+    transition: transform var(--ds-duration-slow) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.ds-sidebar .nav-link,
+.sidebar .nav-link {
+    color: var(--ds-text-on-dark-secondary) !important;
+    border-radius: var(--ds-radius-md);
+    margin: 2px 0;
+    font-weight: var(--ds-fw-semibold);
+    transition: background-color var(--ds-duration) var(--ds-ease),
+                color var(--ds-duration) var(--ds-ease),
+                transform var(--ds-duration) var(--ds-ease);
+}
+
+.ds-sidebar .nav-link:hover,
+.sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--ds-text-on-dark) !important;
+}
+
+.ds-sidebar .nav-link.active,
+.sidebar .nav-link.active {
+    background: var(--ds-brand) !important;
+    color: var(--ds-text-on-brand) !important;
+    box-shadow: none;
+}
+
+.ds-sidebar .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] i.bi-chevron-down,
+.sidebar .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] i.bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.ds-sidebar .nav-link i.bi-chevron-down,
+.sidebar .nav-link i.bi-chevron-down {
+    transition: transform var(--ds-duration) var(--ds-ease);
+}
+
+.ds-sidebar .collapse ul .nav-link,
+.sidebar .collapse ul .nav-link {
+    color: var(--ds-text-on-dark-secondary) !important;
+    opacity: 1;
+    font-size: 0.9rem;
+    font-weight: var(--ds-fw-medium);
+}
+
+.ds-sidebar .collapse ul .nav-link:hover,
+.sidebar .collapse ul .nav-link:hover {
+    color: var(--ds-text-on-dark) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.ds-sidebar .collapse ul .nav-link.active,
+.sidebar .collapse ul .nav-link.active {
+    background: var(--ds-brand-soft) !important;
+    color: var(--ds-brand) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* 13. Page chrome helpers                                              */
+/* ------------------------------------------------------------------ */
+.ds-page {
+    background: var(--ds-page-light);
+    min-height: 100vh;
+}
+
+.ds-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-4);
+    margin-bottom: var(--ds-space-6);
+}
+
+.ds-divider {
+    height: 3px;
+    width: 48px;
+    border-radius: 2px;
+    background: var(--ds-brand);
+}
+
+.ds-surface {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+}
+
+.transition-transform {
+    transition: transform var(--ds-duration) var(--ds-ease);
+}
+
+.rounded-4 { border-radius: var(--ds-radius-xl) !important; }
+.rounded-5 { border-radius: 2.5rem !important; }
+
+/* ------------------------------------------------------------------ */
+/* 14. Wallet visual-state placeholders (UI only — not wired)           */
+/* ------------------------------------------------------------------ */
+.ds-wallet-card {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    padding: var(--ds-space-6);
+    box-shadow: var(--ds-shadow-sm);
+}
+
+.ds-wallet-balance {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: var(--ds-fw-bold);
+    letter-spacing: var(--ds-tracking-tight);
+    font-variant-numeric: tabular-nums;
+}
+
+.ds-wallet-state-low {
+    border-color: rgba(217, 119, 6, 0.45);
+    background: linear-gradient(180deg, #fffaf3 0%, var(--ds-surface) 48%);
+}
+
+.ds-wallet-state-blocked {
+    border-color: rgba(220, 53, 69, 0.4);
+    background: linear-gradient(180deg, #fff5f5 0%, var(--ds-surface) 48%);
+}
+
+/* ------------------------------------------------------------------ */
+/* 15. Reduced motion                                                   */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* 16. Phase 6 — Global polish & consistency                            */
+/* ------------------------------------------------------------------ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Focus visibility for interactive controls */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--ds-brand);
+    outline-offset: 2px;
+}
+
+/* Soften Bootstrap primary toward brand ink where used as accent chrome */
+.btn-primary {
+    --bs-btn-bg: var(--ds-ink);
+    --bs-btn-border-color: var(--ds-ink);
+    --bs-btn-hover-bg: #000;
+    --bs-btn-hover-border-color: #000;
+    --bs-btn-active-bg: #000;
+    --bs-btn-active-border-color: #000;
+    --bs-btn-font-weight: 700;
+    border-radius: var(--ds-radius-pill);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--ds-ink);
+    --bs-btn-border-color: var(--ds-border-strong);
+    --bs-btn-hover-bg: var(--ds-brand-soft);
+    --bs-btn-hover-border-color: var(--ds-brand);
+    --bs-btn-hover-color: var(--ds-ink);
+    border-radius: var(--ds-radius-pill);
+    font-weight: 600;
+}
+
+.btn-sm {
+    min-height: 32px;
+}
+
+.btn:not(.btn-sm):not(.btn-lg) {
+    min-height: 42px;
+}
+
+/* Icon-only circular controls */
+.btn.rounded-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.45rem;
+}
+
+/* Modal consistency */
+.modal-content {
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    box-shadow: var(--ds-shadow-lg);
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom-color: var(--ds-border);
+}
+
+.modal-footer {
+    border-top-color: var(--ds-border);
+}
+
+.modal-dialog-scrollable .modal-body {
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 0.75rem;
+        max-width: calc(100% - 1.5rem);
+    }
+}
+
+/* Table numeric alignment helper */
+.table .text-end,
+.table td.text-end,
+.table th.text-end {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Prevent long unbroken strings from blowing layout */
+.table td,
+.ds-card,
+.admin-card,
+.drv-card,
+.rider-booking-sheet {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Long addresses / IDs */
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Dropdown polish */
+.dropdown-menu {
+    border-radius: var(--ds-radius-lg);
+    border-color: var(--ds-border);
+    box-shadow: var(--ds-shadow-md);
+    padding: 0.4rem;
+}
+
+.dropdown-item {
+    border-radius: var(--ds-radius-md);
+    font-weight: 500;
+}
+
+.dropdown-item:active {
+    background-color: var(--ds-brand);
+    color: var(--ds-text-on-brand);
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: var(--ds-radius-md) !important;
+    margin: 0 0.15rem;
+    color: var(--ds-text);
+    border-color: var(--ds-border);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--ds-ink);
+    border-color: var(--ds-ink);
+}
+
+/* Desktop content rhythm */
+@media (min-width: 1400px) {
+    .admin-shell .admin-content,
+    .driver-shell .main-content {
+        max-width: 1440px;
+    }
+}
+
+/* Shared page container */
+.ds-container-narrow {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+}
+
+.ds-container-wide {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* 17. Phase 7 — Accessibility deep pass                                */
+/* ------------------------------------------------------------------ */
+
+/* Skip link — first focusable control in layouts */
+.ds-skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100000;
+    padding: 0.65rem 1rem;
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-ink);
+    color: #fff;
+    font-weight: var(--ds-fw-bold);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 0.15s ease;
+    box-shadow: var(--ds-shadow-md);
+}
+
+.ds-skip-link:focus,
+.ds-skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--ds-brand);
+    outline-offset: 3px;
+    color: #fff;
+}
+
+/* Visually hidden but available to AT / focusable when needed */
+.ds-visually-hidden,
+.ds-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.ds-visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Stronger dual-surface focus (overrides early outline:none) */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.page-link:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible,
+.dropdown-item:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid var(--ds-ink) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(205, 220, 41, 0.45) !important;
+}
+
+/* Focus on dark / charcoal chrome */
+.navbar-dark a:focus-visible,
+.navbar-dark button:focus-visible,
+.ds-sidebar a:focus-visible,
+.ds-sidebar button:focus-visible,
+.offcanvas.sidebar a:focus-visible,
+.offcanvas.sidebar button:focus-visible,
+.public-nav a:focus-visible,
+.public-nav button:focus-visible {
+    outline-color: var(--ds-brand) !important;
+    box-shadow: 0 0 0 4px rgba(205, 220, 41, 0.35) !important;
+}
+
+/* Active nav — not color alone */
+.nav-link.active,
+.nav-link.is-active,
+.rider-nav-item.is-active,
+.driver-nav-item.is-active,
+.public-nav .nav-link.is-active {
+    font-weight: var(--ds-fw-bold);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 2px;
+}
+
+.ds-sidebar .nav-link.active,
+.driver-shell .nav-link.active {
+    text-decoration: none;
+    box-shadow: inset 3px 0 0 var(--ds-ink);
+}
+
+/* Brand buttons: never rely on white-on-lime */
+.btn-brand,
+.btn-brand:hover,
+.btn-brand:focus-visible,
+.bg-brand,
+.badge.bg-brand {
+    color: #111 !important;
+}
+
+/* Readable placeholders */
+.form-control::placeholder,
+.form-select::placeholder,
+.clean-input::placeholder {
+    color: #5c6570 !important;
+    opacity: 1;
+}
+
+/* Touch targets */
+.ds-touch-target,
+.rider-bottom-nav .rider-nav-item,
+.driver-bottom-nav .driver-nav-item {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+.btn.btn-link.p-0 {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mobile readable inputs (avoid iOS zoom + clipping) */
+@media (max-width: 991.98px) {
+    .form-control,
+    .form-select,
+    .clean-input,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"],
+    input[type="search"],
+    textarea {
+        font-size: 16px !important;
+        line-height: 1.4;
+    }
+}
+
+/* Status live region helper */
+.ds-live-status[aria-live] {
+    /* presentation only — no visual change required */
+}
+
+/* Modal close affordance */
+.modal .btn-close:focus-visible {
+    outline: 2px solid var(--ds-ink) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(205, 220, 41, 0.45) !important;
+    opacity: 1;
+}
+
+/* FAQ collapsed panels stay out of tab order when hidden via CSS */
+.faq-body[aria-hidden="true"] {
+    visibility: hidden;
+}
+
+.faq-card.active-faq .faq-body[aria-hidden="false"],
+.faq-card.active-faq .faq-body:not([aria-hidden]) {
+    visibility: visible;
+}
+
+/* Reduced motion — keep useful state changes, drop decorative motion */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    .active-scale:hover,
+    .active-scale:active {
+        transform: none !important;
+    }
+
+    .nav-link:hover {
+        transform: none !important;
+    }
+
+    .pub-hero-media img,
+    .online-indicator,
+    .pin-wrapper {
+        animation: none !important;
+        transition: none !important;
+    }
+}

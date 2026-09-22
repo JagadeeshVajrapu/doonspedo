@@ -1,0 +1,29 @@
+{
+    "name": "Doonspedo Driver",
+    "short_name": "DoonDriver",
+    "description": "Manage your rides and earnings as a Doonspedo driver partner.",
+    "start_url": "/driver/login",
+    "display": "standalone",
+    "background_color": "#0b0d10",
+    "theme_color": "#cddc29",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "orientation": "portrait",
+    "categories": [
+        "travel",
+        "transportation",
+        "business"
+    ]
+}

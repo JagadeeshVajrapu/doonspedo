@@ -1,0 +1,50 @@
+@extends('layouts.app')
+
+@section('title', 'Rider Registration - Doonspedo')
+@section('body_class', 'rider-auth-page')
+
+@section('content')
+<div class="rider-auth-card mx-auto">
+    <div class="text-center mb-4">
+        <a href="{{ url('/') }}">
+            <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" class="auth-logo mb-3">
+        </a>
+        <h1 class="h3 fw-bold mb-1 text-dark-custom">Create account</h1>
+        <p class="text-muted small mb-0">Join Doonspedo and start booking rides</p>
+    </div>
+
+    @if($errors->any())
+        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 small mb-4" role="alert">
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('register.submit') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label class="form-label text-dark-custom small fw-bold" for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" name="name" class="form-control clean-input" placeholder="Enter your name" required value="{{ old('name') }}" autocomplete="name">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-dark-custom small fw-bold" for="reg-mobile">Mobile Number</label>
+            <input type="tel" id="reg-mobile" name="mobile" class="form-control clean-input" placeholder="+91 00000 00000" required value="{{ old('mobile', session('rider_mobile')) }}" autocomplete="tel">
+        </div>
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-clean py-3 shadow active-scale mb-3">
+                Create Account <i class="bi bi-person-plus ms-2" aria-hidden="true"></i>
+            </button>
+        </div>
+    </form>
+
+    <div class="text-center">
+        <p class="text-muted small mb-3">Already have an account? <a href="{{ route('login') }}" class="text-dark-custom text-decoration-none fw-bold">Login</a></p>
+        <a href="{{ url('/') }}" class="text-muted text-decoration-none small">← Back to website</a>
+    </div>
+</div>
+@endsection

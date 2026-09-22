@@ -1,0 +1,721 @@
+/**
+ * Doonspedo Backend — admin / driver / branch surfaces
+ * Extends design-system.css (must load first).
+ */
+
+body {
+    background-color: var(--ds-page-light);
+    font-family: var(--ds-font);
+    color: var(--ds-text);
+}
+
+/* Cards — subtle lift; no transform jank on dense admin tables */
+.card {
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    box-shadow: var(--ds-shadow-xs);
+    background: var(--ds-surface);
+    transition: box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.card:hover {
+    box-shadow: var(--ds-shadow-sm);
+}
+
+/* Login surfaces */
+.login-card {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    box-shadow: var(--ds-shadow-md);
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background:
+        radial-gradient(ellipse at top right, rgba(205, 220, 41, 0.18), transparent 45%),
+        var(--ds-page-light);
+}
+
+/* Admin/driver form polish */
+.form-control,
+.form-select {
+    border-radius: var(--ds-radius-md);
+    border-color: var(--ds-border);
+    padding: 0.65rem 0.9rem;
+    transition: border-color var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ds-brand);
+    box-shadow: var(--ds-focus-ring);
+}
+
+.form-label {
+    font-size: var(--ds-text-label);
+    font-weight: 600;
+    color: var(--ds-text-secondary);
+}
+
+/* Tables inside admin */
+.table {
+    --bs-table-bg: transparent;
+}
+
+.table thead th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ds-text-secondary);
+    font-weight: 700;
+    border-bottom-color: var(--ds-border);
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.9rem 0.85rem;
+}
+
+/* Badges map Bootstrap variants toward design system */
+.badge.bg-success {
+    background-color: var(--ds-success) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--ds-warning-soft) !important;
+    color: var(--ds-warning) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--ds-danger) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--ds-info) !important;
+}
+
+/* Search inputs in sidebar */
+.sidebar .form-control {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--ds-text-on-dark);
+}
+
+.sidebar .form-control::placeholder {
+    color: var(--ds-text-on-dark-secondary);
+}
+
+.sidebar .form-control:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--ds-brand);
+    color: #fff;
+    box-shadow: var(--ds-focus-ring);
+}
+
+.sidebar .input-group-text {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--ds-text-on-dark-secondary);
+}
+
+/* Logo / brand text contrast on dark sidebar */
+.sidebar .text-brand {
+    color: var(--ds-brand) !important;
+}
+
+.sidebar h3,
+.sidebar h6,
+.sidebar .small {
+    color: inherit;
+}
+
+/* Soften driver sidebar profile text for dark canvas */
+.sidebar .text-dark {
+    color: var(--ds-text-on-dark) !important;
+}
+
+.sidebar .border-light,
+.sidebar .border-bottom.border-light,
+.sidebar .border-top.border-light {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.sidebar .btn-outline-danger {
+    border-color: rgba(220, 53, 69, 0.55);
+    color: #ff8a95;
+}
+
+.sidebar .btn-outline-danger:hover {
+    background: var(--ds-danger);
+    border-color: var(--ds-danger);
+    color: #fff;
+}
+
+/* ================================================================== */
+/* Phase 4 — Driver / captain experience                                */
+/* ================================================================== */
+
+.driver-shell .main-content {
+    padding-bottom: 5.5rem;
+}
+
+@media (min-width: 992px) {
+    .driver-shell .main-content {
+        padding-bottom: 2.5rem;
+    }
+}
+
+.drv-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.drv-page-header h1,
+.drv-page-header h3 {
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.25rem;
+    color: var(--ds-text, #12151a);
+}
+
+.drv-card {
+    background: #fff;
+    border: 1px solid var(--ds-border, #e2e6eb);
+    border-radius: 18px;
+    box-shadow: var(--ds-shadow-xs, 0 1px 2px rgba(11,13,16,.04));
+    overflow: hidden;
+}
+
+.drv-stat {
+    background: #fff;
+    border: 1px solid var(--ds-border, #e2e6eb);
+    border-radius: 16px;
+    padding: 1.15rem 1.25rem;
+    height: 100%;
+    box-shadow: var(--ds-shadow-xs);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drv-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ds-shadow-sm);
+}
+
+.drv-stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-muted, #8a93a0);
+    margin-bottom: 0.35rem;
+}
+
+.drv-stat-value {
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ds-text, #12151a);
+    font-variant-numeric: tabular-nums;
+}
+
+.drv-online-panel {
+    text-align: center;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+}
+
+.drv-online-panel.is-online {
+    background: linear-gradient(180deg, rgba(31,157,85,0.08), transparent 55%);
+}
+
+.drv-online-panel.is-offline {
+    background: linear-gradient(180deg, rgba(138,147,160,0.08), transparent 55%);
+}
+
+.drv-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.drv-status-pill.online {
+    background: var(--ds-success-soft, rgba(31,157,85,.12));
+    color: var(--ds-success, #1f9d55);
+}
+
+.drv-status-pill.offline {
+    background: var(--ds-surface-subtle, #eef0f3);
+    color: var(--ds-text-secondary, #5c6570);
+}
+
+.drv-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+@media (min-width: 576px) {
+    .drv-quick-actions {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.drv-quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ds-text);
+    background: #fff;
+    border: 1px solid var(--ds-border);
+    border-radius: 14px;
+    padding: 1rem 0.75rem;
+    min-height: 92px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.drv-quick-action i {
+    font-size: 1.35rem;
+    color: #3d4508;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--ds-brand-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drv-quick-action:hover {
+    border-color: rgba(205, 220, 41, 0.55);
+    background: #fcfef0;
+    color: var(--ds-text);
+    transform: translateY(-2px);
+}
+
+/* Driver bottom nav */
+.driver-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1040;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.55rem 0.35rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--ds-border);
+    box-shadow: 0 -8px 24px rgba(11, 13, 16, 0.08);
+}
+
+@media (min-width: 992px) {
+    .driver-bottom-nav { display: none; }
+}
+
+.driver-nav-item {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ds-text-muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.35rem 0.2rem;
+    border-radius: 12px;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+}
+
+.driver-nav-item i {
+    font-size: 1.3rem;
+}
+
+.driver-nav-item.is-active,
+.driver-nav-item:hover {
+    color: #3d4508;
+    background: var(--ds-brand-soft);
+}
+
+/* Sidebar grouping */
+.ds-sidebar .nav-section-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    padding: 0.85rem 0.75rem 0.35rem;
+}
+
+.ds-sidebar .nav-link {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+/* Mobile bid/ride cards */
+@media (max-width: 767.98px) {
+    .drv-responsive-table thead { display: none; }
+    .drv-responsive-table,
+    .drv-responsive-table tbody,
+    .drv-responsive-table tr,
+    .drv-responsive-table td {
+        display: block;
+        width: 100%;
+    }
+    .drv-responsive-table tr {
+        border: 1px solid var(--ds-border);
+        border-radius: 14px;
+        margin-bottom: 0.85rem;
+        padding: 0.85rem;
+        background: #fff;
+    }
+    .drv-responsive-table td {
+        padding: 0.35rem 0 !important;
+        text-align: left !important;
+        border: 0 !important;
+    }
+}
+
+.extra-small { font-size: 0.72rem; }
+.active-scale:active { transform: scale(0.98); }
+
+/* ================================================================== */
+/* Phase 5 — Admin / Branch operations shell                            */
+/* ================================================================== */
+
+.admin-shell {
+    background: var(--ds-page-light, #f3f5f7);
+}
+
+.admin-shell .admin-main {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-shell .admin-content {
+    flex-grow: 1;
+    padding: 1.25rem 1rem 2rem;
+}
+
+@media (min-width: 768px) {
+    .admin-shell .admin-content {
+        padding: 1.75rem 2rem 2.5rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .admin-shell .admin-content {
+        padding: 2rem 2.5rem 3rem;
+    }
+}
+
+/* Desktop sidebar sticky; mobile off-canvas handled in layout */
+.admin-shell .sidebar.ds-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    max-height: 100vh;
+    overflow-y: auto;
+    z-index: 1040;
+}
+
+@media (max-width: 991.98px) {
+    .admin-shell > .d-flex > .sidebar.ds-sidebar {
+        display: none !important;
+    }
+}
+
+.admin-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ds-border, #e2e6eb);
+}
+
+.admin-topbar-titles h1 {
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.15rem;
+    color: var(--ds-text, #12151a);
+}
+
+.admin-topbar-search {
+    flex: 1 1 220px;
+    max-width: 420px;
+}
+
+.admin-card {
+    background: #fff;
+    border: 1px solid var(--ds-border, #e2e6eb);
+    border-radius: 16px;
+    box-shadow: var(--ds-shadow-xs, 0 1px 2px rgba(11,13,16,.04));
+    overflow: hidden;
+}
+
+.admin-card:hover {
+    transform: none;
+    box-shadow: var(--ds-shadow-sm, 0 4px 12px rgba(11,13,16,.06));
+}
+
+.admin-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ds-border, #e2e6eb);
+    background: #fff;
+}
+
+.admin-card-header h2,
+.admin-card-header h5,
+.admin-card-header .admin-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-filter-bar {
+    background: #fff;
+    border: 1px solid var(--ds-border);
+    border-radius: 16px;
+    padding: 1rem 1.15rem;
+    margin-bottom: 1.25rem;
+}
+
+.admin-kpi {
+    background: #fff;
+    border: 1px solid var(--ds-border);
+    border-radius: 16px;
+    padding: 1.15rem 1.25rem;
+    height: 100%;
+    box-shadow: var(--ds-shadow-xs);
+}
+
+.admin-kpi-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-muted, #8a93a0);
+    margin-bottom: 0.35rem;
+}
+
+.admin-kpi-value {
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-text);
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-shell .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8f9fb;
+    white-space: nowrap;
+}
+
+.admin-shell .table tbody tr:hover {
+    background: rgba(205, 220, 41, 0.06);
+}
+
+.admin-mobile-bar {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .admin-mobile-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.admin-offcanvas.sidebar {
+    max-width: min(86vw, 300px);
+    min-width: 0;
+    width: min(86vw, 300px);
+}
+
+.admin-footer {
+    border-top: 1px solid var(--ds-border);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    color: var(--ds-text-muted);
+    font-size: 0.85rem;
+    background: transparent;
+}
+
+/* Soften default card hover lift in admin lists */
+.admin-shell .card:hover {
+    transform: none;
+}
+
+.admin-shell .btn-brand {
+    background: #cddc29;
+    color: #111;
+    border-color: #cddc29;
+    font-weight: 700;
+}
+
+.admin-shell .btn-brand:hover {
+    background: #b9c825;
+    color: #111;
+}
+
+@media (max-width: 767.98px) {
+    .admin-responsive-table thead { display: none; }
+    .admin-responsive-table,
+    .admin-responsive-table tbody,
+    .admin-responsive-table tr,
+    .admin-responsive-table td {
+        display: block;
+        width: 100%;
+    }
+    .admin-responsive-table tr {
+        border: 1px solid var(--ds-border);
+        border-radius: 14px;
+        margin-bottom: 0.85rem;
+        padding: 0.9rem;
+        background: #fff;
+    }
+    .admin-responsive-table td {
+        padding: 0.35rem 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+    }
+}
+
+/* ================================================================== */
+/* Phase 6 — Admin / driver global polish                               */
+/* ================================================================== */
+
+/* Shared brand utility aliases already in design-system; keep local
+   btn-brand overrides aligned with tokens */
+.btn-brand {
+    background-color: var(--ds-brand) !important;
+    color: var(--ds-text-on-brand) !important;
+    border-color: var(--ds-brand) !important;
+}
+
+.btn-brand:hover,
+.btn-brand:focus {
+    background-color: var(--ds-brand-hover) !important;
+    color: var(--ds-text-on-brand) !important;
+}
+
+/* Driver dark theme (moved from layout inline where possible) */
+.driver-shell.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.driver-shell.dark-mode .card,
+.driver-shell.dark-mode .drv-card,
+.driver-shell.dark-mode .drv-stat,
+.driver-shell.dark-mode .admin-card {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border-color: #333 !important;
+}
+
+.driver-shell.dark-mode .text-dark { color: #fff !important; }
+.driver-shell.dark-mode .text-muted { color: #aaa !important; }
+.driver-shell.dark-mode .bg-white { background-color: #1e1e1e !important; }
+.driver-shell.dark-mode .bg-light { background-color: #2a2a2a !important; }
+.driver-shell.dark-mode .table { color: #e0e0e0 !important; }
+.driver-shell.dark-mode .form-control,
+.driver-shell.dark-mode .form-select {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #fff;
+}
+.driver-shell.dark-mode .modal-content {
+    background-color: #1e1e1e;
+    color: #fff;
+}
+.driver-shell.dark-mode .dropdown-menu {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+.driver-shell.dark-mode .dropdown-item { color: #e0e0e0; }
+.driver-shell.dark-mode .dropdown-item:hover { background-color: #333; }
+
+/* Ensure fixed driver bottom nav never covers last actions */
+.driver-shell .main-content {
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 992px) {
+    .driver-shell .main-content {
+        padding-bottom: 2.5rem;
+    }
+}
+
+/* Admin filter collapse helper for very small screens */
+@media (max-width: 575.98px) {
+    .admin-filter-bar .form-select,
+    .admin-filter-bar .form-control,
+    .admin-topbar-search .form-control {
+        font-size: 16px; /* prevent iOS zoom */
+    }
+
+    .admin-kpi-value {
+        font-size: 1.25rem;
+    }
+}
+
+/* Prevent sticky table headers from stacking oddly inside nested scrolls */
+.admin-shell .admin-table-wrap {
+    max-width: 100%;
+}
+
+/* Finance amount emphasis */
+.admin-shell .text-success.fw-bold,
+.admin-shell .text-danger.fw-bold,
+.driver-shell .text-success.fw-bold,
+.driver-shell .text-danger.fw-bold {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}

@@ -1,0 +1,28 @@
+{
+    "name": "Doonspedo - Premium Rides",
+    "short_name": "Doonspedo",
+    "description": "Book your premium ride with Doonspedo instantly.",
+    "start_url": "/app",
+    "display": "standalone",
+    "background_color": "#0b0d10",
+    "theme_color": "#cddc29",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/1048/1048313.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/1048/1048313.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "orientation": "portrait",
+    "categories": [
+        "travel",
+        "transportation"
+    ]
+}

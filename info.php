@@ -1,0 +1,1 @@
+<?php echo 'ACTIVE_ROOT_IS_FTP_ROOT_' . basename(__DIR__); ?>
