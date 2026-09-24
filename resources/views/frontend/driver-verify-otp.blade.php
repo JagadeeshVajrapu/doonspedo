@@ -18,8 +18,13 @@
                 </div>
 
                 @if(session('error'))
-                    <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 small mb-3">
+                    <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 small mb-3" role="alert">
                         {{ session('error') }}
+                    </div>
+                @endif
+                @if(session('success'))
+                    <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 small mb-3" role="alert">
+                        {{ session('success') }}
                     </div>
                 @endif
 
@@ -44,6 +49,7 @@
                     <form action="{{ route('driver.login.sendOtp') }}" method="POST">
                         @csrf
                         <input type="hidden" name="mobile" value="{{ session('mobile') }}">
+                        <input type="hidden" name="branch_id" value="{{ session('branch_id') }}">
                         <button type="submit" class="btn btn-link text-dark-custom text-decoration-none fw-bold p-0 small">Resend OTP</button>
                     </form>
                     <div class="mt-4">

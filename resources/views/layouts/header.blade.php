@@ -1,5 +1,5 @@
 {{-- Public site navbar — preserves auth/role links and existing routes --}}
-<nav class="navbar navbar-expand-lg navbar-dark public-nav sticky-top py-3" aria-label="Primary">
+<nav class="navbar navbar-expand-lg navbar-light public-nav sticky-top py-3" aria-label="Primary">
     @if(session('error'))
         <div class="position-absolute w-100" style="top: 0; left: 0; z-index: 1050;">
             <div class="alert alert-danger bg-danger text-white border-0 text-center m-0 rounded-0 fs-6 py-2 shadow-sm" role="alert">
@@ -10,11 +10,11 @@
     @endif
 
     <div class="container">
-        <a class="navbar-brand text-brand fw-bold fs-3 mb-0" href="{{ url('/') }}">
+        <a class="navbar-brand fw-bold fs-3 mb-0" href="{{ url('/') }}">
             @if(!empty($sys_settings['app_logo']))
-                <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" width="140" height="40" decoding="async" style="max-height: 40px; width: auto;">
+                <img class="public-logo" src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" width="148" height="44" decoding="async">
             @else
-                {{ $sys_settings['app_name'] ?? 'Doonspedo' }}
+                <span class="text-brand">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</span>
             @endif
         </a>
 
@@ -81,7 +81,7 @@
                 @endif
 
                 <li class="nav-item">
-                    <a class="btn btn-brand btn-book-cta px-4 py-2" href="{{ route('rider.app') }}">Book Now</a>
+                    <a class="btn btn-brand btn-book-cta px-4" href="{{ route('rider.app') }}">Book Now</a>
                 </li>
             </ul>
         </div>

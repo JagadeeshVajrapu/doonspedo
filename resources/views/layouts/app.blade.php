@@ -37,8 +37,32 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
+        @php
+            $rawThemeColor = (string) ($sys_settings['theme_color'] ?? '#cddc29');
+            $hex = ltrim($rawThemeColor, '#');
+            if (strlen($hex) === 3) {
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+            }
+            $brandSafe = $rawThemeColor;
+            if (strlen($hex) === 6 && ctype_xdigit($hex)) {
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                $luma = (0.299 * $r) + (0.587 * $g) + (0.114 * $b);
+                // Ultra-light yellow/lime (e.g. #ffff66) is unreadable on white — use teal accents
+                if ($luma >= 180) {
+                    $brandSafe = '#0F766E';
+                }
+            }
+        @endphp
         :root {
-            --ds-brand: {{ $sys_settings['theme_color'] ?? '#cddc29' }};
+            --ds-brand: {{ $brandSafe }};
+            --ds-brand-hover: {{ $brandSafe === '#0F766E' ? '#0d9488' : '#d8e640' }};
+            --ds-brand-pressed: {{ $brandSafe === '#0F766E' ? '#115E59' : '#b8c61f' }};
+            --ds-brand-soft: {{ $brandSafe === '#0F766E' ? 'rgba(15, 118, 110, 0.12)' : 'rgba(205, 220, 41, 0.12)' }};
+            --ds-brand-ring: {{ $brandSafe === '#0F766E' ? 'rgba(15, 118, 110, 0.28)' : 'rgba(205, 220, 41, 0.28)' }};
+            --ds-brand-ink: {{ $brandSafe === '#0F766E' ? '#ffffff' : '#111111' }};
+            --ds-text-on-brand: {{ $brandSafe === '#0F766E' ? '#ffffff' : '#111111' }};
             --primary-color: var(--ds-brand);
             --bg-base: {{ session('theme') == 'light' ? '#f3f5f7' : '#0b0d10' }};
             --bg-card: {{ session('theme') == 'light' ? '#ffffff' : '#1c2128' }};

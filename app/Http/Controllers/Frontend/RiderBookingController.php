@@ -14,19 +14,19 @@ class RiderBookingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pickup_location'    => 'required|string',
-            'dropoff_location'   => 'required|string',
-            'service_type'      => 'required|in:ride,rental,parcel,freight',
-            'vehicle_category_id' => 'nullable|exists:vehicle_categories,id',
-            'fare'               => 'nullable|numeric',
-            'payment_method'     => 'required|string|in:cash,wallet,online',
-            'notes'              => 'nullable|string',
-            'parcel_details'     => 'nullable|string',
-            'pickup_lat'         => 'nullable|numeric',
-            'pickup_lng'         => 'nullable|numeric',
-            'dropoff_lat'        => 'nullable|numeric',
-            'dropoff_lng'        => 'nullable|numeric',
-            'distance'           => 'nullable|numeric',
+            'pickup_location'     => 'required|string|max:500',
+            'dropoff_location'    => 'required|string|max:500',
+            'service_type'        => 'required|in:ride,rental,parcel,freight',
+            'vehicle_category_id' => 'required|exists:vehicle_categories,id',
+            'fare'                => 'required|numeric|min:0',
+            'payment_method'      => 'required|string|in:cash,wallet,online',
+            'notes'               => 'nullable|string|max:1000',
+            'parcel_details'      => 'nullable|string|max:1000',
+            'pickup_lat'          => 'required|numeric|between:-90,90',
+            'pickup_lng'          => 'required|numeric|between:-180,180',
+            'dropoff_lat'         => 'required|numeric|between:-90,90',
+            'dropoff_lng'         => 'required|numeric|between:-180,180',
+            'distance'            => 'nullable|numeric|min:0',
         ]);
 
         if ($request->payment_method === 'wallet') {
@@ -136,15 +136,19 @@ class RiderBookingController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot cancel a completed or already cancelled ride.'], 403);
         }
 
+        $wasPending = $booking->status === 'pending';
+
         $booking->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
-            'notes' => $booking->notes . "\nCancellation Reason: " . $request->reason
+            'notes' => trim(($booking->notes ?? '') . "\nCancellation Reason: " . ($request->reason ?? 'Cancelled by rider')),
         ]);
 
-        // Also reject all bids if it was pending
-        if ($booking->status == 'pending') {
-            Bid::where('booking_id', $booking->id)->update(['status' => 'rejected']);
+        // Reject open bids for cancelled pending requests
+        if ($wasPending) {
+            Bid::where('booking_id', $booking->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'rejected']);
         }
 
         return response()->json([

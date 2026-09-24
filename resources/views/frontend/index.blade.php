@@ -1,15 +1,10 @@
 @extends('layouts.app')
 
 @section('title', 'Welcome to Doonspedo')
-
-@php
-    $heroImagePreload = !empty($sys_settings['hero_image'] ?? null)
-        ? asset($sys_settings['hero_image'])
-        : 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1400&q=75';
-@endphp
+@section('body_class', 'pub-home')
 
 @section('styles')
-<link rel="preload" as="image" href="{{ $heroImagePreload }}" fetchpriority="high">
+<link rel="preload" as="image" href="{{ asset('uploads/homepage/hero_mobility.jpg') }}" fetchpriority="high">
 @endsection
 
 @section('scripts')
@@ -54,13 +49,10 @@
     $heroSubtitle = $sys_settings['hero_subtitle'] ?? 'Book city rides and parcel deliveries with verified drivers — simple booking, clear pricing, and support when you need it.';
     $heroCtaText = $sys_settings['hero_cta_text'] ?? 'Book Your Ride';
     $heroCtaLink = !empty($sys_settings['hero_cta_link']) ? $sys_settings['hero_cta_link'] : route('rider.app');
-    $heroImage = !empty($sys_settings['hero_image'])
-        ? asset($sys_settings['hero_image'])
-        : 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1400&q=75';
-    $aboutImage = !empty($sys_settings['about_image'])
-        ? asset($sys_settings['about_image'])
-        : 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=75';
-    $safetyImage = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1000&q=75';
+    // Custom mobility creatives
+    $heroMobilityImage = asset('uploads/homepage/hero_mobility.jpg');
+    $aboutImage = asset('uploads/homepage/about_mobility.jpg');
+    // Safety uses a dedicated trust visual — not the fleet marketing image
     $currencySymbol = $default_currency?->symbol ?? '₹';
 @endphp
 
@@ -68,23 +60,15 @@
 
     <main id="main-content">
 
-    {{-- ========== HERO ========== --}}
+    {{-- ========== HERO (premium white — no human photo) ========== --}}
     <section class="pub-hero" aria-labelledby="hero-heading">
-        <div class="pub-hero-media" aria-hidden="true">
-            <img
-                src="{{ $heroImage }}"
-                alt=""
-                width="1400"
-                height="900"
-                fetchpriority="high"
-                decoding="async"
-            >
+        <div class="pub-hero-media pub-hero-media--white" aria-hidden="true">
             <div class="pub-hero-overlay"></div>
         </div>
 
         <div class="container pub-hero-content">
             <div class="row align-items-center g-4 g-lg-5">
-                <div class="col-lg-7">
+                <div class="col-lg-6">
                     <p class="pub-eyebrow"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ $brand }} Mobility</p>
 
                     <h1 id="hero-heading" class="pub-hero-title">
@@ -98,7 +82,7 @@
                     <p class="pub-hero-copy">{{ $heroSubtitle }}</p>
 
                     <div class="pub-hero-actions">
-                        <a href="{{ $heroCtaLink }}" class="btn btn-brand btn-lg px-4 px-md-5 py-3 active-scale">
+                        <a href="{{ $heroCtaLink }}" class="btn btn-brand btn-lg px-4 px-md-5 active-scale">
                             {{ $heroCtaText }}
                         </a>
                         <a href="{{ route('driver.register') }}" class="btn btn-outline-brand btn-lg px-4 px-md-5 py-3">
@@ -113,18 +97,19 @@
                     </ul>
                 </div>
 
-                <div class="col-lg-5">
+                <div class="col-lg-6">
                     <div class="pub-hero-panel">
-                        <div class="pub-hero-card">
+                        <figure class="pub-hero-visual-card pub-media-frame">
                             <img
-                                src="{{ $heroImage }}"
-                                alt="{{ $brand }} — premium mobility"
-                                width="640"
-                                height="640"
+                                class="pub-media-img"
+                                src="{{ $heroMobilityImage }}"
+                                alt="{{ $brand }} city rides — cab, auto, bike and van with route tracking"
+                                width="1024"
+                                height="768"
+                                fetchpriority="high"
                                 decoding="async"
-                                onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1000&q=75';"
                             >
-                        </div>
+                        </figure>
                     </div>
                 </div>
             </div>
@@ -253,11 +238,11 @@
     </section>
 
     {{-- ========== HOW IT WORKS ========== --}}
-    <section id="how-it-works" class="pub-section pub-section-dark" aria-labelledby="how-heading">
+    <section id="how-it-works" class="pub-section pub-section-light" aria-labelledby="how-heading">
         <div class="container">
             <div class="text-center mx-auto mb-5" style="max-width: 40rem;">
                 <p class="pub-eyebrow justify-content-center"><i class="bi bi-signpost-2" aria-hidden="true"></i> How it works</p>
-                <h2 id="how-heading" class="pub-title text-white">Book in a few clear steps</h2>
+                <h2 id="how-heading" class="pub-title">Book in a few clear steps</h2>
                 <p class="pub-lead mx-auto">A simple flow based on the existing {{ $brand }} rider experience.</p>
             </div>
 
@@ -299,14 +284,15 @@
         <div class="container">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6 order-lg-2">
-                    <div class="pub-about-media">
+                    <div class="pub-about-media pub-media-frame">
                         <img
+                            class="pub-media-img"
                             src="{{ $aboutImage }}"
-                            alt="About {{ $brand }}"
+                            alt="{{ $brand }} mobility — bike, cab and auto with smart booking"
                             loading="lazy"
-                            width="800"
-                            height="600"
-                            onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80';"
+                            width="1024"
+                            height="576"
+                            decoding="async"
                         >
                     </div>
                 </div>
@@ -384,12 +370,12 @@
     </section>
 
     {{-- ========== SAFETY ========== --}}
-    <section id="safety" class="pub-section pub-section-ink" aria-labelledby="safety-heading">
+    <section id="safety" class="pub-section pub-section-light" aria-labelledby="safety-heading">
         <div class="container">
             <div class="pub-safety">
                 <div>
                     <p class="pub-eyebrow"><i class="bi bi-shield-shaded" aria-hidden="true"></i> Safety &amp; trust</p>
-                    <h2 id="safety-heading" class="pub-title text-white">Travel with confidence</h2>
+                    <h2 id="safety-heading" class="pub-title">Travel with confidence</h2>
                     <p class="pub-lead">
                         {{ $brand }} focuses on practical safety tools already part of the product —
                         driver verification, live trip context, and support channels for riders and partners.
@@ -418,22 +404,46 @@
                         </li>
                     </ul>
                 </div>
-                <div class="pub-safety-media">
-                    <img
-                        src="{{ $safetyImage }}"
-                        alt="Safe city transportation with {{ $brand }}"
-                        loading="lazy"
-                        width="1000"
-                        height="750"
-                        onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1200&q=80';"
-                    >
+                <div class="pub-safety-media pub-media-frame pub-safety-visual-card">
+                    <div class="pub-safety-art-wrap" aria-hidden="true">
+                        <svg class="pub-safety-art" viewBox="0 0 480 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Safety and trust">
+                            <defs>
+                                <linearGradient id="safetyBg" x1="40" y1="20" x2="440" y2="300" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#F0FDFA"/>
+                                    <stop offset="1" stop-color="#ECFEFF"/>
+                                </linearGradient>
+                                <linearGradient id="safetyRoute" x1="80" y1="240" x2="380" y2="80" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#0F766E"/>
+                                    <stop offset="1" stop-color="#14B8A6"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="480" height="320" rx="22" fill="url(#safetyBg)"/>
+                            <circle cx="390" cy="70" r="48" fill="#CCFBF1" opacity="0.75"/>
+                            <circle cx="78" cy="250" r="36" fill="#99F6E4" opacity="0.4"/>
+                            <path d="M240 42 C192 42, 164 68, 164 110 C164 168, 240 214, 240 214 C240 214, 316 168, 316 110 C316 68, 288 42, 240 42Z" fill="#0F766E"/>
+                            <path d="M240 68 C210 68, 192 85, 192 114 C192 152, 240 184, 240 184 C240 184, 288 152, 288 114 C288 85, 270 68, 240 68Z" fill="#14B8A6"/>
+                            <path d="M216 116 L234 134 L270 94" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M86 230 C140 204, 200 158, 260 140 C310 126, 340 110, 384 92" stroke="url(#safetyRoute)" stroke-width="5" stroke-linecap="round" stroke-dasharray="10 10" opacity="0.9"/>
+                            <circle cx="86" cy="230" r="11" fill="#0F766E"/>
+                            <circle cx="86" cy="230" r="4.5" fill="#fff"/>
+                            <circle cx="384" cy="92" r="11" fill="#F59E0B"/>
+                            <circle cx="384" cy="92" r="4.5" fill="#fff"/>
+                        </svg>
+                        <div class="pub-safety-chip">
+                            <span class="pub-safety-chip-icon"><i class="bi bi-shield-check"></i></span>
+                            <span>
+                                <strong>Verified · Visible · Supported</strong>
+                                <small>Safety tools built into every trip</small>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     {{-- ========== DRIVER CTA + PLANS ========== --}}
-    <section id="drive" class="pub-section pub-section-dark" aria-labelledby="drive-heading">
+    <section id="drive" class="pub-section pub-section-light" aria-labelledby="drive-heading">
         <div class="container">
             <div class="pub-driver mb-5">
                 <div class="row align-items-center g-4">
@@ -460,7 +470,7 @@
                 <div class="pub-plans-block">
                     <div class="text-center mb-5">
                         <h3 class="pub-plans-title">
-                            <span class="text-white">DRIVER</span>
+                            <span class="pub-plans-title-main">DRIVER</span>
                             <span class="text-brand"> SUBSCRIPTION PLANS</span>
                         </h3>
                         <p class="pub-plans-sub">Choose a plan that fits your schedule and maximize your earnings.</p>
@@ -497,59 +507,75 @@
     {{-- ========== FAQ ========== --}}
     <section id="faq" class="pub-section pub-section-light pub-faq" aria-labelledby="faq-heading">
         <div class="container">
-            <div class="text-center mx-auto mb-5" style="max-width: 42rem;">
-                <p class="pub-eyebrow justify-content-center"><i class="bi bi-question-circle" aria-hidden="true"></i> FAQ</p>
+            <div class="pub-faq-head">
+                <p class="pub-eyebrow"><i class="bi bi-question-circle" aria-hidden="true"></i> FAQ</p>
                 <h2 id="faq-heading" class="pub-title">Frequently Asked Questions</h2>
-                <p class="pub-lead mx-auto">Everything you need to know about our premium taxi service.</p>
+                <p class="pub-lead">Everything you need to know about our premium taxi service.</p>
             </div>
 
-            <div class="faq-container" role="list">
-                @php
-                    $fallbackFaqs = [
-                        ['id' => 'f1', 'question' => 'How do I book a ride with Doonspedo?', 'answer' => 'Open the Doonspedo app or website, enter your pickup and drop locations, choose a vehicle type, review the fare, and tap Book Now. A nearby partner driver will be assigned to your trip.'],
-                        ['id' => 'f2', 'question' => 'Is pricing transparent before I confirm?', 'answer' => 'Yes. You see the estimated fare before confirming your booking. Doonspedo focuses on clear pricing with no surprise charges at the end of your ride.'],
-                        ['id' => 'f3', 'question' => 'Are drivers verified on the platform?', 'answer' => 'Partner drivers complete verification and approval before going online. You can also follow trip status in real time for added peace of mind.'],
-                        ['id' => 'f4', 'question' => 'Can I send a parcel with Doonspedo?', 'answer' => 'Yes. Use the parcel option in the rider app to send packages across the city with the same simple booking flow you use for rides.'],
-                        ['id' => 'f5', 'question' => 'How do I become a partner driver?', 'answer' => 'Tap Partner with Us, create your partner account, complete KYC and vehicle details, choose a subscription plan, and start accepting rides once approved.'],
-                        ['id' => 'f6', 'question' => 'How can I contact support?', 'answer' => 'Reach us at support@doonspedo.com or call +91 96272 17655. You can also use in-app support after signing in as a rider or partner.'],
-                    ];
-                    $faqItems = (isset($faqs) && count($faqs) > 0) ? $faqs : collect($fallbackFaqs);
-                    $faqShown = 0;
-                @endphp
-                @foreach($faqItems as $faq)
+            <div class="pub-faq-layout">
+                <div class="pub-faq-list" role="list">
                     @php
-                        $faqId = is_array($faq) ? $faq['id'] : $faq->id;
-                        $q = trim((string) (is_array($faq) ? $faq['question'] : $faq->question));
-                        $a = trim((string) (is_array($faq) ? $faq['answer'] : $faq->answer));
-                        $looksPlaceholder = (bool) preg_match('/^(ques\d*\??|ans\d*\??)$/i', $q)
-                            || (bool) preg_match('/^(ques\d*\??|ans\d*\??)$/i', $a);
-                        if ($looksPlaceholder || $q === '') {
-                            continue;
-                        }
-                        $faqShown++;
+                        $fallbackFaqs = [
+                            ['id' => 'f1', 'question' => 'How do I book a ride with Doonspedo?', 'answer' => 'Open the Doonspedo app or website, enter your pickup and drop locations, choose a vehicle type, review the fare, and tap Book Now. A nearby partner driver will be assigned to your trip.'],
+                            ['id' => 'f2', 'question' => 'Is pricing transparent before I confirm?', 'answer' => 'Yes. You see the estimated fare before confirming your booking. Doonspedo focuses on clear pricing with no surprise charges at the end of your ride.'],
+                            ['id' => 'f3', 'question' => 'Are drivers verified on the platform?', 'answer' => 'Partner drivers complete verification and approval before going online. You can also follow trip status in real time for added peace of mind.'],
+                            ['id' => 'f4', 'question' => 'Can I send a parcel with Doonspedo?', 'answer' => 'Yes. Use the parcel option in the rider app to send packages across the city with the same simple booking flow you use for rides.'],
+                            ['id' => 'f5', 'question' => 'How do I become a partner driver?', 'answer' => 'Tap Partner with Us, create your partner account, complete KYC and vehicle details, choose a subscription plan, and start accepting rides once approved.'],
+                            ['id' => 'f6', 'question' => 'How can I contact support?', 'answer' => 'Reach us at support@doonspedo.com or call +91 96272 17655. You can also use in-app support after signing in as a rider or partner.'],
+                        ];
+                        $faqItems = (isset($faqs) && count($faqs) > 0) ? $faqs : collect($fallbackFaqs);
+                        $faqShown = 0;
                     @endphp
-                    <div class="faq-card" id="faq-card-{{ $faqId }}" role="listitem">
-                        <button
-                            class="faq-header"
-                            type="button"
-                            id="faq-btn-{{ $faqId }}"
-                            aria-expanded="false"
-                            aria-controls="faq-panel-{{ $faqId }}"
-                            onclick="toggleFaq('{{ $faqId }}')"
-                        >
-                            <span class="faq-index" aria-hidden="true">{{ str_pad((string) $faqShown, 2, '0', STR_PAD_LEFT) }}</span>
-                            <span class="faq-q">{{ $q }}</span>
-                            <span class="faq-icon" aria-hidden="true">
-                                <i class="bi bi-plus-lg"></i>
-                            </span>
-                        </button>
-                        <div class="faq-body" id="faq-panel-{{ $faqId }}" role="region" aria-labelledby="faq-btn-{{ $faqId }}" aria-hidden="true">
-                            <div class="faq-content">
-                                {{ $a !== '' ? $a : 'Answer coming soon.' }}
+                    @foreach($faqItems as $faq)
+                        @php
+                            $faqId = is_array($faq) ? $faq['id'] : $faq->id;
+                            $q = trim((string) (is_array($faq) ? $faq['question'] : $faq->question));
+                            $a = trim((string) (is_array($faq) ? $faq['answer'] : $faq->answer));
+                            $looksPlaceholder = (bool) preg_match('/^(ques\d*\??|ans\d*\??)$/i', $q)
+                                || (bool) preg_match('/^(ques\d*\??|ans\d*\??)$/i', $a);
+                            if ($looksPlaceholder || $q === '') {
+                                continue;
+                            }
+                            $faqShown++;
+                        @endphp
+                        <div class="faq-card" id="faq-card-{{ $faqId }}" role="listitem">
+                            <button
+                                class="faq-header"
+                                type="button"
+                                id="faq-btn-{{ $faqId }}"
+                                aria-expanded="false"
+                                aria-controls="faq-panel-{{ $faqId }}"
+                                onclick="toggleFaq('{{ $faqId }}')"
+                            >
+                                <span class="faq-index" aria-hidden="true">{{ str_pad((string) $faqShown, 2, '0', STR_PAD_LEFT) }}</span>
+                                <span class="faq-q">{{ $q }}</span>
+                                <span class="faq-icon" aria-hidden="true">
+                                    <i class="bi bi-plus-lg"></i>
+                                </span>
+                            </button>
+                            <div class="faq-body" id="faq-panel-{{ $faqId }}" role="region" aria-labelledby="faq-btn-{{ $faqId }}" aria-hidden="true">
+                                <div class="faq-content">
+                                    {{ $a !== '' ? $a : 'Answer coming soon.' }}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
+
+                <aside class="pub-faq-visual" aria-hidden="true">
+                    <figure class="pub-faq-visual-card pub-media-frame">
+                        <img
+                            class="pub-media-img"
+                            src="{{ $heroMobilityImage }}"
+                            alt=""
+                            width="1024"
+                            height="576"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </figure>
+                </aside>
             </div>
         </div>
     </section>

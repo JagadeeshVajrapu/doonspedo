@@ -97,8 +97,8 @@
                             @if($ride->status == 'accepted')
                                 <form action="{{ route('driver.rides.pickup', $ride->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow">
-                                        ARRIVED AT PICKUP
+                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Starting trip...">
+                                        Passenger onboard — start trip
                                     </button>
                                 </form>
                             @elseif($ride->status == 'ongoing')

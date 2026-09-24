@@ -34,14 +34,16 @@ class DriverRideController extends Controller
         if (!session('driver_id')) return response()->json(['success' => false], 401);
         
         $driver = $this->getDriver();
-        if (!$driver->is_online) return response()->json(['requests' => []]);
+        if (!$driver || !$driver->is_online || $driver->is_blocked) {
+            return response()->json(['success' => true, 'requests' => []]);
+        }
 
-        // In a real app, logic would match based on proximity and vehicle category.
-        // For now, we fetch pending requests matching driver's vehicle category or general rides.
+        // Pending open bookings (existing marketplace behavior). Proximity filtering can be added later.
         $requests = Booking::with('user', 'vehicleCategory')
             ->where('status', 'pending')
             ->whereNull('driver_id')
             ->latest()
+            ->limit(20)
             ->get();
 
         return response()->json(['success' => true, 'requests' => $requests]);
@@ -95,8 +97,14 @@ class DriverRideController extends Controller
     public function pickupPassenger($id)
     {
         if (!session('driver_id')) return redirect()->route('driver.login');
-        
-        $ride = Booking::findOrFail($id);
+
+        $driver = $this->getDriver();
+        $ride = Booking::where('driver_id', $driver->id)->findOrFail($id);
+
+        if ($ride->status !== 'accepted') {
+            return back()->with('error', 'This ride cannot be started from its current status.');
+        }
+
         $ride->update([
             'status' => 'ongoing',
             'picked_up_at' => now(),
@@ -109,8 +117,12 @@ class DriverRideController extends Controller
     {
         if (!session('driver_id')) return redirect()->route('driver.login');
         
-        $ride = Booking::findOrFail($id);
         $driver = $this->getDriver();
+        $ride = Booking::where('driver_id', $driver->id)->findOrFail($id);
+
+        if ($ride->status !== 'ongoing') {
+            return back()->with('error', 'Only an ongoing ride can be completed.');
+        }
         
         // Simple fare calculation if not set
         if (!$ride->fare) {

@@ -12,7 +12,7 @@
             <div class="col-lg-4 col-md-6 pe-lg-5">
                 <a href="{{ url('/') }}" class="d-inline-block mb-3 text-decoration-none">
                     @if(!empty($sys_settings['app_logo']))
-                        <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $footerName }}" width="160" height="56" loading="lazy" decoding="async" style="max-height: 56px; width: auto; object-fit: contain;">
+                        <img class="public-logo public-logo--footer" src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $footerName }}" width="160" height="56" loading="lazy" decoding="async">
                     @else
                         <h3 class="text-brand fw-bold mb-0">{{ $footerName }}</h3>
                     @endif
@@ -72,9 +72,9 @@
             <p class="text-secondary mb-0 small">
                 &copy; {{ date('Y') }} Doonspedo. All rights reserved.
             </p>
-            <p class="text-secondary mb-0 small">
+            <p class="text-secondary mb-0 small text-md-center flex-grow-1">
                 Developed by
-                <a href="https://webexpertsworld.com" target="_blank" rel="noopener noreferrer" class="text-brand fw-bold text-decoration-none">WebExpertsWorld.com</a>
+                <a href="https://webfasttech.com/" target="_blank" rel="noopener noreferrer" class="text-brand fw-bold text-decoration-none">WebFastTechnology</a>
             </p>
         </div>
     </div>

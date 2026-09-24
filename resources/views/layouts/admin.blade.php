@@ -15,10 +15,37 @@
 
     @if(!empty($sys_settings['theme_color']))
     <style>
+        @php
+            $rawThemeColor = (string) $sys_settings['theme_color'];
+            $hex = ltrim($rawThemeColor, '#');
+            if (strlen($hex) === 3) {
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+            }
+            $brandSafe = $rawThemeColor;
+            if (strlen($hex) === 6 && ctype_xdigit($hex)) {
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                $luma = (0.299 * $r) + (0.587 * $g) + (0.114 * $b);
+                if ($luma >= 180) {
+                    $brandSafe = '#0F766E';
+                }
+            }
+        @endphp
         :root {
-            --ds-brand: {{ $sys_settings['theme_color'] }};
+            --ds-brand: {{ $brandSafe }};
             --admin-primary: var(--ds-brand);
             --primary-color: var(--ds-brand);
+            --ds-brand-hover: {{ $brandSafe === '#0F766E' ? '#0d9488' : '#d8e640' }};
+            --ds-brand-ink: {{ $brandSafe === '#0F766E' ? '#ffffff' : '#111111' }};
+            --ds-brand-soft: {{ $brandSafe === '#0F766E' ? 'rgba(15, 118, 110, 0.12)' : 'rgba(205, 220, 41, 0.12)' }};
+        }
+        /* Keep brand text readable on light admin surfaces */
+        .admin-shell .text-brand {
+            color: var(--ds-brand) !important;
+        }
+        .admin-shell .btn-brand {
+            color: var(--ds-brand-ink) !important;
         }
     </style>
     @endif

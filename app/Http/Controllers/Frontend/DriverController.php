@@ -50,8 +50,14 @@ class DriverController extends Controller
         
         session(['otp' => $otp, 'mobile' => $request->mobile, 'branch_id' => $request->branch_id]);
         session()->save();
+
+        $success = 'OTP sent successfully!';
+        // Local/dev only: surface OTP so QA can login without SMS delivery
+        if (app()->environment(['local', 'testing'])) {
+            $success .= ' (Local OTP: ' . $otp . ')';
+        }
         
-        return redirect()->route('driver.login.verifyOtpForm')->with('success', 'OTP sent successfully!');
+        return redirect()->route('driver.login.verifyOtpForm')->with('success', $success);
     }
 
     public function verifyOtp(Request $request)

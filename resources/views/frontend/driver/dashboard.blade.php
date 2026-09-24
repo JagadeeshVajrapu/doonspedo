@@ -203,30 +203,44 @@
                 })
                 .catch(err => {
                     toggleBtn.disabled = false;
+                    const currentlyOnline = statusBadge && statusBadge.innerText.trim() === 'ONLINE';
+                    toggleBtn.innerHTML = currentlyOnline
+                        ? '<i class="bi bi-power me-2" aria-hidden="true"></i> GO OFFLINE'
+                        : '<i class="bi bi-power me-2" aria-hidden="true"></i> GO ONLINE NOW';
                     alert('Action failed. Try again.');
                 });
             });
         }
 
         let pollInterval;
+        let lastAlertedRequestId = null;
         function startPolling() {
             if(pollInterval) return;
+            checkRequests();
             pollInterval = setInterval(checkRequests, 5000); // Check every 5 seconds
         }
 
         function stopPolling() {
             clearInterval(pollInterval);
             pollInterval = null;
+            lastAlertedRequestId = null;
+            const box = document.getElementById('new-requests-container');
+            if (box) box.innerHTML = '';
         }
 
         function checkRequests() {
-            fetch('{{ route("driver.rides.requests") }}')
+            fetch('{{ route("driver.rides.requests") }}', { headers: { 'Accept': 'application/json' } })
             .then(res => res.json())
             .then(data => {
-                if(data.success && data.requests.length > 0) {
-                    showRequestAlert(data.requests[0]); // Show the latest one
+                if(data.success && data.requests && data.requests.length > 0) {
+                    const latest = data.requests[0];
+                    if (latest.id !== lastAlertedRequestId) {
+                        lastAlertedRequestId = latest.id;
+                        showRequestAlert(latest);
+                    }
                 }
-            });
+            })
+            .catch(() => {});
         }
 
         // Synthesize a loud "Ding-Dong!" taxi bell ringtone natively with zero network delay
@@ -375,14 +389,21 @@
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     booking_id: rideId,
                     bid_amount: amount / exchangeRate
                 })
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.message || 'Unable to place bid');
+                }
+                return data;
+            })
             .then(data => {
                 const alertEl = document.getElementById('ride-alert-' + rideId);
                 if(data.success) {
@@ -396,7 +417,7 @@
                     `;
                     setTimeout(() => alertEl.remove(), 10000);
                 } else {
-                    alert(data.message);
+                    alert(data.message || 'Unable to place bid');
                     btn.disabled = false;
                     btn.innerHTML = 'PLACE BID';
                 }
@@ -404,7 +425,7 @@
             .catch(err => {
                 btn.disabled = false;
                 btn.innerHTML = 'PLACE BID';
-                alert('Connection error. Try again.');
+                alert(err.message || 'Connection error. Try again.');
             });
         }
 
