@@ -567,7 +567,7 @@
                     <figure class="pub-faq-visual-card pub-media-frame">
                         <img
                             class="pub-media-img"
-                            src="{{ $heroMobilityImage }}"
+                            src="{{ asset('uploads/homepage/doonspedo_image.png') }}"
                             alt=""
                             width="1024"
                             height="576"
