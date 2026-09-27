@@ -21,12 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Share settings globally to all views
         \Illuminate\Support\Facades\View::composer('*', function ($view) {
-            $settingsFile = storage_path('app/settings.json');
-            $sys_settings = [];
-            if (\Illuminate\Support\Facades\File::exists($settingsFile)) {
-                $sys_settings = json_decode(\Illuminate\Support\Facades\File::get($settingsFile), true);
-            }
-            $view->with('sys_settings', $sys_settings);
+            $view->with('sys_settings', load_sys_settings());
 
             // Share default currency globally
             try {

@@ -1055,7 +1055,7 @@ function reverseGeocode(lat, lng, inputId) {
     input.dataset.lastRequest = requestId;
 
     // Use Nominatim first
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&email=support@cabbooking.com&email=support@cabbooking.com&lat=${lat}&lon=${lng}&zoom=19&addressdetails=1`, {
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&email=support@doonspedo.com&lat=${lat}&lon=${lng}&zoom=19&addressdetails=1`, {
         headers: { 'Accept-Language': 'en' }
     })
     .then(res => {
@@ -2260,7 +2260,7 @@ function geocodeLeaflet(type) {
     const input = document.getElementById(type + '-location');
     if (!input.value) return;
 
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@cabbooking.com&email=support@cabbooking.com&q=${encodeURIComponent(input.value)}&countrycodes=in&limit=1`)
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@doonspedo.com&q=${encodeURIComponent(input.value)}&countrycodes=in&limit=1`)
         .then(res => {
             if (!res.ok) throw new Error("Nominatim status error");
             return res.json();
@@ -2350,7 +2350,7 @@ async function startSearching() {
             } catch (e) { console.error("Google pickup geocode failed", e); }
         } else {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@cabbooking.com&email=support@cabbooking.com&q=${encodeURIComponent(pickupText)}&countrycodes=in&limit=1`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@doonspedo.com&q=${encodeURIComponent(pickupText)}&countrycodes=in&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                     pickupLatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
@@ -2401,7 +2401,7 @@ async function startSearching() {
             } catch (e) { console.error("Google stop geocode failed", e); }
         } else {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@cabbooking.com&email=support@cabbooking.com&q=${encodeURIComponent(stopText)}&countrycodes=in&limit=1`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@doonspedo.com&q=${encodeURIComponent(stopText)}&countrycodes=in&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                     stopLatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
@@ -2439,7 +2439,7 @@ async function startSearching() {
             } catch (e) { console.error("Google drop geocode failed", e); }
         } else {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@cabbooking.com&email=support@cabbooking.com&q=${encodeURIComponent(dropText)}&countrycodes=in&limit=1`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&email=support@doonspedo.com&q=${encodeURIComponent(dropText)}&countrycodes=in&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                     dropLatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];

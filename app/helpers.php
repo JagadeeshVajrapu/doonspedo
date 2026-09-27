@@ -95,17 +95,48 @@ if (!function_exists('send_sms')) {
     }
 }
 
+if (!function_exists('load_sys_settings')) {
+    /**
+     * Load storage/app/settings.json.
+     * The retired public address info@taxiapp.com is rewritten once to support@doonspedo.com.
+     */
+    function load_sys_settings(): array
+    {
+        static $settings = null;
+        if ($settings !== null) {
+            return $settings;
+        }
+
+        $path = storage_path('app/settings.json');
+        $settings = [];
+        if (file_exists($path)) {
+            $decoded = json_decode((string) file_get_contents($path), true);
+            $settings = is_array($decoded) ? $decoded : [];
+        }
+
+        $current = strtolower(trim((string) ($settings['support_email'] ?? '')));
+        if ($current === 'info@taxiapp.com') {
+            $settings['support_email'] = 'support@doonspedo.com';
+            if (file_exists($path) && is_writable($path)) {
+                file_put_contents(
+                    $path,
+                    json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).PHP_EOL
+                );
+            }
+        }
+
+        return $settings;
+    }
+}
+
 if (!function_exists('get_settings')) {
     /**
      * Get a setting value by key from the settings.json file.
      */
     function get_settings($key, $default = null)
     {
-        static $settings = null;
-        if ($settings === null) {
-            $path = storage_path('app/settings.json');
-            $settings = file_exists($path) ? json_decode(file_get_contents($path), true) : [];
-        }
+        $settings = load_sys_settings();
+
         return $settings[$key] ?? $default;
     }
 }
