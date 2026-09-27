@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminNotification;
+use App\Models\CommissionSetting;
+use App\Models\PaymentQrCode;
+use App\Models\Transaction;
+use App\Models\WalletRecharge;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 
 class DriverFinanceController extends Controller
@@ -51,15 +57,146 @@ class DriverFinanceController extends Controller
         if (!session('driver_id')) return redirect()->route('driver.login');
         
         $driver = $this->getDriver();
-        $transactions = \App\Models\Transaction::where('driver_id', $driver->id)
+        $transactions = Transaction::where('driver_id', $driver->id)
             ->latest()
+            ->limit(8)
             ->get();
-        
+
         $withdrawals = \App\Models\WithdrawalRequest::where('driver_id', $driver->id)
             ->latest()
             ->get();
 
-        return view('frontend.driver.finance.wallet', compact('driver', 'transactions', 'withdrawals'));
+        $walletService = app(WalletService::class);
+        $lowBalance = $walletService->isLowBalance($driver);
+        $commission = CommissionSetting::current();
+        $pendingRecharge = WalletRecharge::where('driver_id', $driver->id)->where('status', 'pending')->latest()->first();
+
+        return view('frontend.driver.finance.wallet', compact('driver', 'transactions', 'withdrawals', 'lowBalance', 'commission', 'pendingRecharge'));
+    }
+
+    public function history(Request $request)
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $filter = $request->query('filter', 'all');
+        $query = Transaction::where('driver_id', $driver->id);
+
+        if ($filter === 'credits') {
+            $query->where('type', 'credit');
+        } elseif ($filter === 'debits') {
+            $query->where('type', 'debit');
+        } elseif ($filter === 'recharge') {
+            $query->where('category', 'recharge');
+        } elseif ($filter === 'commission') {
+            $query->where('category', 'ride_commission');
+        } elseif ($filter === 'failed') {
+            $query->where('status', 'failed');
+        } elseif ($filter === 'pending') {
+            $query->where('status', 'pending');
+        }
+
+        $transactions = $query->latest()->paginate(20)->withQueryString();
+
+        return view('frontend.driver.finance.history', compact('driver', 'transactions', 'filter'));
+    }
+
+    public function addMoneyForm()
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $limits = CommissionSetting::current();
+
+        return view('frontend.driver.finance.add-money', compact('driver', 'limits'));
+    }
+
+    public function startRecharge(Request $request)
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $limits = CommissionSetting::current();
+        $min = $limits ? (float) $limits->min_recharge : 10;
+        $max = $limits ? (float) $limits->max_recharge : 50000;
+
+        $request->validate([
+            'amount' => 'required|numeric|min:'.$min.'|max:'.$max,
+        ]);
+
+        $qr = PaymentQrCode::active();
+        if (!$qr) {
+            return back()->with('error', 'Payment QR is not available right now. Please try again later.')->withInput();
+        }
+
+        $recharge = WalletRecharge::create([
+            'driver_id' => $driver->id,
+            'amount' => number_format((float) $request->amount, 2, '.', ''),
+            'payment_method' => 'upi_qr',
+            'payment_qr_code_id' => $qr->id,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('driver.wallet.pay', $recharge->id);
+    }
+
+    public function showPayment($id)
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $recharge = WalletRecharge::with('qrCode')
+            ->where('driver_id', $driver->id)
+            ->findOrFail($id);
+
+        return view('frontend.driver.finance.pay', compact('driver', 'recharge'));
+    }
+
+    public function submitPayment(Request $request, $id)
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $recharge = WalletRecharge::where('driver_id', $driver->id)->findOrFail($id);
+
+        if ($recharge->status !== 'pending') {
+            return redirect()->route('driver.wallet')->with('error', 'This recharge is already '.$recharge->status.'.');
+        }
+
+        $request->validate([
+            'payment_reference' => 'required|string|max:80',
+        ]);
+
+        $reference = trim($request->payment_reference);
+        $recharge->update([
+            'payment_reference' => $reference,
+            'submitted_at' => now(),
+            'status' => 'pending',
+        ]);
+
+        $amountLabel = '₹'.number_format((float) $recharge->amount, 2);
+        $message = $driver->name.' paid '.$amountLabel.' and submitted UTR '.$reference.'. Approve it to credit the wallet.';
+        $notice = AdminNotification::query()
+            ->where('reference_type', 'wallet_recharge')
+            ->where('reference_id', $recharge->id)
+            ->where('is_read', false)
+            ->first();
+
+        if ($notice) {
+            $notice->update(['message' => $message]);
+        } else {
+            AdminNotification::create([
+                'title' => 'Wallet payment to approve',
+                'message' => $message,
+                'type' => 'wallet_payment',
+                'action_url' => route('admin.finance.recharges.show', $recharge->id),
+                'reference_type' => 'wallet_recharge',
+                'reference_id' => $recharge->id,
+                'is_read' => false,
+            ]);
+        }
+
+        return redirect()->route('driver.wallet')->with('success', 'Payment submitted successfully. Admin verification is pending.');
     }
 
     public function requestWithdrawal(Request $request)

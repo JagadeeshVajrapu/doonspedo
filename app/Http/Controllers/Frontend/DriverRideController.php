@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Transaction;
+use App\Services\WalletService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -70,6 +71,11 @@ class DriverRideController extends Controller
             return back()->with('error', 'You already have an active ride.');
         }
 
+        $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);
+        if ($blocked) {
+            return back()->with('error', $blocked)->with('needs_wallet', true);
+        }
+
         $booking->update([
             'driver_id' => $driver->id,
             'status' => 'accepted',
@@ -78,6 +84,24 @@ class DriverRideController extends Controller
         ]);
 
         return redirect()->route('driver.rides.details', $booking->id)->with('success', 'Ride accepted! Navigate to pickup.');
+    }
+
+    public function markArrived($id)
+    {
+        if (!session('driver_id')) return redirect()->route('driver.login');
+
+        $driver = $this->getDriver();
+        $booking = Booking::where('driver_id', $driver->id)->findOrFail($id);
+
+        if ($booking->status !== 'accepted') {
+            return back()->with('error', 'You can mark arrival only while you are on the way to the rider.');
+        }
+
+        if (!$booking->arrived_at) {
+            $booking->update(['arrived_at' => now()]);
+        }
+
+        return back()->with('success', 'You have reached the rider. The ride OTP is now on this screen. Confirm it to start the trip.');
     }
 
     public function rejectRide($id)
@@ -124,6 +148,11 @@ class DriverRideController extends Controller
                 return;
             }
 
+            if (!$ride->arrived_at) {
+                $error = 'Reach the rider before starting the trip.';
+                return;
+            }
+
             if (!$ride->ride_otp || !hash_equals((string) $ride->ride_otp, (string) $request->otp)) {
                 $error = 'Incorrect OTP. Please ask the customer for the correct ride OTP.';
                 return;
@@ -154,62 +183,82 @@ class DriverRideController extends Controller
         if ($ride->status !== 'ongoing') {
             return back()->with('error', 'Only an ongoing ride can be completed.');
         }
-        
-        // Simple fare calculation if not set
-        if (!$ride->fare) {
-            $distance = (float)$ride->distance ?: 5.0;
-            $ride->fare = 50 + ($distance * 15); // Base 50 + 15 per km
-        }
 
-        // Calculate commission and net earning
-        $commissionRate = $driver->commission_rate ?: config('taxi.default_commission_rate', 15);
-        $commission = ($commissionRate / 100) * $ride->fare;
-        $netEarning = $ride->fare - $commission;
+        $service = app(WalletService::class);
+        $summary = null;
+        $error = null;
 
-        $ride->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-            'fare' => $ride->fare,
-            'commission_amount' => $commission,
-            'net_amount' => $netEarning,
-            'payment_status' => 'completed',
-        ]);
+        DB::transaction(function () use ($id, $driver, $service, &$summary, &$error) {
+            $ride = Booking::where('driver_id', $driver->id)->lockForUpdate()->find($id);
+            if (!$ride || $ride->status !== 'ongoing') {
+                $error = 'Only an ongoing ride can be completed.';
+                return;
+            }
 
-        // Logic for Rider Wallet Deduction
-        if ($ride->payment_method === 'wallet') {
-            $user = $ride->user;
-            if ($user->wallet_balance >= $ride->fare) {
-                $user->decrement('wallet_balance', $ride->fare);
-                
-                // Record Rider Transaction
+            if (!$ride->fare) {
+                $distance = (float) $ride->distance ?: 5.0;
+                $ride->fare = 50 + ($distance * 15);
+            }
+
+            $prepaid = $service->activeCommission();
+            if ($prepaid) {
+                $commission = (float) $service->requiredCommission($ride);
+            } else {
+                $commissionRate = $driver->commission_rate ?: config('taxi.default_commission_rate', 15);
+                $commission = ($commissionRate / 100) * (float) $ride->fare;
+            }
+            $netEarning = (float) $ride->fare - $commission;
+
+            $ride->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'fare' => $ride->fare,
+                'commission_amount' => $commission,
+                'net_amount' => $netEarning,
+                'payment_status' => 'completed',
+            ]);
+
+            if ($ride->payment_method === 'wallet') {
+                $user = $ride->user()->lockForUpdate()->first();
+                if ($user && $user->wallet_balance >= $ride->fare) {
+                    $user->decrement('wallet_balance', $ride->fare);
+                    Transaction::create([
+                        'user_id' => $user->id,
+                        'booking_id' => $ride->id,
+                        'type' => 'debit',
+                        'amount' => $ride->fare,
+                        'description' => 'Payment for Ride (#'.$ride->id.')',
+                        'status' => 'success',
+                    ]);
+                }
+            }
+
+            $commissionNote = '';
+            if ($prepaid) {
+                $debit = $service->debitRideCommissionLocked($driver->id, $ride->id);
+                $commissionNote = $debit['ok']
+                    ? ' Commission deducted: ₹'.number_format((float) ($debit['amount'] ?? $commission), 2).'.'
+                    : ' '.$debit['message'];
+            } else {
+                $lockedDriver = DriverRegistration::query()->whereKey($driver->id)->lockForUpdate()->first();
+                $lockedDriver->increment('wallet_balance', $netEarning);
                 Transaction::create([
-                    'user_id' => $user->id,
+                    'driver_id' => $lockedDriver->id,
                     'booking_id' => $ride->id,
-                    'type' => 'debit',
-                    'amount' => $ride->fare,
-                    'description' => 'Payment for Ride (#' . $ride->id . ')',
+                    'type' => 'credit',
+                    'amount' => $netEarning,
+                    'description' => 'Ride Earning (#'.$ride->id.')',
                     'status' => 'success',
                 ]);
-            } else {
-                // If wallet balance was somehow insufficient at the end
-                // We mark it as successful anyway (for driver) but ideally 
-                // we should handle this earlier.
             }
+
+            $summary = 'Ride completed! Fare: ₹'.number_format((float) $ride->fare, 2).$commissionNote;
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
         }
 
-        // Credit driver's wallet
-        $driver->increment('wallet_balance', $netEarning);
-
-        // Record Driver Transaction
-        Transaction::create([
-            'driver_id' => $driver->id,
-            'booking_id' => $ride->id,
-            'type' => 'credit',
-            'amount' => $netEarning,
-            'description' => 'Ride Earning (#' . $ride->id . ')',
-            'status' => 'success',
-        ]);
-
-        return redirect()->route('driver.dashboard')->with('success', 'Ride completed! Fare: ₹' . number_format($ride->fare, 2) . ' (Net: ₹' . number_format($netEarning, 2) . ')');
+        return redirect()->route('driver.dashboard')->with('success', $summary);
     }
 }

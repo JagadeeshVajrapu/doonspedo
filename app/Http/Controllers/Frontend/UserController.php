@@ -172,28 +172,59 @@ class UserController extends Controller
         if ($existing && $existing->status === 'approved') {
             return back()->with('error', 'Your KYC is already approved.');
         }
-        if ($existing && $existing->status === 'pending') {
-            return back()->with('error', 'Your KYC is already under review.');
+
+        $documentType = (string) $request->input('document_type');
+        $documentNumber = preg_replace('/\s+/', '', (string) $request->input('document_number'));
+        if ($documentType === 'pan') {
+            $documentNumber = strtoupper($documentNumber);
+        }
+        $request->merge(['document_number' => $documentNumber]);
+
+        $numberRules = ['required', 'string', 'max:80'];
+        if ($documentType === 'aadhaar') {
+            $numberRules[] = 'regex:/^[0-9]{12}$/';
+        } elseif ($documentType === 'pan') {
+            $numberRules[] = 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/';
+        } else {
+            $numberRules[] = 'min:5';
         }
 
+        $replacingPending = $existing && $existing->status === 'pending' && $existing->document_path;
         $request->validate([
             'full_name' => 'required|string|max:255',
             'document_type' => 'required|in:aadhaar,pan,driving_licence',
-            'document_number' => 'nullable|string|max:80',
-            'document' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'document_number' => $numberRules,
+            'document' => ($replacingPending ? 'nullable' : 'required').'|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ], [
+            'document_number.regex' => $documentType === 'aadhaar'
+                ? 'Enter the 12-digit Aadhaar number.'
+                : 'Enter a valid PAN in the format ABCDE1234F.',
+            'document.required' => 'Upload a clear photo or PDF of your ID.',
         ]);
 
-        $path = $request->file('document')->store('customer-kyc/'.$user->id, 'local');
+        $path = $replacingPending ? $existing->document_path : null;
+        if ($request->hasFile('document')) {
+            $path = $request->file('document')->store('customer-kyc/'.$user->id, 'local');
+        }
 
-        \App\Models\CustomerKycSubmission::create([
-            'user_id' => $user->id,
+        $payload = [
             'full_name' => $request->full_name,
-            'document_type' => $request->document_type,
-            'document_number' => $request->document_number,
+            'document_type' => $documentType,
+            'document_number' => $documentNumber,
             'document_path' => $path,
             'status' => 'pending',
-        ]);
+            'rejection_reason' => null,
+            'reviewed_at' => null,
+        ];
 
-        return back()->with('success', 'KYC submitted. Status: pending review.');
+        if ($replacingPending) {
+            $existing->update($payload);
+            $message = 'KYC updated. Status: pending review.';
+        } else {
+            \App\Models\CustomerKycSubmission::create($payload + ['user_id' => $user->id]);
+            $message = 'KYC submitted. Status: pending review.';
+        }
+
+        return back()->with('success', $message);
     }
 }

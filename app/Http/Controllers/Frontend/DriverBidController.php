@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Bid;
+use App\Services\WalletService;
 use Illuminate\Support\Facades\DB;
 
 class DriverBidController extends Controller
@@ -44,6 +45,11 @@ class DriverBidController extends Controller
 
         if ($booking->status !== 'pending') {
             return response()->json(['success' => false, 'message' => 'This ride is no longer open for bidding.'], 403);
+        }
+
+        $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);
+        if ($blocked) {
+            return response()->json(['success' => false, 'message' => $blocked, 'needs_wallet' => true], 403);
         }
 
         // Check if already bidded

@@ -102,12 +102,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     @hasSection('needs_maps')
-        @php $mapProvider = $sys_settings['map_provider'] ?? 'google'; @endphp
         {{-- Leaflet JS: required for OSM provider and as Google failure fallback --}}
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        @if($mapProvider == 'google' && !empty($sys_settings['google_maps_key']))
-            <script src="https://maps.googleapis.com/maps/api/js?key={{ $sys_settings['google_maps_key'] }}&libraries=places&callback=initMap" async defer></script>
-        @endif
     @endif
 
     <script>
@@ -118,6 +114,29 @@
         }
     </script>
     @yield('scripts')
+
+    @hasSection('needs_maps')
+        @php $mapProvider = $sys_settings['map_provider'] ?? 'google'; @endphp
+        @if($mapProvider == 'google' && !empty($sys_settings['google_maps_key']))
+            {{-- Load after page scripts so window.initMap already exists. --}}
+            <script>
+                window.__bootGoogleMap = function () {
+                    var started = Date.now();
+                    (function tryInit() {
+                        if (typeof window.initMap === 'function') {
+                            window.initMap();
+                            return;
+                        }
+                        if (Date.now() - started < 8000) {
+                            setTimeout(tryInit, 40);
+                        }
+                    })();
+                };
+            </script>
+            <script src="https://maps.googleapis.com/maps/api/js?key={{ $sys_settings['google_maps_key'] }}&libraries=places&callback=__bootGoogleMap" async defer></script>
+        @endif
+    @endif
+
     @include('partials.ui.a11y-enhancements')
 
     <!-- Popup Ad Modal -->

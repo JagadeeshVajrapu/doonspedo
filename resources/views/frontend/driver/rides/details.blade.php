@@ -98,17 +98,26 @@
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2 mt-5">
-                            @if($ride->status == 'accepted')
+                        <div class="d-grid gap-2 mt-4">
+                            @if($ride->status == 'accepted' && !$ride->arrived_at)
+                                <p class="small text-muted mb-2">Go to the pickup point first. The ride OTP stays on the rider's phone until you arrive.</p>
+                                <form action="{{ route('driver.rides.arrived', $ride->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-brand w-100 py-3 rounded-pill fw-bold shadow">
+                                        I have reached the rider
+                                    </button>
+                                </form>
+                            @elseif($ride->status == 'accepted' && $ride->arrived_at)
+                                <div class="text-center border rounded-4 p-3 mb-3 bg-light">
+                                    <div class="small text-muted fw-bold text-uppercase">Ride OTP</div>
+                                    <div class="display-6 fw-bold mb-1" style="letter-spacing: 0.2em;">{{ $ride->ride_otp }}</div>
+                                    <p class="small text-muted mb-0">Shared because you have reached the rider. Confirm it to start the trip.</p>
+                                </div>
                                 <form action="{{ route('driver.rides.pickup', $ride->id) }}" method="POST">
                                     @csrf
-                                    <label class="form-label small fw-bold" for="ride-otp">Customer ride OTP</label>
-                                    <input id="ride-otp" name="otp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" class="form-control text-center fw-bold mb-2" placeholder="6-digit OTP" required autocomplete="one-time-code">
-                                    @error('otp')
-                                        <div class="text-danger small mb-2">{{ $message }}</div>
-                                    @enderror
-                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Verifying OTP...">
-                                        Verify OTP and start trip
+                                    <input type="hidden" name="otp" value="{{ $ride->ride_otp }}">
+                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Starting trip...">
+                                        Confirm OTP and start trip
                                     </button>
                                 </form>
                             @elseif($ride->status == 'ongoing')

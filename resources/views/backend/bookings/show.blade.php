@@ -4,7 +4,7 @@
 @section('page_title', 'View Booking #' . $booking->id)
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-text text-brand me-2"></i> Booking Details</h5>
     <div class="d-flex gap-2">
         <a href="{{ route('admin.bookings.edit', $booking->id) }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold">
@@ -53,6 +53,18 @@
                                 <span class="badge bg-{{ $color }} bg-opacity-10 text-{{ $color }} px-3 py-2 rounded-pill shadow-sm">
                                     {{ ucfirst($booking->status) }}
                                 </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Partner reached</td>
+                            <td>
+                                @if($booking->arrived_at)
+                                    {{ $booking->arrived_at->format('M d, Y h:i A') }}
+                                @elseif($booking->driver_id && $booking->status === 'accepted')
+                                    On the way to the rider
+                                @else
+                                    —
+                                @endif
                             </td>
                         </tr>
                         <tr>
@@ -144,6 +156,9 @@
                     <h5 class="fw-bold mb-1">{{ $booking->driver->name }}</h5>
                     <p class="text-muted mb-2"><i class="bi bi-envelope me-1"></i> {{ $booking->driver->email }}</p>
                     <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i> {{ $booking->driver->mobile }}</p>
+                    @if($booking->driver->vehicle_number)
+                        <p class="text-muted mb-0 mt-2"><i class="bi bi-truck me-1"></i> {{ $booking->driver->vehicle_number }}</p>
+                    @endif
                 @else
                     <div class="bg-light d-inline-block p-3 rounded-circle mb-3 border border-secondary border-dashed">
                         <i class="bi bi-question-lg text-muted" style="font-size: 2rem;"></i>
@@ -172,6 +187,9 @@
                         </span>
                     </div>
                 </div>
+                @if($booking->commission_amount)
+                    <p class="small mb-0 mt-3">Platform commission {{ $default_currency->symbol ?? '₹' }}{{ number_format($booking->commission_amount, 2) }} was deducted from the partner wallet when this ride was completed.</p>
+                @endif
             </div>
             <i class="bi bi-wallet2 position-absolute top-0 end-0 opacity-10 m-3" style="font-size: 6rem;"></i>
         </div>

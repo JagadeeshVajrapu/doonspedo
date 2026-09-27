@@ -27,8 +27,12 @@
 
     <div class="d-flex align-items-center gap-2">
         @if(auth('admin')->check())
-            <a href="{{ route('admin.notifications.push') }}" class="btn btn-light border rounded-circle p-2" aria-label="Notifications">
+            @php $adminUnread = \App\Models\AdminNotification::where('is_read', false)->count(); @endphp
+            <a href="{{ route('admin.notifications.index') }}" class="btn btn-light border rounded-circle p-2 position-relative" aria-label="Notifications{{ $adminUnread ? ', '.$adminUnread.' unread' : '' }}">
                 <i class="bi bi-bell"></i>
+                @if($adminUnread)
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $adminUnread }}</span>
+                @endif
             </a>
         @endif
         <div class="dropdown">

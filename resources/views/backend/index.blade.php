@@ -77,6 +77,7 @@
             <a href="{{ route('admin.drivers.kyc.pending') }}" class="btn btn-sm btn-outline-dark rounded-pill">Pending KYC</a>
             <a href="{{ route('admin.bookings.index', ['status' => 'pending']) }}" class="btn btn-sm btn-outline-dark rounded-pill">Pending bookings</a>
             <a href="{{ route('admin.finance.transactions') }}" class="btn btn-sm btn-dark rounded-pill">Transactions</a>
+            <a href="{{ route('admin.finance.recharges', ['status' => 'pending']) }}" class="btn btn-sm btn-outline-dark rounded-pill">Pending recharges ({{ \App\Models\WalletRecharge::where('status', 'pending')->count() }})</a>
         </div>
     </div>
 </div>

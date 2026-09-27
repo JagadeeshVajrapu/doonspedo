@@ -66,6 +66,9 @@ class RiderBookingController extends Controller
     public function showBids($bookingId)
     {
         $booking = Booking::with('driver')->where('user_id', Auth::id())->findOrFail($bookingId);
+        if ($booking->driver_id && in_array($booking->status, ['accepted', 'ongoing'], true)) {
+            $booking->makeVisible('ride_otp');
+        }
         $bids = Bid::with('driver')->where('booking_id', $bookingId)->where('status', 'pending')->get();
 
         return response()->json([

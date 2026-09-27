@@ -25,6 +25,9 @@
 @endif
 @if(session('error'))
     @include('partials.ui.alert', ['variant' => 'danger', 'message' => session('error')])
+    @if(session('needs_wallet'))
+        <a href="{{ route('driver.wallet.add') }}" class="btn btn-dark rounded-pill mb-3">Add money</a>
+    @endif
 @endif
 
 @if($driver->status == 'pending')
@@ -149,7 +152,7 @@
     </div>
 
     <!-- Ride Requests Modal / Container -->
-    <div id="new-requests-container" class="position-fixed top-0 end-0 p-3" style="z-index: 2000; max-width: 350px; pointer-events: none;">
+    <div id="new-requests-container" class="position-fixed p-2 p-sm-3" style="z-index: 2000; top: 0.5rem; right: 0.5rem; left: auto; width: min(22rem, calc(100vw - 1rem)); pointer-events: none;">
         <!-- Requests will be injected here via JS -->
     </div>
 

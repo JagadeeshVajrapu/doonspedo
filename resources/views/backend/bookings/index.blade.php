@@ -61,14 +61,14 @@
                 @if(isset($bookings) && count($bookings) > 0)
                     @foreach($bookings as $booking)
                     <tr>
-                        <td class="fw-bold px-4">#{{ $booking->id }}</td>
-                        <td>{{ $booking->user ? $booking->user->name : 'N/A' }}</td>
-                        <td>
+                        <td class="fw-bold px-4" data-label="Booking">#{{ $booking->id }}</td>
+                        <td data-label="Rider">{{ $booking->user ? $booking->user->name : 'N/A' }}</td>
+                        <td data-label="Type">
                             <span class="badge bg-info bg-opacity-10 text-info px-2 py-1 rounded-pill">
                                 {{ ucfirst($booking->service_type) }}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="Route">
                             <div class="small text-truncate" style="max-width: 180px;" title="{{ $booking->pickup_location }}">
                                 <i class="bi bi-geo-alt text-success me-1"></i> {{ $booking->pickup_location }}
                             </div>
@@ -76,8 +76,8 @@
                                 <i class="bi bi-geo text-danger me-1"></i> {{ $booking->dropoff_location }}
                             </div>
                         </td>
-                        <td>{{ $booking->driver ? $booking->driver->first_name . ' ' . $booking->driver->last_name : 'Unassigned' }}</td>
-                        <td>
+                        <td data-label="Partner">{{ $booking->driver?->name ?? 'Unassigned' }}</td>
+                        <td data-label="Status">
                             @php
                                 $statusColors = [
                                     'pending' => 'warning',
@@ -90,7 +90,7 @@
                             @endphp
                             @include('partials.ui.status-badge', ['label' => ucfirst($booking->status), 'variant' => $variant])
                         </td>
-                        <td class="text-end px-4">
+                        <td class="text-end px-4" data-label="Actions">
                             <a href="{{ route('admin.bookings.show', $booking->id) }}" class="btn btn-sm btn-light border rounded-circle shadow-sm me-1" title="View Details" aria-label="View booking">
                                 <i class="bi bi-eye text-primary"></i>
                             </a>

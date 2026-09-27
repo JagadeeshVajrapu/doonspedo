@@ -199,6 +199,15 @@
                             <a href="{{ route('admin.finance.commissions') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.finance.commissions') ? 'active' : '' }}">Commissions</a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('admin.finance.qr') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.finance.qr*') ? 'active' : '' }}">QR Code</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.finance.recharges') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.finance.recharges*') ? 'active' : '' }}">Payment History</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.finance.partner-transactions') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.finance.partner-*') ? 'active' : '' }}">Partner Wallets</a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('admin.finance.coupons') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.finance.coupons') ? 'active' : '' }}">Coupons</a>
                         </li>
                         <li class="nav-item">
@@ -240,6 +249,9 @@
                 </a>
                 <div class="collapse {{ request()->is('admin/notifications*') ? 'show' : '' }} ps-3" id="notificationMenu{{ $sfx }}">
                     <ul class="nav flex-column border-start border-secondary ms-2 small">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.notifications.index') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.notifications.index') ? 'active' : '' }}">Inbox</a>
+                        </li>
                         <li class="nav-item">
                             <a href="{{ route('admin.notifications.push') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.notifications.push') ? 'active' : '' }}">Push Notifications</a>
                         </li>

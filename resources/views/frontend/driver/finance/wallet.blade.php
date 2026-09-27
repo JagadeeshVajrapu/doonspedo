@@ -35,14 +35,15 @@
                 <div class="small text-white-50 fw-bold text-uppercase mb-2">Available balance</div>
                 <div class="display-5 fw-bold mb-3">{{ $balanceDisplay }}</div>
 
-                {{-- Visual structure for future prepaid commission wallet (presentation only) --}}
-                <div class="small text-white-50 mb-3">
-                    Wallet balance supports ride activity and future commission deductions.
-                </div>
+                @if(!empty($lowBalance))
+                    <div class="alert alert-warning py-2 small">Low wallet balance. Add money to continue accepting rides.</div>
+                @endif
 
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-brand btn-lg rounded-pill fw-bold py-3 active-scale" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                        <i class="bi bi-arrow-up-circle me-1"></i> Request withdrawal
+                    <a href="{{ route('driver.wallet.add') }}" class="btn btn-brand btn-lg rounded-pill fw-bold py-3">+ Add money</a>
+                    <a href="{{ route('driver.wallet.history') }}" class="btn btn-outline-light rounded-pill">Transaction history</a>
+                    <button type="button" class="btn btn-outline-light rounded-pill" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                        Request withdrawal
                     </button>
                     <p class="extra-small text-white-50 text-center mb-0 mt-1">
                         Minimum withdrawal: {{ $currencySymbol }}{{ number_format(100 * $rate, 2) }}
@@ -81,9 +82,15 @@
                         @include('partials.ui.status-badge', ['label' => 'Wallet credit', 'variant' => 'success', 'icon' => 'bi-plus-circle'])
                         @include('partials.ui.status-badge', ['label' => 'Wallet debit', 'variant' => 'danger', 'icon' => 'bi-dash-circle'])
                         @include('partials.ui.status-badge', ['label' => 'Withdrawal', 'variant' => 'warning', 'icon' => 'bi-bank'])
-                        @include('partials.ui.status-badge', ['label' => 'Commission (soon)', 'variant' => 'neutral', 'icon' => 'bi-percent'])
+                        @include('partials.ui.status-badge', ['label' => 'Ride commission', 'variant' => 'neutral', 'icon' => 'bi-percent'])
                     </div>
-                    <p class="extra-small text-muted mb-0 mt-2">Commission deductions will appear here when enabled. No values calculated now.</p>
+                    <p class="extra-small text-muted mb-0 mt-2">
+                        @if(!empty($commission) && $commission->is_active)
+                            Current commission: {{ $commission->label() }}.
+                        @else
+                            Prepaid ride commission is turned off. Completed rides use the existing earnings credit.
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>
@@ -95,6 +102,7 @@
         <div class="drv-card">
             <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
                 <h2 class="h6 fw-bold mb-0">Recent transactions</h2>
+                <a href="{{ route('driver.wallet.history') }}" class="small fw-bold text-decoration-none">View all</a>
             </div>
 
             {{-- Desktop table --}}

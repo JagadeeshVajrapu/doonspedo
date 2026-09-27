@@ -29,6 +29,7 @@ class Booking extends Model
         'dropoff_lat',
         'dropoff_lng',
         'accepted_at',
+        'arrived_at',
         'picked_up_at',
         'completed_at',
         'cancelled_at',
@@ -40,6 +41,7 @@ class Booking extends Model
 
     protected $casts = [
         'accepted_at' => 'datetime',
+        'arrived_at' => 'datetime',
         'picked_up_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',

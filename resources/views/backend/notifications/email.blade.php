@@ -64,7 +64,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold text-muted">"From" Email Address</label>
-                            <input type="email" class="form-control" name="mail_from_address" value="noreply@doonspedo.com" required>
+                            <input type="email" class="form-control" name="mail_from_address" value="support@doonspedo.com" required>
                         </div>
                     </div>
 

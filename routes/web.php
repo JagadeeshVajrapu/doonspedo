@@ -292,6 +292,17 @@ Route::group(['prefix' => 'admin/finance', 'as' => 'admin.finance.'], function (
     Route::get('/gateways', [\App\Http\Controllers\Admin\FinanceController::class, 'gateways'])->name('gateways');
     Route::get('/commissions', [\App\Http\Controllers\Admin\FinanceController::class, 'commissions'])->name('commissions');
     Route::post('/commissions', [\App\Http\Controllers\Admin\FinanceController::class, 'updateCommissions'])->name('commissions.update');
+    Route::get('/qr-codes', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'qrIndex'])->name('qr');
+    Route::post('/qr-codes', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'qrStore'])->name('qr.store');
+    Route::post('/qr-codes/{id}/activate', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'qrActivate'])->name('qr.activate');
+    Route::post('/qr-codes/{id}/deactivate', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'qrDeactivate'])->name('qr.deactivate');
+    Route::delete('/qr-codes/{id}', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'qrDestroy'])->name('qr.destroy');
+    Route::get('/recharges', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'recharges'])->name('recharges');
+    Route::get('/recharges/{id}', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'showRecharge'])->name('recharges.show');
+    Route::post('/recharges/{id}/approve', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'approveRecharge'])->name('recharges.approve');
+    Route::post('/recharges/{id}/reject', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'rejectRecharge'])->name('recharges.reject');
+    Route::get('/partner-wallets', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'transactions'])->name('partner-transactions');
+    Route::get('/partner-wallets/{id}', [\App\Http\Controllers\Admin\PartnerWalletController::class, 'partner'])->name('partner-wallet');
     Route::get('/coupons', [\App\Http\Controllers\Admin\FinanceController::class, 'coupons'])->name('coupons');
     Route::get('/transactions', [\App\Http\Controllers\Admin\FinanceController::class, 'transactions'])->name('transactions');
     Route::get('/invoices', [\App\Http\Controllers\Admin\FinanceController::class, 'invoices'])->name('invoices');
@@ -328,6 +339,9 @@ Route::group(['prefix' => 'admin/cms', 'as' => 'admin.cms.'], function () {
 
 // Admin Notifications
 Route::group(['prefix' => 'admin/notifications', 'as' => 'admin.notifications.'], function () {
+    Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
+    Route::get('/{id}/open', [\App\Http\Controllers\Admin\NotificationController::class, 'open'])->name('open');
+    Route::post('/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('read-all');
     Route::get('/push', [\App\Http\Controllers\Admin\NotificationController::class, 'push'])->name('push');
     Route::post('/push', [\App\Http\Controllers\Admin\NotificationController::class, 'storePush'])->name('push.store');
     
@@ -384,6 +398,7 @@ Route::group(['prefix' => 'driver', 'as' => 'driver.'], function () {
         Route::post('/{id}/accept', [\App\Http\Controllers\Frontend\DriverRideController::class, 'acceptRide'])->name('accept');
         Route::post('/{id}/reject', [\App\Http\Controllers\Frontend\DriverRideController::class, 'rejectRide'])->name('reject');
         Route::get('/{id}/details', [\App\Http\Controllers\Frontend\DriverRideController::class, 'showRideDetails'])->name('details');
+        Route::post('/{id}/arrived', [\App\Http\Controllers\Frontend\DriverRideController::class, 'markArrived'])->name('arrived');
         Route::post('/{id}/pickup', [\App\Http\Controllers\Frontend\DriverRideController::class, 'pickupPassenger'])->name('pickup');
         Route::post('/{id}/complete', [\App\Http\Controllers\Frontend\DriverRideController::class, 'completeRide'])->name('complete');
     });
@@ -399,6 +414,11 @@ Route::group(['prefix' => 'driver', 'as' => 'driver.'], function () {
     // Finance & Wallet
     Route::get('/earnings', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'earnings'])->name('earnings');
     Route::get('/wallet', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'wallet'])->name('wallet');
+    Route::get('/wallet/history', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'history'])->name('wallet.history');
+    Route::get('/wallet/add-money', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'addMoneyForm'])->name('wallet.add');
+    Route::post('/wallet/add-money', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'startRecharge'])->name('wallet.add.submit');
+    Route::get('/wallet/pay/{id}', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'showPayment'])->name('wallet.pay');
+    Route::post('/wallet/pay/{id}', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'submitPayment'])->name('wallet.pay.submit');
     Route::post('/withdraw', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'requestWithdrawal'])->name('withdraw.request');
     Route::get('/subscriptions', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'subscriptions'])->name('subscriptions');
     Route::post('/subscriptions/purchase', [\App\Http\Controllers\Frontend\DriverFinanceController::class, 'purchaseSubscription'])->name('subscriptions.purchase');
