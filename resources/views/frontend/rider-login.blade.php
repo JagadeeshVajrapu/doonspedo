@@ -22,12 +22,13 @@
                     </div>
                 @endif
 
+                @php $showPasswordLogin = $errors->has('email') || $errors->has('password') || old('email'); @endphp
                 <div class="rider-auth-tabs" role="tablist" aria-label="Login method">
-                    <button type="button" onclick="toggleForm('otp')" id="otp-toggle" class="btn btn-clean flex-grow-1 py-2" role="tab" aria-selected="true" aria-controls="otp-form">Mobile OTP</button>
-                    <button type="button" onclick="toggleForm('password')" id="password-toggle" class="btn btn-light flex-grow-1 py-2 text-muted border-0" role="tab" aria-selected="false" aria-controls="password-form">Password</button>
+                    <button type="button" onclick="toggleForm('otp')" id="otp-toggle" class="btn {{ $showPasswordLogin ? 'btn-light text-muted border-0' : 'btn-clean' }} flex-grow-1 py-2" role="tab" aria-selected="{{ $showPasswordLogin ? 'false' : 'true' }}" aria-controls="otp-form">Mobile OTP</button>
+                    <button type="button" onclick="toggleForm('password')" id="password-toggle" class="btn {{ $showPasswordLogin ? 'btn-clean' : 'btn-light text-muted border-0' }} flex-grow-1 py-2" role="tab" aria-selected="{{ $showPasswordLogin ? 'true' : 'false' }}" aria-controls="password-form">Password</button>
                 </div>
 
-                <form id="otp-form" action="{{ route('login.sendOtp') }}" method="POST" role="tabpanel" aria-labelledby="otp-toggle">
+                <form id="otp-form" action="{{ route('login.sendOtp') }}" method="POST" role="tabpanel" aria-labelledby="otp-toggle" @if($showPasswordLogin) style="display: none;" hidden @endif>
                     @csrf
                     <div class="mb-4">
                         <label class="form-label text-dark-custom small fw-bold" for="login-mobile">Mobile Number</label>
@@ -40,11 +41,14 @@
                     </div>
                 </form>
 
-                <form id="password-form" action="{{ route('login.submit') }}" method="POST" style="display: none;" role="tabpanel" aria-labelledby="password-toggle" hidden>
+                <form id="password-form" action="{{ route('login.submit') }}" method="POST" role="tabpanel" aria-labelledby="password-toggle" @unless($showPasswordLogin) style="display: none;" hidden @endunless>
                     @csrf
+                    @error('email')
+                        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 small mb-3" role="alert">{{ $message }}</div>
+                    @enderror
                     <div class="mb-3">
                         <label class="form-label text-dark-custom small fw-bold" for="login-email">Email Address</label>
-                        <input type="email" id="login-email" name="email" class="form-control clean-input" placeholder="your@email.com" required autocomplete="email">
+                        <input type="email" id="login-email" name="email" class="form-control clean-input" placeholder="your@email.com" required autocomplete="email" value="{{ old('email') }}">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-dark-custom small fw-bold" for="login-password">Password</label>
@@ -76,29 +80,16 @@
         const otpToggle = document.getElementById('otp-toggle');
         const passwordToggle = document.getElementById('password-toggle');
 
-        if (type === 'password') {
-            otpForm.style.display = 'none';
-            otpForm.hidden = true;
-            passwordForm.style.display = 'block';
-            passwordForm.hidden = false;
-            passwordToggle.classList.replace('btn-light', 'btn-clean');
-            passwordToggle.classList.remove('text-muted');
-            passwordToggle.setAttribute('aria-selected', 'true');
-            otpToggle.classList.replace('btn-clean', 'btn-light');
-            otpToggle.classList.add('text-muted');
-            otpToggle.setAttribute('aria-selected', 'false');
-        } else {
-            otpForm.style.display = 'block';
-            otpForm.hidden = false;
-            passwordForm.style.display = 'none';
-            passwordForm.hidden = true;
-            otpToggle.classList.replace('btn-light', 'btn-clean');
-            otpToggle.classList.remove('text-muted');
-            otpToggle.setAttribute('aria-selected', 'true');
-            passwordToggle.classList.replace('btn-clean', 'btn-light');
-            passwordToggle.classList.add('text-muted');
-            passwordToggle.setAttribute('aria-selected', 'false');
-        }
+        const showPassword = type === 'password';
+        otpForm.style.display = showPassword ? 'none' : 'block';
+        otpForm.hidden = showPassword;
+        passwordForm.style.display = showPassword ? 'block' : 'none';
+        passwordForm.hidden = !showPassword;
+
+        otpToggle.className = 'btn flex-grow-1 py-2 ' + (showPassword ? 'btn-light text-muted border-0' : 'btn-clean');
+        passwordToggle.className = 'btn flex-grow-1 py-2 ' + (showPassword ? 'btn-clean' : 'btn-light text-muted border-0');
+        otpToggle.setAttribute('aria-selected', showPassword ? 'false' : 'true');
+        passwordToggle.setAttribute('aria-selected', showPassword ? 'true' : 'false');
     }
 </script>
 @endsection

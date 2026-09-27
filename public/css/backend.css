@@ -435,8 +435,9 @@ body {
     }
 }
 
-/* Desktop sidebar sticky; mobile off-canvas handled in layout */
-.admin-shell .sidebar.ds-sidebar {
+/* Desktop sidebar only. The mobile drawer also uses .sidebar.ds-sidebar;
+   sticky would override Bootstrap's fixed offcanvas and leave a blank viewport. */
+.admin-shell .sidebar.ds-sidebar:not(.offcanvas) {
     position: sticky;
     top: 0;
     align-self: flex-start;
@@ -445,10 +446,15 @@ body {
     z-index: 1040;
 }
 
-@media (max-width: 991.98px) {
-    .admin-shell > .d-flex > .sidebar.ds-sidebar {
-        display: none !important;
-    }
+.admin-shell .offcanvas.sidebar.ds-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    align-self: auto;
+    min-height: 100vh;
+    max-height: 100vh;
+    height: 100vh;
+    z-index: 1045;
 }
 
 .admin-topbar {

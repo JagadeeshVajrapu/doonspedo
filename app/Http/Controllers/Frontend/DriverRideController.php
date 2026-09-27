@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DriverRideController extends Controller
@@ -73,6 +74,7 @@ class DriverRideController extends Controller
             'driver_id' => $driver->id,
             'status' => 'accepted',
             'accepted_at' => now(),
+            'ride_otp' => $booking->ride_otp ?: Booking::generateRideOtp(),
         ]);
 
         return redirect()->route('driver.rides.details', $booking->id)->with('success', 'Ride accepted! Navigate to pickup.');
@@ -94,23 +96,52 @@ class DriverRideController extends Controller
         return view('frontend.driver.rides.details', compact('driver', 'ride'));
     }
 
-    public function pickupPassenger($id)
+    public function pickupPassenger(Request $request, $id)
     {
         if (!session('driver_id')) return redirect()->route('driver.login');
 
-        $driver = $this->getDriver();
-        $ride = Booking::where('driver_id', $driver->id)->findOrFail($id);
-
-        if ($ride->status !== 'accepted') {
-            return back()->with('error', 'This ride cannot be started from its current status.');
-        }
-
-        $ride->update([
-            'status' => 'ongoing',
-            'picked_up_at' => now(),
+        $request->validate([
+            'otp' => 'required|digits:6',
         ]);
 
-        return back()->with('success', 'Trip started! Drive safely to destination.');
+        $driver = $this->getDriver();
+        if (!$driver || $driver->is_blocked) {
+            return back()->with('error', 'Your driver account cannot start rides.');
+        }
+
+        $started = false;
+        $error = null;
+
+        DB::transaction(function () use ($request, $id, $driver, &$started, &$error) {
+            $ride = Booking::where('driver_id', $driver->id)->lockForUpdate()->find($id);
+            if (!$ride) {
+                $error = 'This ride is not assigned to you.';
+                return;
+            }
+
+            if ($ride->status !== 'accepted' || $ride->ride_otp_verified_at) {
+                $error = 'This ride cannot be started from its current status.';
+                return;
+            }
+
+            if (!$ride->ride_otp || !hash_equals((string) $ride->ride_otp, (string) $request->otp)) {
+                $error = 'Incorrect OTP. Please ask the customer for the correct ride OTP.';
+                return;
+            }
+
+            $ride->update([
+                'status' => 'ongoing',
+                'picked_up_at' => now(),
+                'ride_otp_verified_at' => now(),
+            ]);
+            $started = true;
+        });
+
+        if (!$started) {
+            return back()->with('error', $error ?: 'Unable to start this ride.')->withInput();
+        }
+
+        return back()->with('success', 'OTP verified. Trip started. Drive safely to the destination.');
     }
 
     public function completeRide($id)

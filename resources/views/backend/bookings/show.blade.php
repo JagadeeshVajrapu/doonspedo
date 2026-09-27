@@ -56,6 +56,18 @@
                             </td>
                         </tr>
                         <tr>
+                            <td class="text-muted">OTP verification</td>
+                            <td>
+                                @if($booking->ride_otp_verified_at)
+                                    Verified {{ $booking->ride_otp_verified_at->format('M d, Y h:i A') }}
+                                @elseif($booking->driver_id)
+                                    Waiting for driver to verify the customer OTP
+                                @else
+                                    Not assigned
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
                             <td class="text-muted">Created At</td>
                             <td>{{ $booking->created_at->format('M d, Y h:i A') }}</td>
                         </tr>
@@ -111,7 +123,7 @@
                 @if($booking->user)
                     <h5 class="fw-bold mb-1">{{ $booking->user->name }}</h5>
                     <p class="text-muted mb-2"><i class="bi bi-envelope me-1"></i> {{ $booking->user->email }}</p>
-                    <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i> {{ $booking->user->phone ?? 'N/A' }}</p>
+                    <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i> {{ $booking->user->mobile ?? $booking->user->phone ?? 'N/A' }}</p>
                 @else
                     <h5 class="fw-bold text-muted">Unknown</h5>
                 @endif
@@ -129,9 +141,9 @@
                     <div class="bg-light d-inline-block p-3 rounded-circle mb-3">
                         <i class="bi bi-person-badge text-info" style="font-size: 2rem;"></i>
                     </div>
-                    <h5 class="fw-bold mb-1">{{ $booking->driver->first_name }} {{ $booking->driver->last_name }}</h5>
+                    <h5 class="fw-bold mb-1">{{ $booking->driver->name }}</h5>
                     <p class="text-muted mb-2"><i class="bi bi-envelope me-1"></i> {{ $booking->driver->email }}</p>
-                    <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i> {{ $booking->driver->phone_number }}</p>
+                    <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i> {{ $booking->driver->mobile }}</p>
                 @else
                     <div class="bg-light d-inline-block p-3 rounded-circle mb-3 border border-secondary border-dashed">
                         <i class="bi bi-question-lg text-muted" style="font-size: 2rem;"></i>

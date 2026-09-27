@@ -50,6 +50,17 @@
             </div>
         </div>
 
+        @if($booking->driver && in_array($booking->status, ['accepted', 'ongoing'], true) && $booking->ride_otp)
+        <div class="rider-card text-center">
+            <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-2">Ride OTP</p>
+            <p class="display-6 fw-bold mb-2" style="letter-spacing: 0.2em;">{{ $booking->ride_otp }}</p>
+            <p class="small text-muted mb-0">Share this OTP with your driver when your driver arrives.</p>
+            @if($booking->ride_otp_verified_at)
+                <p class="small text-success mt-2 mb-0">OTP verified. Your trip has started.</p>
+            @endif
+        </div>
+        @endif
+
         @if($booking->driver)
         <div class="rider-card">
             <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-3">Driver &amp; Vehicle</p>

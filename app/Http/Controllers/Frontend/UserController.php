@@ -46,24 +46,22 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
             'mobile' => 'required|string|max:15|unique:users,mobile',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'email' => $request->email,
             'mobile' => $request->mobile,
-            'password' => bcrypt('rider123'), // Default password or handle differently
+            'password' => $request->password,
         ]);
 
-        // After registration, send OTP to verify mobile
-        $otp = rand(100000, 999999);
-        $message = "Your doonspedo1 login OTP is $otp. Please enter this code to continue. This OTP is valid for 5 minutes. - doonspedo";
-        send_sms($user->mobile, $message, '1707177754632189212');
+        Auth::login($user);
+        $request->session()->regenerate();
 
-        session(['rider_otp' => $otp, 'rider_mobile' => $user->mobile]);
-        session()->save();
-        
-        return redirect()->route('login.verifyOtpForm')->with('success', 'Registration successful! Please verify your mobile.');
+        return redirect()->route('rider.app')->with('success', 'Account created. You are signed in.');
     }
 
     public function sendOtp(Request $request)
@@ -159,5 +157,43 @@ class UserController extends Controller
         $user->update($data);
 
         return back()->with('success', 'Profile updated successfully!');
+    }
+
+    public function showKyc()
+    {
+        $submission = \App\Models\CustomerKycSubmission::where('user_id', auth()->id())->latest()->first();
+        return view('frontend.rider.kyc', compact('submission'));
+    }
+
+    public function storeKyc(Request $request)
+    {
+        $user = auth()->user();
+        $existing = \App\Models\CustomerKycSubmission::where('user_id', $user->id)->latest()->first();
+        if ($existing && $existing->status === 'approved') {
+            return back()->with('error', 'Your KYC is already approved.');
+        }
+        if ($existing && $existing->status === 'pending') {
+            return back()->with('error', 'Your KYC is already under review.');
+        }
+
+        $request->validate([
+            'full_name' => 'required|string|max:255',
+            'document_type' => 'required|in:aadhaar,pan,driving_licence',
+            'document_number' => 'nullable|string|max:80',
+            'document' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
+
+        $path = $request->file('document')->store('customer-kyc/'.$user->id, 'local');
+
+        \App\Models\CustomerKycSubmission::create([
+            'user_id' => $user->id,
+            'full_name' => $request->full_name,
+            'document_type' => $request->document_type,
+            'document_number' => $request->document_number,
+            'document_path' => $path,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'KYC submitted. Status: pending review.');
     }
 }

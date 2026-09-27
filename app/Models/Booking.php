@@ -12,6 +12,8 @@ class Booking extends Model
         'vehicle_category_id',
         'service_type',
         'status',
+        'ride_otp',
+        'ride_otp_verified_at',
         'pickup_location',
         'dropoff_location',
         'distance',
@@ -32,12 +34,22 @@ class Booking extends Model
         'cancelled_at',
     ];
 
+    protected $hidden = [
+        'ride_otp',
+    ];
+
     protected $casts = [
         'accepted_at' => 'datetime',
         'picked_up_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'ride_otp_verified_at' => 'datetime',
     ];
+
+    public static function generateRideOtp(): string
+    {
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
 
     public function user()
     {

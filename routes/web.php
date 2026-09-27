@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [\App\Http\Controllers\Frontend\UserController::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile', [\App\Http\Controllers\Frontend\UserController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/kyc', [\App\Http\Controllers\Frontend\UserController::class, 'showKyc'])->name('rider.kyc');
+    Route::post('/kyc', [\App\Http\Controllers\Frontend\UserController::class, 'storeKyc'])->name('rider.kyc.store');
 
     // Rider Booking & Bidding
     Route::group(['prefix' => 'rider/bookings', 'as' => 'rider.bookings.'], function () {
@@ -194,6 +196,13 @@ Route::group(['prefix' => 'admin/users', 'as' => 'admin.users.'], function () {
     Route::get('/blocked', [\App\Http\Controllers\Admin\UserController::class, 'blocked'])->name('blocked');
     Route::post('/{id}/block', [\App\Http\Controllers\Admin\UserController::class, 'block'])->name('block');
     Route::get('/wallet', [\App\Http\Controllers\Admin\UserController::class, 'wallet'])->name('wallet');
+});
+
+Route::middleware('auth:admin')->prefix('admin/customer-kyc')->name('admin.customers.kyc.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\CustomerKycController::class, 'index'])->name('index');
+    Route::get('/{submission}/document', [\App\Http\Controllers\Admin\CustomerKycController::class, 'download'])->name('download');
+    Route::post('/{submission}/approve', [\App\Http\Controllers\Admin\CustomerKycController::class, 'approve'])->name('approve');
+    Route::post('/{submission}/reject', [\App\Http\Controllers\Admin\CustomerKycController::class, 'reject'])->name('reject');
 });
 
 // Admin Driver Management

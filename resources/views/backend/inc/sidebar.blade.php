@@ -145,14 +145,15 @@
                 </div>
             </li>
             <li>
-                <a href="#userMenu{{ $sfx }}" data-bs-toggle="collapse" class="nav-link py-2 px-3 d-flex align-items-center justify-content-between" aria-expanded="{{ request()->is('admin/users*') ? 'true' : 'false' }}">
+                <a href="#userMenu{{ $sfx }}" data-bs-toggle="collapse" class="nav-link py-2 px-3 d-flex align-items-center justify-content-between" aria-expanded="{{ request()->is('admin/users*') || request()->is('admin/customer-kyc*') ? 'true' : 'false' }}">
                     <span><i class="bi bi-person-check me-2"></i> Customers</span>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
-                <div class="collapse {{ request()->is('admin/users*') ? 'show' : '' }} ps-3" id="userMenu{{ $sfx }}">
+                <div class="collapse {{ request()->is('admin/users*') || request()->is('admin/customer-kyc*') ? 'show' : '' }} ps-3" id="userMenu{{ $sfx }}">
                     <ul class="nav flex-column border-start border-secondary ms-2 small">
                         <li class="nav-item">
                             <a href="{{ route('admin.users.index') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">All Customers</a>
+                            <a href="{{ route('admin.customers.kyc.index') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.customers.kyc.*') ? 'active' : '' }}">Customer KYC</a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('admin.users.blocked') }}" class="nav-link py-2 px-3 fw-light {{ request()->routeIs('admin.users.blocked') ? 'active' : '' }}">Blocked Users</a>

@@ -23,6 +23,11 @@
 </div>
 
 <div class="row">
+    @if(session('error'))
+        <div class="col-12">
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        </div>
+    @endif
     <div class="col-lg-12">
         <div class="drv-card overflow-hidden">
                 <div class="row g-0">
@@ -97,8 +102,13 @@
                             @if($ride->status == 'accepted')
                                 <form action="{{ route('driver.rides.pickup', $ride->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Starting trip...">
-                                        Passenger onboard — start trip
+                                    <label class="form-label small fw-bold" for="ride-otp">Customer ride OTP</label>
+                                    <input id="ride-otp" name="otp" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" class="form-control text-center fw-bold mb-2" placeholder="6-digit OTP" required autocomplete="one-time-code">
+                                    @error('otp')
+                                        <div class="text-danger small mb-2">{{ $message }}</div>
+                                    @enderror
+                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Verifying OTP...">
+                                        Verify OTP and start trip
                                     </button>
                                 </form>
                             @elseif($ride->status == 'ongoing')

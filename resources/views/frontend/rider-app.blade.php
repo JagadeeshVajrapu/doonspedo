@@ -115,7 +115,7 @@
                                 <i class="bi bi-circle-fill" style="font-size: 10px;"></i>
                             </span>
                             <input type="text" id="pickup-location" class="form-control bg-white border-0 text-dark py-3" style="outline: none; box-shadow: none;" placeholder="Search pickup or use current location" value="" aria-labelledby="pickup-label" autocomplete="street-address">
-                            <button id="detect-btn" onclick="detectLocation()" class="btn btn-link text-secondary border-0 bg-white" type="button" title="Use my current location" aria-label="Use my current location"><i class="bi bi-crosshair" aria-hidden="true"></i></button>
+                            <button id="detect-btn" onclick="detectLocation()" class="btn btn-link text-secondary border-0 bg-white text-nowrap small fw-bold" type="button" title="Use Current Location" aria-label="Use Current Location"><i class="bi bi-crosshair" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">Use Current Location</span></button>
                         </div>
                         <div id="location-status" class="small mt-1 px-1 d-none" role="status" aria-live="polite"></div>
                     </div>
@@ -1252,6 +1252,8 @@ function initAutocomplete() {
 
         pickupAutocomplete.addListener('place_changed', () => handlePlaceSelect('pickup'));
         dropAutocomplete.addListener('place_changed', () => handlePlaceSelect('drop'));
+        pickupInput.addEventListener('input', () => { pickupLatLng = null; });
+        dropInput.addEventListener('input', () => { dropLatLng = null; });
 
         const stopInput = document.getElementById('stop-location');
         if (stopInput) {

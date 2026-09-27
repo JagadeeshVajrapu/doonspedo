@@ -52,6 +52,7 @@ class RiderBookingController extends Controller
             'notes'               => $request->notes,
             'parcel_details'      => $request->parcel_details,
             'status'              => 'pending',
+            'ride_otp'            => Booking::generateRideOtp(),
             'payment_status'      => 'pending',
         ]);
 
@@ -92,11 +93,16 @@ class RiderBookingController extends Controller
             $bid->update(['status' => 'accepted']);
 
             // Update the booking
+            if (!$booking->ride_otp) {
+                $booking->ride_otp = Booking::generateRideOtp();
+            }
+
             $booking->update([
                 'driver_id'   => $bid->driver_id,
                 'fare'        => $bid->bid_amount,
                 'status'      => 'accepted',
                 'accepted_at' => now(),
+                'ride_otp'    => $booking->ride_otp,
             ]);
 
             // Reject all other bids for this booking
@@ -108,7 +114,7 @@ class RiderBookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Bid accepted! Your driver is on the way.',
-            'booking' => $booking->load('driver')
+            'booking' => $booking->load('driver')->makeVisible('ride_otp')
         ]);
     }
 
@@ -180,8 +186,13 @@ class RiderBookingController extends Controller
             'vehicle_category_id' => $oldBooking->vehicle_category_id,
             'pickup_location'     => $oldBooking->pickup_location,
             'dropoff_location'    => $oldBooking->dropoff_location,
+            'pickup_lat'          => $oldBooking->pickup_lat,
+            'pickup_lng'          => $oldBooking->pickup_lng,
+            'dropoff_lat'         => $oldBooking->dropoff_lat,
+            'dropoff_lng'         => $oldBooking->dropoff_lng,
             'fare'                => $oldBooking->fare,
             'status'              => 'pending',
+            'ride_otp'            => Booking::generateRideOtp(),
             'payment_status'      => 'pending',
         ]);
 
@@ -197,6 +208,10 @@ class RiderBookingController extends Controller
     public function getStatus($id)
     {
         $booking = Booking::with('driver')->where('user_id', Auth::id())->findOrFail($id);
+        if ($booking->driver_id && in_array($booking->status, ['accepted', 'ongoing'], true)) {
+            $booking->makeVisible('ride_otp');
+        }
+
         return response()->json([
             'success' => true,
             'status'  => $booking->status,

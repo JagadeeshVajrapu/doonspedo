@@ -30,9 +30,24 @@
             <input type="text" id="reg-name" name="name" class="form-control clean-input" placeholder="Enter your name" required value="{{ old('name') }}" autocomplete="name">
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
+            <label class="form-label text-dark-custom small fw-bold" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" name="email" class="form-control clean-input" placeholder="name@example.com" required value="{{ old('email') }}" autocomplete="email">
+        </div>
+
+        <div class="mb-3">
             <label class="form-label text-dark-custom small fw-bold" for="reg-mobile">Mobile Number</label>
-            <input type="tel" id="reg-mobile" name="mobile" class="form-control clean-input" placeholder="+91 00000 00000" required value="{{ old('mobile', session('rider_mobile')) }}" autocomplete="tel">
+            <input type="tel" id="reg-mobile" name="mobile" class="form-control clean-input" placeholder="+91 00000 00000" required value="{{ old('mobile') }}" autocomplete="tel">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-dark-custom small fw-bold" for="reg-password">Password</label>
+            <input type="password" id="reg-password" name="password" class="form-control clean-input" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-dark-custom small fw-bold" for="reg-password-confirm">Confirm Password</label>
+            <input type="password" id="reg-password-confirm" name="password_confirmation" class="form-control clean-input" placeholder="Repeat your password" required minlength="8" autocomplete="new-password">
         </div>
 
         <div class="d-grid mt-4">
