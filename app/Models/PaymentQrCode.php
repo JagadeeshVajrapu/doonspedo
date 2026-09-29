@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class PaymentQrCode extends Model
 {
@@ -26,7 +25,7 @@ class PaymentQrCode extends Model
 
     public function imageUrl(): string
     {
-        return Storage::disk('public')->url($this->image_path);
+        return media_url($this->image_path);
     }
 
     public static function active(): ?self

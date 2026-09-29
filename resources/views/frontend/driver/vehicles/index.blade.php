@@ -30,7 +30,7 @@
     <div class="col-md-6 col-lg-4">
         <div class="drv-card h-100 border-top border-4 {{ $vehicle->status == 'active' ? 'border-brand' : 'border-light' }}">
             @if($vehiclePhoto)
-                <img src="{{ asset('storage/' . $vehiclePhoto->document_path) }}" class="w-100" style="height: 160px; object-fit: cover;" alt="Vehicle photo">
+                <img src="{{ media_url($vehiclePhoto->document_path) }}" class="w-100" style="height: 160px; object-fit: cover;" alt="Vehicle photo">
             @else
                 <div class="bg-light w-100 d-flex align-items-center justify-content-center border-bottom" style="height: 160px;">
                     <i class="bi bi-car-front text-muted display-4"></i>

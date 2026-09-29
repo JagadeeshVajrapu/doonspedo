@@ -50,6 +50,18 @@
             </div>
         </div>
 
+        @if($booking->status === 'accepted' && !$booking->arrived_at)
+        <div class="rider-card text-center">
+            <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-2">Partner arrival</p>
+            @if(!empty($etaMinutes))
+                <p class="h4 fw-bold mb-1">About {{ $etaMinutes }} min</p>
+                <p class="small text-muted mb-0">Estimated from your partner's current location to this pickup.</p>
+            @else
+                <p class="small text-muted mb-0">Your partner's live location will show an arrival time as soon as their phone shares it.</p>
+            @endif
+        </div>
+        @endif
+
         @if($booking->driver && in_array($booking->status, ['accepted', 'ongoing'], true) && $booking->ride_otp)
         <div class="rider-card text-center">
             <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-2">Ride OTP</p>
@@ -65,7 +77,7 @@
         <div class="rider-card">
             <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-3">Driver &amp; Vehicle</p>
             <div class="d-flex align-items-center">
-                <img src="{{ $booking->driver->profile_image ? asset('uploads/profiles/' . $booking->driver->profile_image) : 'https://i.pravatar.cc/100?u=' . $booking->driver->id }}" alt="{{ $booking->driver->name }}" class="rounded-circle me-3 border" style="width: 52px; height: 52px; object-fit: cover;" loading="lazy">
+                <img src="{{ $booking->driver->profile_image ? media_url($booking->driver->profile_image) : 'https://i.pravatar.cc/100?u=' . $booking->driver->id }}" alt="{{ $booking->driver->name }}" class="rounded-circle me-3 border" style="width: 52px; height: 52px; object-fit: cover;" loading="lazy">
                 <div>
                     <h3 class="h6 mb-0 fw-bold">{{ $booking->driver->name }}</h3>
                     <p class="mb-0 small text-muted">

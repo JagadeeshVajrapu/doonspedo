@@ -150,13 +150,20 @@ class DriverController extends Controller
                 $image_type_aux = explode("image/", $image_parts[0]);
                 $image_type = $image_type_aux[1];
                 $image_base64 = base64_decode($image_parts[1]);
-                $fileName = 'drivers/profile/' . uniqid() . '.' . $image_type;
-                
-                \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
-                $driver->update(['profile_image' => $fileName]);
+
+                try {
+                    $stored = app(\App\Services\CloudinaryStorage::class)->storeBinary($image_base64, uniqid().'.'.$image_type, 'drivers/profile');
+                } catch (\RuntimeException $e) {
+                    return back()->with('error', $e->getMessage());
+                }
+                $driver->update(['profile_image' => $stored]);
             }
         } elseif ($request->hasFile('profile_image')) {
-            $path = $request->file('profile_image')->store('drivers/profile', 'public');
+            try {
+                $path = app(\App\Services\CloudinaryStorage::class)->storeUploadedFile($request->file('profile_image'), 'drivers/profile');
+            } catch (\RuntimeException $e) {
+                return back()->with('error', $e->getMessage());
+            }
             $driver->update(['profile_image' => $path]);
         }
 

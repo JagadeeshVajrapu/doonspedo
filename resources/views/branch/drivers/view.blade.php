@@ -16,7 +16,7 @@
         <div class="row">
             <div class="col-md-4 text-center mb-4 mb-md-0">
                 @if($driver->profile_image)
-                    <img src="{{ asset('storage/' . $driver->profile_image) }}" alt="Driver Profile" class="img-fluid rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;">
+                    <img src="{{ media_url($driver->profile_image) }}" alt="Driver Profile" class="img-fluid rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;">
                 @else
                     <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm" style="width: 150px; height: 150px;">
                         <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>

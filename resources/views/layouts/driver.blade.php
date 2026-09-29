@@ -119,7 +119,7 @@
         <div class="offcanvas-body p-4">
             <div class="text-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
                 @if($driver->profile_image ?? false)
-                    <img src="{{ asset('storage/' . $driver->profile_image) }}" class="rounded-circle border border-2 border-brand mb-2" style="width: 56px; height: 56px; object-fit: cover;" alt="{{ $driver->name }}">
+                    <img src="{{ media_url($driver->profile_image) }}" class="rounded-circle border border-2 border-brand mb-2" style="width: 56px; height: 56px; object-fit: cover;" alt="{{ $driver->name }}">
                 @else
                     <div class="bg-brand-soft rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 56px; height: 56px;">
                         <i class="bi bi-person text-brand fs-4"></i>
@@ -317,6 +317,25 @@
         });
 
         /* ── LOCATION ── */
+        let lastDriverLocationPost = 0;
+        function postDriverLocation(position) {
+            const now = Date.now();
+            if (now - lastDriverLocationPost < 15000) return;
+            lastDriverLocationPost = now;
+            fetch("{{ route('driver.updateLocation') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude })
+            }).catch(function() {});
+        }
+        function watchDriverLocation() {
+            if (window.driverLocationWatch || !navigator.geolocation) return;
+            window.driverLocationWatch = navigator.geolocation.watchPosition(postDriverLocation, function() {}, {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 10000
+            });
+        }
         function autoDetectLocation() {
             if (!navigator.geolocation) {
                 updateLocationUI('unsupported');
@@ -327,11 +346,8 @@
                 function(position) {
                     updateLocationUI('granted');
                     localStorage.setItem('location_allowed', 'true');
-                    fetch("{{ route('driver.updateLocation') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude })
-                    }).catch(function() {});
+                    postDriverLocation(position);
+                    watchDriverLocation();
                 },
                 function(error) {
                     updateLocationUI(error.code === error.PERMISSION_DENIED ? 'denied' : 'prompt');
@@ -455,11 +471,8 @@
                 function(position) {
                     updateLocationUI('granted');
                     localStorage.setItem('location_allowed', 'true');
-                    fetch("{{ route('driver.updateLocation') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude })
-                    }).catch(function() {});
+                    postDriverLocation(position);
+                    watchDriverLocation();
                 },
                 function() {
                     alert('Location blocked. Please tap the lock icon in your browser URL bar and enable Location.');

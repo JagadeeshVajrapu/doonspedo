@@ -116,12 +116,12 @@
                                 <div class="card-body bg-white text-center p-3 d-flex flex-column justify-content-center" style="min-height: 300px;">
                                     <div class="doc-preview-container mb-4">
                                         @if($doc->kycRequirement->document_type == 'image')
-                                            <img src="{{ asset('storage/' . $doc->document_path) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="KYC Doc">
+                                            <img src="{{ media_url($doc->document_path) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="KYC Doc">
                                         @elseif($doc->kycRequirement->document_type == 'pdf')
                                             <div class="py-4 bg-light rounded-4">
                                                 <i class="bi bi-file-earmark-pdf text-danger display-1"></i>
                                                 <div class="mt-3">
-                                                    <a href="{{ asset('storage/' . $doc->document_path) }}" target="_blank" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold shadow-sm">
+                                                    <a href="{{ media_url($doc->document_path) }}" target="_blank" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold shadow-sm">
                                                        <i class="bi bi-eye me-1"></i> VIEW PDF
                                                     </a>
                                                 </div>

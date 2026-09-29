@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Services\CloudinaryStorage;
 use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use App\Models\Vehicle;
@@ -74,7 +75,7 @@ class DriverVehicleController extends Controller
 
             // Handle RC Book Upload
             if ($request->hasFile('rc_book')) {
-                $rcPath = $request->file('rc_book')->store('vehicles/documents', 'public');
+                $rcPath = app(CloudinaryStorage::class)->storeUploadedFile($request->file('rc_book'), 'vehicles/documents');
                 VehicleSpecificDocument::create([
                     'vehicle_id'    => $vehicle->id,
                     'document_name' => 'RC Book',
@@ -85,7 +86,7 @@ class DriverVehicleController extends Controller
 
             // Handle Insurance Upload
             if ($request->hasFile('insurance')) {
-                $insPath = $request->file('insurance')->store('vehicles/documents', 'public');
+                $insPath = app(CloudinaryStorage::class)->storeUploadedFile($request->file('insurance'), 'vehicles/documents');
                 VehicleSpecificDocument::create([
                     'vehicle_id'    => $vehicle->id,
                     'document_name' => 'Insurance',
@@ -96,7 +97,7 @@ class DriverVehicleController extends Controller
 
             // Handle Vehicle Photo Upload
             if ($request->hasFile('vehicle_image')) {
-                $vehPath = $request->file('vehicle_image')->store('vehicles/documents', 'public');
+                $vehPath = app(CloudinaryStorage::class)->storeUploadedFile($request->file('vehicle_image'), 'vehicles/documents');
                 VehicleSpecificDocument::create([
                     'vehicle_id'    => $vehicle->id,
                     'document_name' => 'Vehicle Photo',

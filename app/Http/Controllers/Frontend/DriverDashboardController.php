@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Services\CloudinaryStorage;
 use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use App\Models\KycRequirement;
@@ -117,6 +118,7 @@ class DriverDashboardController extends Controller
 
         $request->validate($rules);
 
+        try {
         foreach ($requirements as $req) {
             $field = 'doc_' . $req->id;
             $path = null;
@@ -127,7 +129,7 @@ class DriverDashboardController extends Controller
                 }
             } else {
                 if ($request->hasFile($field)) {
-                    $path = $request->file($field)->store('drivers/kyc', 'public');
+                    $path = app(CloudinaryStorage::class)->storeUploadedFile($request->file($field), 'drivers/kyc');
                 }
             }
 
@@ -144,6 +146,9 @@ class DriverDashboardController extends Controller
                     ]
                 );
             }
+        }
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
         }
 
         $driver->status = 'pending';
@@ -185,7 +190,11 @@ class DriverDashboardController extends Controller
         ]);
 
         if ($request->hasFile('profile_image')) {
-            $data['profile_image'] = $request->file('profile_image')->store('drivers/profile', 'public');
+            try {
+                $data['profile_image'] = app(CloudinaryStorage::class)->storeUploadedFile($request->file('profile_image'), 'drivers/profile');
+            } catch (\RuntimeException $e) {
+                return back()->with('error', $e->getMessage())->withInput();
+            }
         }
 
         $driver->update($data);
@@ -320,13 +329,6 @@ class DriverDashboardController extends Controller
         }
 
         $driver->is_online = !$driver->is_online;
-        
-        // Update mock location if going online (in real app, this comes from GPS)
-        if ($driver->is_online) {
-            $driver->current_lat = $driver->current_lat ?? 30.3165; // Dehradun Mock
-            $driver->current_lng = $driver->current_lng ?? 78.0322;
-        }
-
         $driver->save();
 
         return response()->json([

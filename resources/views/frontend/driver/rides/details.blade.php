@@ -108,16 +108,13 @@
                                     </button>
                                 </form>
                             @elseif($ride->status == 'accepted' && $ride->arrived_at)
-                                <div class="text-center border rounded-4 p-3 mb-3 bg-light">
-                                    <div class="small text-muted fw-bold text-uppercase">Ride OTP</div>
-                                    <div class="display-6 fw-bold mb-1" style="letter-spacing: 0.2em;">{{ $ride->ride_otp }}</div>
-                                    <p class="small text-muted mb-0">Shared because you have reached the rider. Confirm it to start the trip.</p>
-                                </div>
                                 <form action="{{ route('driver.rides.pickup', $ride->id) }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="otp" value="{{ $ride->ride_otp }}">
-                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Starting trip...">
-                                        Confirm OTP and start trip
+                                    <label class="form-label small fw-bold text-uppercase text-muted" for="ride-otp-input">Rider OTP</label>
+                                    <input id="ride-otp-input" type="text" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" minlength="6" class="form-control form-control-lg text-center fw-bold mb-2 @error('otp') is-invalid @enderror" style="letter-spacing: 0.28em;" placeholder="000000" autocomplete="one-time-code" required value="{{ old('otp') }}">
+                                    <p class="small text-muted mb-3">Ask the rider for the OTP on their trip screen, then verify it to start the trip.</p>
+                                    <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow" data-loading-label="Verifying OTP...">
+                                        Verify OTP and start trip
                                     </button>
                                 </form>
                             @elseif($ride->status == 'ongoing')

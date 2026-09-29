@@ -35,7 +35,7 @@
                         <div class="col-12 text-center mb-2">
                             <div class="position-relative d-inline-block">
                                 @if($driver->profile_image)
-                                    <img src="{{ asset('storage/' . $driver->profile_image) }}" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;" alt="{{ $driver->name }}">
+                                    <img src="{{ media_url($driver->profile_image) }}" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;" alt="{{ $driver->name }}">
                                 @else
                                     <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 120px; height: 120px;">
                                         <i class="bi bi-person text-secondary display-4"></i>

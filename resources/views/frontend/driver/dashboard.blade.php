@@ -235,6 +235,13 @@
             fetch('{{ route("driver.rides.requests") }}', { headers: { 'Accept': 'application/json' } })
             .then(res => res.json())
             .then(data => {
+                if (data.needs_location) {
+                    const box = document.getElementById('new-requests-container');
+                    if (box) {
+                        box.innerHTML = '<div class="alert alert-warning small mb-0 shadow" style="pointer-events:auto;">Allow location to receive nearby ride requests.</div>';
+                    }
+                    return;
+                }
                 if(data.success && data.requests && data.requests.length > 0) {
                     const latest = data.requests[0];
                     if (latest.id !== lastAlertedRequestId) {
@@ -349,7 +356,7 @@
                         </div>
                         
                         <div class="mb-3">
-                            <div class="small mb-1"><i class="bi bi-geo-alt-fill text-brand"></i> <strong>From:</strong> ${request.pickup_location}</div>
+                            <div class="small mb-1"><i class="bi bi-geo-alt-fill text-brand"></i> <strong>From:</strong> ${request.pickup_location}${request.distance_km != null ? ' · ' + request.distance_km + ' km away' : ''}</div>
                             <div class="small"><i class="bi bi-flag-fill text-brand"></i> <strong>To:</strong> ${request.dropoff_location}</div>
                             ${request.parcel_details ? `<div class="extra-small text-muted mt-2 p-2 bg-dark rounded border border-secondary border-opacity-25"><i class="bi bi-info-circle me-1"></i> ${request.parcel_details}</div>` : ''}
                         </div>

@@ -15,6 +15,18 @@ class NotificationController extends Controller
         return view('backend.notifications.index', compact('notifications'));
     }
 
+    public function feed()
+    {
+        $latest = AdminNotification::query()->latest()->limit(5)->get([
+            'id', 'title', 'message', 'is_read', 'action_url', 'created_at',
+        ]);
+
+        return response()->json([
+            'unread' => AdminNotification::query()->where('is_read', false)->count(),
+            'latest' => $latest->first(),
+        ]);
+    }
+
     public function open($id)
     {
         $notification = AdminNotification::query()->findOrFail($id);

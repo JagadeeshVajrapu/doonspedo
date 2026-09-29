@@ -129,6 +129,24 @@ if (!function_exists('load_sys_settings')) {
     }
 }
 
+if (!function_exists('media_url')) {
+    /**
+     * Public URL for a stored file. Cloudinary links are returned as-is.
+     */
+    function media_url(?string $path): string
+    {
+        if ($path === null || $path === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        return asset('storage/'.ltrim($path, '/'));
+    }
+}
+
 if (!function_exists('get_settings')) {
     /**
      * Get a setting value by key from the settings.json file.

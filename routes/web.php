@@ -339,6 +339,7 @@ Route::group(['prefix' => 'admin/cms', 'as' => 'admin.cms.'], function () {
 
 // Admin Notifications
 Route::group(['prefix' => 'admin/notifications', 'as' => 'admin.notifications.'], function () {
+    Route::get('/feed', [\App\Http\Controllers\Admin\NotificationController::class, 'feed'])->name('feed');
     Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
     Route::get('/{id}/open', [\App\Http\Controllers\Admin\NotificationController::class, 'open'])->name('open');
     Route::post('/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('read-all');

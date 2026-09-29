@@ -89,7 +89,7 @@
                                     <h6 class="fw-bold text-dark mb-0 d-flex justify-content-between align-items-center">
                                         <span><i class="bi {{ $doc['icon'] }} me-2 text-primary"></i>{{ $doc['label'] }}</span>
                                         @if($driver->{$doc['field']})
-                                            <a href="{{ asset('storage/' . $driver->{$doc['field']}) }}" target="_blank" class="btn btn-sm btn-link p-0 text-primary" title="Open in new tab">
+                                            <a href="{{ media_url($driver->{$doc['field']}) }}" target="_blank" class="btn btn-sm btn-link p-0 text-primary" title="Open in new tab">
                                                 <i class="bi bi-box-arrow-up-right"></i>
                                             </a>
                                         @endif
@@ -98,7 +98,7 @@
                                 <div class="card-body bg-white rounded-bottom-4 text-center p-3 d-flex flex-column justify-content-center" style="min-height: 300px;">
                                     @if($driver->{$doc['field']})
                                         <div class="doc-preview-container position-relative">
-                                            <img src="{{ asset('storage/' . $driver->{$doc['field']}) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $doc['label'] }}">
+                                            <img src="{{ media_url($driver->{$doc['field']}) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $doc['label'] }}">
                                         </div>
                                     @else
                                         <div class="py-5">

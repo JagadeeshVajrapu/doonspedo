@@ -114,7 +114,7 @@ class UserController extends Controller
             return redirect()->route('rider.app')->with('success', 'Logged in successfully!');
         }
 
-        \Illuminate\Support\Facades\Log::warning("OTP mismatch for mobile {$request->mobile}. Expected: " . session('rider_otp') . ", Got: {$request->otp}");
+        \Illuminate\Support\Facades\Log::warning('Rider login OTP did not match.');
         return back()->with('error', 'Invalid OTP. Please try again.');
     }
 
@@ -204,7 +204,11 @@ class UserController extends Controller
 
         $path = $replacingPending ? $existing->document_path : null;
         if ($request->hasFile('document')) {
-            $path = $request->file('document')->store('customer-kyc/'.$user->id, 'local');
+            try {
+                $path = app(\App\Services\CloudinaryStorage::class)->storeUploadedFile($request->file('document'), 'customer-kyc/'.$user->id);
+            } catch (\RuntimeException $e) {
+                return back()->with('error', $e->getMessage())->withInput();
+            }
         }
 
         $payload = [

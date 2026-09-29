@@ -89,7 +89,7 @@
                             <p class="mb-0">{{ $msg->message }}</p>
                             @if($msg->attachment_path)
                                 <div class="mt-2 pt-2 border-top">
-                                    <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="small text-decoration-none fw-bold">
+                                    <a href="{{ media_url($msg->attachment_path) }}" target="_blank" class="small text-decoration-none fw-bold">
                                         <i class="bi bi-paperclip"></i> View Attachment
                                     </a>
                                 </div>

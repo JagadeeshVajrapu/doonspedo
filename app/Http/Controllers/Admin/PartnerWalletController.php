@@ -7,6 +7,7 @@ use App\Models\DriverRegistration;
 use App\Models\PaymentQrCode;
 use App\Models\Transaction;
 use App\Models\WalletRecharge;
+use App\Services\CloudinaryStorage;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +38,11 @@ class PartnerWalletController extends Controller
             return back()->with('error', 'Upload a JPEG, PNG, or WebP image.')->withInput();
         }
 
-        $path = $file->store('payment-qr', 'public');
+        try {
+            $path = app(CloudinaryStorage::class)->storeUploadedFile($file, 'payment-qr');
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
 
         DB::transaction(function () use ($request, $path) {
             PaymentQrCode::query()->where('is_active', true)->update(['is_active' => false]);
@@ -82,7 +87,9 @@ class PartnerWalletController extends Controller
             return back()->with('error', 'This QR was used for a successful recharge, so it was deactivated instead of deleted.');
         }
 
-        Storage::disk('public')->delete($code->image_path);
+        if (!preg_match('#^https?://#i', (string) $code->image_path)) {
+            Storage::disk('public')->delete($code->image_path);
+        }
         $code->delete();
 
         return back()->with('success', 'QR code deleted.');

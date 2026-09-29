@@ -2675,8 +2675,8 @@ function showRideOtp(booking) {
         box.classList.remove('d-none');
         code.textContent = booking.ride_otp;
         if (note) note.textContent = booking.arrived_at
-            ? 'Your partner has reached you. They can see this OTP and start the trip.'
-            : 'Share this with your partner only after they reach you.';
+            ? 'Your partner has reached you. Read this OTP to them so they can start the trip.'
+            : 'Keep this OTP until your partner reaches you, then read it to them.';
     } else if (booking.status === 'ongoing') {
         box.classList.remove('d-none');
         code.textContent = 'Started';
@@ -2721,7 +2721,7 @@ function fetchBids() {
                     document.getElementById('driver-info').innerHTML = `<i class="bi bi-star-fill text-brand"></i> 4.9 Driver • ${driver.vehicle_type || 'Vehicle'}`;
                     document.getElementById('vehicle-reg').innerText = driver.vehicle_number || 'N/A';
                     document.getElementById('final-fare').innerText = `Rs. ${booking.fare}`;
-                    document.getElementById('driver-photo').src = driver.profile_image ? `/uploads/profiles/${driver.profile_image}` : `https://i.pravatar.cc/100?u=${driver.id}`;
+                    document.getElementById('driver-photo').src = driver.profile_image ? (String(driver.profile_image).startsWith('http') ? driver.profile_image : `/storage/${driver.profile_image}`) : `https://i.pravatar.cc/100?u=${driver.id}`;
                     document.getElementById('driver-phone').href = `tel:${driver.mobile}`;
                 }
 
@@ -3010,8 +3010,8 @@ function fetchStatus() {
             if (status === 'accepted') {
                 title.innerText = booking.arrived_at ? 'Partner has reached you' : 'Driver is on the way';
                 desc.innerText = booking.arrived_at
-                    ? 'Show the OTP below so the trip can start'
-                    : 'Please wait at the pickup point';
+                    ? 'Share the OTP below so your partner can start the trip'
+                    : (data.eta_minutes ? ('Arriving in about ' + data.eta_minutes + ' min') : 'Please wait at the pickup point');
                 title.className = 'fw-bold mb-1 text-brand';
             } else if (status === 'arrived') {
                 // Legacy label — backend uses accepted → ongoing (no separate arrived status)

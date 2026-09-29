@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Bid;
+use App\Support\Geo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -169,7 +170,9 @@ class RiderBookingController extends Controller
     public function show($id)
     {
         $booking = Booking::with(['driver', 'vehicleCategory'])->where('user_id', Auth::id())->findOrFail($id);
-        return view('frontend.rider.bookings.show', compact('booking'));
+        $etaMinutes = $this->arrivalMinutes($booking);
+
+        return view('frontend.rider.bookings.show', compact('booking', 'etaMinutes'));
     }
 
     public function downloadInvoice($id)
@@ -218,7 +221,26 @@ class RiderBookingController extends Controller
         return response()->json([
             'success' => true,
             'status'  => $booking->status,
+            'eta_minutes' => $this->arrivalMinutes($booking),
             'booking' => $booking
         ]);
+    }
+
+    private function arrivalMinutes(Booking $booking): ?int
+    {
+        $driver = $booking->driver;
+        if (!$driver || $booking->status !== 'accepted' || $booking->arrived_at) {
+            return null;
+        }
+        if ($driver->current_lat === null || $driver->current_lng === null || $booking->pickup_lat === null || $booking->pickup_lng === null) {
+            return null;
+        }
+
+        return Geo::etaMinutes(Geo::kilometers(
+            (float) $driver->current_lat,
+            (float) $driver->current_lng,
+            (float) $booking->pickup_lat,
+            (float) $booking->pickup_lng
+        ));
     }
 }

@@ -8,6 +8,7 @@ use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Transaction;
 use App\Services\WalletService;
+use App\Support\Geo;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -40,13 +41,33 @@ class DriverRideController extends Controller
             return response()->json(['success' => true, 'requests' => []]);
         }
 
-        // Pending open bookings (existing marketplace behavior). Proximity filtering can be added later.
+        if ($driver->current_lat === null || $driver->current_lng === null) {
+            return response()->json(['success' => true, 'requests' => [], 'needs_location' => true]);
+        }
+
+        $radius = Geo::nearbyRadiusKm($driver);
         $requests = Booking::with('user', 'vehicleCategory')
             ->where('status', 'pending')
             ->whereNull('driver_id')
+            ->whereNotNull('pickup_lat')
+            ->whereNotNull('pickup_lng')
             ->latest()
-            ->limit(20)
-            ->get();
+            ->limit(50)
+            ->get()
+            ->filter(function (Booking $booking) use ($driver, $radius) {
+                $km = Geo::kilometers(
+                    (float) $driver->current_lat,
+                    (float) $driver->current_lng,
+                    (float) $booking->pickup_lat,
+                    (float) $booking->pickup_lng
+                );
+                $booking->setAttribute('distance_km', round($km, 1));
+
+                return $km <= $radius;
+            })
+            ->sortBy('distance_km')
+            ->take(20)
+            ->values();
 
         return response()->json(['success' => true, 'requests' => $requests]);
     }
@@ -69,6 +90,11 @@ class DriverRideController extends Controller
             
         if ($hasActive) {
             return back()->with('error', 'You already have an active ride.');
+        }
+
+        $tooFar = Geo::outOfRangeMessage($driver, $booking);
+        if ($tooFar) {
+            return back()->with('error', $tooFar);
         }
 
         $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);

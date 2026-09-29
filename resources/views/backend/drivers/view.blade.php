@@ -16,7 +16,7 @@
             <div class="card-body text-center p-4">
                 <div class="mb-3 position-relative d-inline-block">
                     @if($driver->profile_image)
-                        <img src="{{ asset('storage/' . $driver->profile_image) }}" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;" alt="Profile">
+                        <img src="{{ media_url($driver->profile_image) }}" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;" alt="Profile">
                     @else
                         <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 120px; height: 120px;">
                             <i class="bi bi-person text-secondary display-4"></i>
@@ -86,7 +86,7 @@
                     <div class="position-relative" style="margin-top: -55px; z-index: 2;">
                         <div class="d-inline-block p-1 bg-white rounded-circle shadow-sm">
                             @if($driver->profile_image)
-                                <img src="{{ asset('storage/' . $driver->profile_image) }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--admin-primary);" alt="Photo">
+                                <img src="{{ media_url($driver->profile_image) }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--admin-primary);" alt="Photo">
                             @else
                                 <div class="rounded-circle d-flex align-items-center justify-content-center bg-light" style="width: 100px; height: 100px; border: 3px solid var(--admin-primary);">
                                     <i class="bi bi-person text-secondary" style="font-size: 3rem;"></i>
@@ -269,11 +269,11 @@
                                 <div class="card-body text-center p-3 d-flex flex-column justify-content-center" style="min-height: 250px;">
                                     @if($driver->{$doc['field']})
                                         <div class="doc-preview-container position-relative mb-2">
-                                            <a href="{{ asset('storage/' . $driver->{$doc['field']}) }}" target="_blank">
-                                                <img src="{{ asset('storage/' . $driver->{$doc['field']}) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $doc['label'] }}">
+                                            <a href="{{ media_url($driver->{$doc['field']}) }}" target="_blank">
+                                                <img src="{{ media_url($driver->{$doc['field']}) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $doc['label'] }}">
                                             </a>
                                         </div>
-                                        <a href="{{ asset('storage/' . $driver->{$doc['field']}) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-auto">
+                                        <a href="{{ media_url($driver->{$doc['field']}) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-auto">
                                             <i class="bi bi-box-arrow-up-right me-1"></i> View Original
                                         </a>
                                     @else
@@ -338,12 +338,12 @@
                                                 </div>
                                             @else
                                                 <div class="doc-preview-container position-relative mb-2">
-                                                    <a href="{{ asset('storage/' . $vdoc->document_path) }}" target="_blank">
-                                                        <img src="{{ asset('storage/' . $vdoc->document_path) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $vdoc->document_name }}">
+                                                    <a href="{{ media_url($vdoc->document_path) }}" target="_blank">
+                                                        <img src="{{ media_url($vdoc->document_path) }}" class="img-fluid rounded shadow-sm doc-img-modal" alt="{{ $vdoc->document_name }}">
                                                     </a>
                                                 </div>
                                             @endif
-                                            <a href="{{ asset('storage/' . $vdoc->document_path) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-auto">
+                                            <a href="{{ media_url($vdoc->document_path) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-auto">
                                                 <i class="bi bi-box-arrow-up-right me-1"></i> View Document
                                             </a>
                                         </div>

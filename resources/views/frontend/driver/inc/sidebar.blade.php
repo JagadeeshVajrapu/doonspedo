@@ -12,7 +12,7 @@
 
     <div class="text-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
         @if($driver->profile_image)
-            <img src="{{ asset('storage/' . $driver->profile_image) }}" class="rounded-circle shadow-sm border border-2 border-brand mb-2" style="width: 64px; height: 64px; object-fit: cover;" alt="{{ $driver->name }}">
+            <img src="{{ media_url($driver->profile_image) }}" class="rounded-circle shadow-sm border border-2 border-brand mb-2" style="width: 64px; height: 64px; object-fit: cover;" alt="{{ $driver->name }}">
         @else
             <div class="bg-brand-soft rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 64px; height: 64px;">
                 <i class="bi bi-person text-brand fs-3"></i>

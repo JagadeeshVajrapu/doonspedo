@@ -55,7 +55,7 @@
                                             @if($existingDoc)
                                                 <div class="mb-2" onclick="triggerFileInput('{{ $req->id }}', false)" style="cursor: pointer;">
                                                     @if($req->document_type == 'image')
-                                                        <img src="{{ asset('storage/' . $existingDoc->document_path) }}" class="img-thumbnail rounded-3 shadow-sm" style="max-height: 120px; object-fit: contain;">
+                                                        <img src="{{ media_url($existingDoc->document_path) }}" class="img-thumbnail rounded-3 shadow-sm" style="max-height: 120px; object-fit: contain;">
                                                     @else
                                                         <div class="bg-danger bg-opacity-10 p-4 rounded-circle mb-2">
                                                             <i class="bi bi-file-earmark-pdf-fill fs-1 text-danger"></i>

@@ -28,12 +28,11 @@
     <div class="d-flex align-items-center gap-2">
         @if(auth('admin')->check())
             @php $adminUnread = \App\Models\AdminNotification::where('is_read', false)->count(); @endphp
-            <a href="{{ route('admin.notifications.index') }}" class="btn btn-light border rounded-circle p-2 position-relative" aria-label="Notifications{{ $adminUnread ? ', '.$adminUnread.' unread' : '' }}">
+            <a href="{{ route('admin.notifications.index') }}" id="admin-notify-link" class="btn btn-light border rounded-circle p-2 position-relative" aria-label="Notifications{{ $adminUnread ? ', '.$adminUnread.' unread' : '' }}">
                 <i class="bi bi-bell"></i>
-                @if($adminUnread)
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $adminUnread }}</span>
-                @endif
+                <span id="admin-notify-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $adminUnread ? '' : 'd-none' }}">{{ $adminUnread ?: '' }}</span>
             </a>
+            <div id="admin-live-toast" class="position-fixed top-0 end-0 p-3" style="z-index: 3000;"></div>
         @endif
         <div class="dropdown">
             <button class="btn btn-white shadow-sm border rounded-pill px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -65,3 +64,47 @@
         </div>
     </div>
 </header>
+@if(auth('admin')->check())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const badge = document.getElementById('admin-notify-badge');
+    const toast = document.getElementById('admin-live-toast');
+    let seenId = null;
+    let ready = false;
+    function paint(data) {
+        if (!badge) return;
+        const unread = Number(data.unread || 0);
+        badge.textContent = unread > 0 ? String(unread) : '';
+        badge.classList.toggle('d-none', unread < 1);
+        const latest = data.latest;
+        if (latest && !latest.is_read && seenId && latest.id !== seenId && toast) {
+            toast.replaceChildren();
+            const box = document.createElement('div');
+            box.className = 'toast show text-bg-dark border-0';
+            box.setAttribute('role', 'status');
+            const body = document.createElement('div');
+            body.className = 'toast-body';
+            const strong = document.createElement('strong');
+            strong.textContent = latest.title || 'Notification';
+            const note = document.createElement('div');
+            note.className = 'small';
+            note.textContent = latest.message || '';
+            body.append(strong, note);
+            box.append(body);
+            toast.append(box);
+            setTimeout(function () { toast.replaceChildren(); }, 8000);
+        }
+        if (latest) seenId = latest.id;
+        ready = true;
+    }
+    function pull() {
+        fetch(@json(route('admin.notifications.feed')), { headers: { 'Accept': 'application/json' } })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (data) { if (data) paint(data); })
+            .catch(function () {});
+    }
+    pull();
+    setInterval(pull, 8000);
+});
+</script>
+@endif

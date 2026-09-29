@@ -17,6 +17,10 @@ class CustomerKycController extends Controller
 
     public function download(CustomerKycSubmission $submission)
     {
+        if (preg_match('#^https?://#i', (string) $submission->document_path)) {
+            return redirect()->away($submission->document_path);
+        }
+
         if (!str_starts_with($submission->document_path, 'customer-kyc/')) {
             abort(404);
         }

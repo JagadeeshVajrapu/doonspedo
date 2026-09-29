@@ -8,6 +8,7 @@ use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Bid;
 use App\Services\WalletService;
+use App\Support\Geo;
 use Illuminate\Support\Facades\DB;
 
 class DriverBidController extends Controller
@@ -45,6 +46,11 @@ class DriverBidController extends Controller
 
         if ($booking->status !== 'pending') {
             return response()->json(['success' => false, 'message' => 'This ride is no longer open for bidding.'], 403);
+        }
+
+        $tooFar = Geo::outOfRangeMessage($driver, $booking);
+        if ($tooFar) {
+            return response()->json(['success' => false, 'message' => $tooFar], 403);
         }
 
         $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);

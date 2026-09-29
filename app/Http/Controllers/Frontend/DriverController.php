@@ -90,7 +90,7 @@ class DriverController extends Controller
             return redirect()->route('driver.dashboard')->with('success', 'Logged in successfully!');
         }
 
-        \Illuminate\Support\Facades\Log::warning("Driver OTP mismatch for mobile {$request->mobile}. Expected: " . session('otp') . ", Got: {$request->otp}");
+        \Illuminate\Support\Facades\Log::warning('Driver login OTP did not match.');
         return back()->with('error', 'Invalid OTP. Please try again.');
     }
 
