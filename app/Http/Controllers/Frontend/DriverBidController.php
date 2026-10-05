@@ -8,6 +8,7 @@ use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Bid;
 use App\Services\WalletService;
+use App\Support\DriverRideRejections;
 use App\Support\Geo;
 use Illuminate\Support\Facades\DB;
 
@@ -53,28 +54,47 @@ class DriverBidController extends Controller
             return response()->json(['success' => false, 'message' => $tooFar], 403);
         }
 
+        if (!DriverRideRejections::matchesCategory($driver, $booking)) {
+            return response()->json(['success' => false, 'message' => 'This ride does not match your active vehicle.'], 403);
+        }
+
         $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);
         if ($blocked) {
             return response()->json(['success' => false, 'message' => $blocked, 'needs_wallet' => true], 403);
         }
 
-        // Check if already bidded
-        $existingBid = Bid::where('booking_id', $booking->id)
-            ->where('driver_id', $driver->id)
-            ->whereIn('status', ['pending', 'accepted'])
-            ->first();
+        $bid = DB::transaction(function () use ($request, $driver, $booking) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->first();
+            if (!$locked || $locked->status !== 'pending' || $locked->driver_id !== null) {
+                return null;
+            }
 
-        if ($existingBid) {
+            $existingBid = Bid::where('booking_id', $locked->id)
+                ->where('driver_id', $driver->id)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingBid) {
+                return false;
+            }
+
+            return Bid::create([
+                'booking_id' => $locked->id,
+                'driver_id'  => $driver->id,
+                'bid_amount' => $request->bid_amount,
+                'notes'      => $request->notes,
+                'status'     => 'pending',
+            ]);
+        });
+
+        if ($bid === false) {
             return response()->json(['success' => false, 'message' => 'You have already placed a bid on this ride.'], 403);
         }
 
-        $bid = Bid::create([
-            'booking_id' => $booking->id,
-            'driver_id'  => $driver->id,
-            'bid_amount' => $request->bid_amount,
-            'notes'      => $request->notes,
-            'status'     => 'pending',
-        ]);
+        if (!$bid) {
+            return response()->json(['success' => false, 'message' => 'This ride is no longer open for bidding.'], 403);
+        }
 
         return response()->json([
             'success' => true, 

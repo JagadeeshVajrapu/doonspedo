@@ -126,7 +126,7 @@
                     </div>
                 @endif
                 <div class="fw-bold text-white">{{ $driver->name ?? 'Captain' }}</div>
-                <div class="small text-white-50">{{ ($driver->is_online ?? false) ? 'Online' : 'Offline' }}</div>
+                <div id="driver-presence-label" class="small text-white-50">{{ ($driver->is_online ?? false) ? 'Online' : 'Offline' }}</div>
             </div>
             <ul class="nav flex-column gap-1 mb-4">
                 <li class="nav-section-label text-white-50 px-3 mb-1">Overview</li>

@@ -73,7 +73,7 @@
                     </li>
                 @else
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{{ route('login') }}">Rider Login</a>
+                        <a class="nav-link fw-semibold" href="{{ route('login') }}">Customer Login</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link fw-semibold" href="{{ route('driver.login') }}">Partner Login</a>

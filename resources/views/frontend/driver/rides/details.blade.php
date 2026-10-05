@@ -23,6 +23,11 @@
 </div>
 
 <div class="row">
+    @if(session('success'))
+        <div class="col-12">
+            <div class="alert alert-success">{{ session('success') }}</div>
+        </div>
+    @endif
     @if(session('error'))
         <div class="col-12">
             <div class="alert alert-danger">{{ session('error') }}</div>
@@ -166,6 +171,21 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function (event) {
+                if (form.dataset.submitted === '1') {
+                    event.preventDefault();
+                    return;
+                }
+                form.dataset.submitted = '1';
+                const button = form.querySelector('button[type="submit"]');
+                if (!button) return;
+                const label = button.getAttribute('data-loading-label');
+                if (label) button.textContent = label;
+                setTimeout(() => { button.disabled = true; }, 0);
+            });
+        });
+
         const pickupLat = {{ $ride->pickup_lat ?? 'null' }};
         const pickupLng = {{ $ride->pickup_lng ?? 'null' }};
         const dropoffLat = {{ $ride->dropoff_lat ?? 'null' }};

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rider Registration - Doonspedo')
+@section('title', 'Customer Registration - Doonspedo')
 @section('body_class', 'rider-auth-page')
 
 @section('content')

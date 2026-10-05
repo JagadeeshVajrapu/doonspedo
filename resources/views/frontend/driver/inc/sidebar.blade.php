@@ -21,7 +21,7 @@
         <h6 class="fw-bold text-white mb-1">{{ $driver->name }}</h6>
         <div class="d-flex justify-content-center gap-2 flex-wrap">
             <span class="ds-badge {{ $driver->status == 'approved' ? 'ds-badge-success' : 'ds-badge-warning' }}">{{ ucfirst($driver->status) }}</span>
-            <span class="ds-badge {{ $driver->is_online ? 'ds-badge-success' : 'ds-badge-neutral' }}">{{ $driver->is_online ? 'Online' : 'Offline' }}</span>
+            <span id="driver-presence-badge" class="ds-badge {{ $driver->is_online ? 'ds-badge-success' : 'ds-badge-neutral' }}">{{ $driver->is_online ? 'Online' : 'Offline' }}</span>
         </div>
     </div>
 

@@ -236,6 +236,7 @@
 
             <!-- 3. Ride Options Selection (Hidden) -->
             <div id="ride-options-sheet" class="d-none">
+                <div class="ride-options-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center gap-2">
                         <button onclick="goBackToLocation()" class="btn btn-sm btn-light rounded-circle p-2 d-flex align-items-center justify-content-center border-0 shadow-sm" style="width: 36px; height: 36px;">
@@ -272,7 +273,7 @@
                     </div>
                 </div>
 
-                <div class="ride-options mb-2 custom-scrollbar" style="max-height: 160px; overflow-y: auto;" id="ride-option-list">
+                <div class="ride-options mb-2" id="ride-option-list">
                     @foreach($categories as $index => $category)
                     <div class="ride-option d-flex align-items-center justify-content-between px-3 py-2 border-bottom border-light {{ str_contains(strtolower($category->icon), 'truck') ? 'freight-cat' : 'ride-cat' }} {{ $index == 0 ? 'active' : '' }}" 
                          data-id="{{ $category->id }}" 
@@ -401,7 +402,7 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <h6 class="mb-0 fw-bold text-dark fare-display-item" id="fare-cat-{{ $category->id }}" style="font-size: 1.1rem;">₹{{ number_format($category->base_fare, 0) }}</h6>
+                            <h6 class="mb-0 fw-bold text-dark fare-display-item" id="fare-cat-{{ $category->id }}" style="font-size: 1.1rem;">@if((float) $category->base_fare > 0)₹{{ number_format($category->base_fare, 0) }}@else—@endif</h6>
                             @if($index == 0)
                                 <span class="text-success fw-bold" style="font-size: 0.65rem;">BEST PRICE</span>
                             @endif
@@ -412,8 +413,8 @@
 
 
                 <!-- Price Breakdown Section (New) -->
-                <div id="price-breakdown" class="mb-3 p-3 bg-light rounded-4 d-none" style="font-size: 0.85rem;">
-                    <div class="d-flex justify-content-between mb-1 d-none">
+                <div id="price-breakdown" class="mb-3 p-3 bg-light rounded-4" style="font-size: 0.85rem;">
+                    <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary">Base Fare</span>
                         <span class="text-dark fw-bold" id="breakdown-base">Rs. 0.00</span>
                     </div>
@@ -444,13 +445,36 @@
                     <input type="hidden" id="selected-payment-method" value="cash">
                 </div>
 
+                <div class="mb-3 p-3 bg-light rounded-4" id="customer-offer-box">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Estimated Fare</span>
+                        <span class="fw-bold text-dark" id="estimated-fare">—</span>
+                    </div>
+                    <div class="fw-bold text-dark mb-2">Make an Offer</div>
+                    <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Add to the estimated fare">
+                        @foreach ([5, 10, 15, 20] as $extra)
+                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill fw-bold" style="min-width:4.25rem;min-height:2.5rem;" data-offer-extra="{{ $extra }}" aria-pressed="false" onclick="selectCustomerOffer({{ $extra }}, this)">+₹{{ $extra }}</button>
+                        @endforeach
+                    </div>
+                    <label class="form-label small text-secondary mb-1" for="custom-offer">Optional custom offer</label>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">₹</span>
+                        <input id="custom-offer" type="number" min="0" step="1" inputmode="decimal" class="form-control" placeholder="Add a custom amount" oninput="setCustomCustomerOffer()">
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-2">
+                        <span class="fw-bold text-dark">Final Offer</span>
+                        <span class="fw-bold text-brand" id="final-offer">—</span>
+                    </div>
+                </div>
+                </div>
+
                 <div class="booking-action-section">
-                    <button onclick="confirmBooking()" class="btn btn-brand w-100 py-3 fw-bold fs-5 rounded-4 shadow-lg active-scale border-0 d-flex justify-content-between align-items-center px-4">
+                    <button type="button" onclick="confirmBooking()" class="btn btn-brand w-100 py-3 fw-bold fs-5 rounded-4 shadow-lg active-scale border-0 d-flex justify-content-between align-items-center px-4">
                         <div class="text-start">
                             <p class="mb-0 x-small opacity-75 fw-normal">Total Price</p>
                             <span>Book <span id="selected-ride-name">Ride</span></span>
                         </div>
-                        <span id="total-fare" class="fs-4">Rs. 0.00</span>
+                        <span id="total-fare" class="fs-4">—</span>
                     </button>
                 </div>
             </div>
@@ -458,15 +482,19 @@
             <!-- 4. Bid List & Selection (New) -->
             <div id="bids-sheet" class="d-none">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold mb-0">Driver Bids</h5>
+                    <h5 class="fw-bold mb-0">Ride request</h5>
                     <span class="badge bg-brand text-dark rounded-pill py-1 px-3" id="bid-count">0 Bids</span>
                 </div>
                 
+                <p class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-4">
+                    <span class="text-secondary small mb-0">Your offer</span>
+                    <strong id="quoted-fare">—</strong>
+                </p>
                 <div id="bid-list" class="mb-4 custom-scrollbar" style="max-height: 350px; overflow-y: auto;">
                     <!-- Bids will be injected here -->
                     <div class="text-center py-5 opacity-50">
                         <div class="spinner-border text-brand spinner-border-sm mb-3" role="status"></div>
-                        <p>Waiting for drivers to bid...</p>
+                        <p>Waiting for a driver to accept your offer...</p>
                     </div>
                 </div>
 
@@ -484,6 +512,7 @@
                         <h5 class="fw-bold mb-1 text-brand" id="tracking-title">Driver is on the way!</h5>
                         <div id="parcel-badge" class="badge bg-warning text-dark d-none mb-2">Picked Up • In Transit</div>
                         <p class="small text-secondary mb-0" id="tracking-desc">Delivery partner arriving in 5 mins</p>
+                        <p class="small text-dark mb-0 mt-1" id="tracking-route"></p>
                     </div>
                     <div class="rounded-circle overflow-hidden border border-brand shadow" style="width: 55px; height: 55px;">
                         <img id="driver-photo" src="https://i.pravatar.cc/100?u=driver1" class="w-100 h-100 object-fit-cover shadow">
@@ -498,14 +527,14 @@
                         </div>
                         <div class="text-end">
                             <h6 id="vehicle-reg" class="mb-1 text-brand">UP 16 AT 4567</h6>
-                            <p class="mb-0 small text-secondary">Fare: <span id="final-fare" class="text-dark fw-bold">?0</span></p>
+                            <p class="mb-0 small text-secondary">Fare: <span id="final-fare" class="text-dark fw-bold">—</span></p>
                         </div>
                     </div>
                     <div class="d-flex gap-2 mt-3">
                         <a id="driver-phone" href="tel:+910000000000" class="btn btn-white shadow-sm flex-grow-1 rounded-pill py-2 small fw-bold border-light">
                             <i class="bi bi-telephone-fill me-2"></i> Call
                         </a>
-                        <button class="btn btn-white shadow-sm flex-grow-1 rounded-pill py-2 small fw-bold border-light">
+                        <button type="button" class="btn btn-white shadow-sm flex-grow-1 rounded-pill py-2 small fw-bold border-light" onclick="openDriverChat()">
                             <i class="bi bi-chat-dots-fill me-2"></i> Message
                         </button>
                     </div>
@@ -519,7 +548,7 @@
 
                 <div class="ride-controls d-flex gap-2">
                     <button onclick="openCancelModal()" class="btn btn-outline-danger flex-grow-1 py-3 rounded-4 border-0 bg-danger bg-opacity-10 fw-bold shadow-sm">Cancel Ride</button>
-                    <a id="chat-driver-link" href="#" class="btn btn-light py-3 rounded-4 border-light shadow-sm" style="width: 60px;" aria-label="Chat with driver"><i class="bi bi-chat-dots-fill text-brand" aria-hidden="true"></i></a>
+                    <a id="chat-driver-link" href="#" class="btn btn-light py-3 rounded-4 border-light shadow-sm" style="width: 60px;" aria-label="Chat with driver" onclick="return openDriverChat()"><i class="bi bi-chat-dots-fill text-brand" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -665,6 +694,35 @@
     background: rgba(205, 220, 41, 0.12);
     border-left: 4px solid var(--primary-color) !important;
 }
+#main-sheet.sheet-picking {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#main-sheet.sheet-picking #booking-forms {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+#ride-options-sheet:not(.d-none) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+#ride-options-sheet .ride-options-body {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+#ride-options-sheet .booking-action-section {
+    flex: 0 0 auto;
+    background: #fff;
+    padding-top: 0.5rem;
+}
 .ride-icon-mini {
     width: 45px;
     height: 45px;
@@ -790,6 +848,8 @@
 })();
 let currentService = 'ride';
 let baseFare = 0;
+let estimatedRideFare = 0;
+let customerOfferExtra = 0;
 let discount = 0;
 let scheduledTime = null;
 let selectedPaymentMethod = 'cash';
@@ -1034,6 +1094,17 @@ function initLeaflet(loc) {
     });
 
     detectLocation();
+}
+
+function holdMapIdle(ms) {
+    suppressMapIdle = true;
+    clearTimeout(window.__mapIdleHold);
+    window.__mapIdleHold = setTimeout(() => { suppressMapIdle = false; }, ms || 1600);
+}
+
+function keepTypedLocation(input) {
+    if (!input) return;
+    input.dataset.lastRequest = 'kept-' + Date.now();
 }
 
 function setElementText(el, text) {
@@ -1413,7 +1484,7 @@ function handlePlaceSelect(type) {
     };
     const address = place.formatted_address || place.name || '';
 
-    suppressMapIdle = true;
+    holdMapIdle(1600);
     clearLocationMessage();
 
     if (type === 'pickup') {
@@ -1430,11 +1501,11 @@ function handlePlaceSelect(type) {
         updateMarker('drop', latlng);
     }
 
+    keepTypedLocation(document.getElementById(type === 'pickup' ? 'pickup-location' : (type === 'drop' ? 'drop-location' : 'stop-location')));
+
     if (pickupLatLng && dropLatLng) {
         calculateRoute();
     }
-
-    setTimeout(() => { suppressMapIdle = false; }, 800);
 }
 
 function onPlaceChanged() {
@@ -1490,6 +1561,23 @@ function updateMarker(type, latlng) {
     }
 }
 
+function rememberApproximateDistance(originFinal, destFinal) {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const lat1 = Number(originFinal.lat);
+    const lon1 = Number(originFinal.lng);
+    const lat2 = Number(destFinal.lat);
+    const lon2 = Number(destFinal.lng);
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2
+        + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const km = (2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)))) * 1.3;
+    lastCalculatedDistance = km;
+    lastCalculatedDuration = Math.round(km * 120);
+    updateFareByDistance(km);
+    return km;
+}
+
 function calculateRoute() {
     const origin = toPlainLatLng(pickupLatLng);
     const destination = toPlainLatLng(dropLatLng);
@@ -1515,7 +1603,8 @@ function calculateRoute() {
 
     if (isGoogleMaps) {
         if (!directionsService || !directionsRenderer) {
-            showLocationMessage('Unable to calculate route. Map services are not ready.', 'error');
+            rememberApproximateDistance(originFinal, destFinal);
+            showLocationMessage('Showing approximate route. Map routing is not ready.', 'warning');
             return;
         }
 
@@ -1556,10 +1645,8 @@ function calculateRoute() {
                 clearLocationMessage();
             } else {
                 console.warn('Directions failed:', status);
-                lastCalculatedDistance = 0;
-                lastCalculatedDuration = 0;
-                if (distDisplay) distDisplay.innerText = 'Unable to calculate route';
-                showLocationMessage('Unable to calculate route. Please try different pickup/drop locations.', 'error');
+                rememberApproximateDistance(originFinal, destFinal);
+                showLocationMessage('Showing approximate route. Road routing is temporarily unavailable.', 'warning');
             }
         });
     } else {
@@ -1652,12 +1739,15 @@ function updateFareByDistance(km) {
         distDisplay.innerText = 'Total Distance: ' + km.toFixed(1) + ' km • ~' + mins + ' min';
     }
 
-    document.querySelectorAll('.ride-option').forEach(option => {
+    document.querySelectorAll('#ride-option-list .ride-option').forEach(option => {
 
         const base = parseFloat(option.dataset.base);
         let rate = parseFloat(option.dataset.rate);
+        if (!Number.isFinite(base)) return;
+        if (!Number.isFinite(rate)) rate = 0;
         
-        const catName = option.querySelector('h6').innerText.toLowerCase();
+        const nameNode = option.querySelector('h6');
+        const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
         
         // Removing global overrides to use the rate specific to the vehicle category
@@ -1686,7 +1776,7 @@ function updateFareByDistance(km) {
         const fareDisplay = option.querySelector('.fare-display-item');
 
         if (fareDisplay) {
-            fareDisplay.innerText = 'Rs. ' + catFare;
+            fareDisplay.innerText = Number.isFinite(finalCatFare) && finalCatFare > 0 ? ('₹' + Number(finalCatFare).toFixed(2)) : '—';
         }
 
         // Recalculate drop time dynamically
@@ -1718,14 +1808,13 @@ function updateFareByDistance(km) {
 }
 
 function selectRide(element) {
-    document.querySelectorAll('.ride-option').forEach(o => o.classList.remove('active'));
+    document.querySelectorAll('#ride-option-list .ride-option').forEach(o => o.classList.remove('active'));
     element.classList.add('active');
     
-    // Get the RAW base fare from data attribute
     baseFare = parseFloat(element.dataset.base) || 0;
     
-    // Update selected ride name in button
-    const rideName = element.querySelector('h6').firstChild.textContent.trim();
+    const nameNode = element.querySelector('h6');
+    const rideName = nameNode && nameNode.firstChild ? nameNode.firstChild.textContent.trim() : 'Ride';
     document.getElementById('selected-ride-name').innerText = rideName;
 
     updateTotal();
@@ -1742,25 +1831,40 @@ function setPaymentMethod(method) {
     else if (method === 'online') display.innerText = 'Online';
 }
 
+function expandBookingSheet() {
+    const map = document.getElementById('main-content');
+    const sheet = document.getElementById('main-sheet');
+    if (map) map.style.minHeight = '12dvh';
+    if (sheet) {
+        const nav = document.querySelector('.rider-bottom-nav');
+        const top = sheet.getBoundingClientRect().top;
+        const limit = nav ? nav.getBoundingClientRect().top : window.innerHeight;
+        const height = Math.max(320, Math.floor(limit - top));
+        sheet.style.height = height + 'px';
+        sheet.style.maxHeight = height + 'px';
+        sheet.classList.add('sheet-picking');
+        sheet.scrollTop = 0;
+    }
+}
+
+function restoreBookingSheet() {
+    const map = document.getElementById('main-content');
+    const sheet = document.getElementById('main-sheet');
+    if (map) map.style.minHeight = '';
+    if (sheet) {
+        sheet.style.height = '';
+        sheet.style.maxHeight = '';
+        sheet.classList.remove('sheet-picking');
+    }
+}
+
 function updateRideOptionsVisibility() {
-    document.querySelectorAll('.ride-option').forEach(opt => {
+    document.querySelectorAll('#ride-option-list .ride-option').forEach(opt => {
         let hide = false;
         
-        // 1. Freight check
+        // Freight vehicles stay off the ride and rental lists. AC only changes the fare, not which vehicles are shown.
         if (currentService === 'ride' || currentService === 'rental') {
             if (opt.classList.contains('freight-cat')) hide = true;
-        }
-        
-        // 2. AC / Non-AC check (Only for ride and rental)
-        if (!hide && (currentService === 'ride' || currentService === 'rental')) {
-            const catName = opt.querySelector('h6').innerText.toLowerCase();
-            const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
-            
-            if (acPreference === 'ac' && isBikeOrAuto) {
-                hide = true;
-            } else if (acPreference === 'non-ac' && !isBikeOrAuto) {
-                hide = true;
-            }
         }
 
         if (hide) {
@@ -1773,9 +1877,9 @@ function updateRideOptionsVisibility() {
     });
 
     // Auto-select first visible option if current is hidden
-    const activeOption = document.querySelector('.ride-option.active');
+    const activeOption = document.querySelector('#ride-option-list .ride-option.active');
     if (!activeOption || activeOption.classList.contains('d-none')) {
-        const firstVisible = Array.from(document.querySelectorAll('.ride-option')).find(opt => !opt.classList.contains('d-none'));
+        const firstVisible = Array.from(document.querySelectorAll('#ride-option-list .ride-option')).find(opt => !opt.classList.contains('d-none'));
         if (firstVisible) {
             selectRide(firstVisible);
         }
@@ -1805,14 +1909,7 @@ function setService(type) {
     document.getElementById('parcel-fields').classList.toggle('d-none', type !== 'parcel');
     document.getElementById('rental-fields').classList.toggle('d-none', type !== 'rental');
     
-    // Toggle Category Visibility
-    document.querySelectorAll('.ride-option').forEach(opt => {
-        if (type === 'ride' || type === 'rental') {
-            opt.classList.toggle('d-none', opt.classList.contains('freight-cat'));
-        } else if (type === 'parcel') {
-            opt.classList.toggle('d-none', false);
-        }
-    });
+    updateRideOptionsVisibility();
 
     // Update Titles
     const btn = document.getElementById('search-btn');
@@ -1862,11 +1959,13 @@ function updateTotal() {
     let distanceKm = lastCalculatedDistance || 0;
     
     // Calculate distance-based part for breakdown
-    const activeOption = document.querySelector('.ride-option.active');
+    const activeOption = document.querySelector('#ride-option-list .ride-option.active:not(.d-none)');
     let ratePerKm = 0;
     if (activeOption) {
         let rate = parseFloat(activeOption.dataset.rate);
-        const catName = activeOption.querySelector('h6').innerText.toLowerCase();
+        if (!Number.isFinite(rate)) rate = 0;
+        const nameNode = activeOption.querySelector('h6');
+        const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
         
         if (!isBikeOrAuto) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
@@ -1906,7 +2005,53 @@ function updateTotal() {
         }
     }
 
-    document.getElementById('total-fare').innerText = `Rs. ${total.toFixed(2)}`;
+    estimatedRideFare = Number.isFinite(total) && total > 0 ? total : 0;
+    refreshCustomerOffer();
+}
+
+function selectCustomerOffer(amount, button) {
+    customerOfferExtra = amount;
+    const custom = document.getElementById('custom-offer');
+    if (custom) custom.value = '';
+    document.querySelectorAll('[data-offer-extra]').forEach(function (el) {
+        const selected = Number(el.getAttribute('data-offer-extra')) === Number(amount);
+        el.classList.toggle('btn-brand', selected);
+        el.classList.toggle('text-dark', selected);
+        el.classList.toggle('btn-outline-dark', !selected);
+        el.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    if (button) button.blur();
+    refreshCustomerOffer();
+}
+
+function setCustomCustomerOffer() {
+    const custom = document.getElementById('custom-offer');
+    const raw = custom ? parseFloat(custom.value) : NaN;
+    document.querySelectorAll('[data-offer-extra]').forEach(function (el) {
+        el.classList.remove('btn-brand', 'text-dark');
+        el.classList.add('btn-outline-dark');
+        el.setAttribute('aria-pressed', 'false');
+    });
+    customerOfferExtra = (custom && custom.value !== '' && Number.isFinite(raw) && raw > 0) ? raw : 0;
+    refreshCustomerOffer();
+}
+
+function refreshCustomerOffer() {
+    const estimate = estimatedRideFare;
+    const extra = Number.isFinite(customerOfferExtra) && customerOfferExtra > 0 ? customerOfferExtra : 0;
+    const ready = Number.isFinite(estimate) && estimate > 0;
+    const finalAmount = ready ? estimate + extra : null;
+    const estEl = document.getElementById('estimated-fare');
+    const finalEl = document.getElementById('final-offer');
+    const fareEl = document.getElementById('total-fare');
+    if (estEl) estEl.textContent = ready ? ('₹' + estimate.toFixed(2)) : '—';
+    if (finalEl) finalEl.textContent = finalAmount === null ? '—' : ('₹' + finalAmount.toFixed(2));
+    if (fareEl) fareEl.innerText = finalAmount === null ? 'Fare unavailable' : ('₹' + finalAmount.toFixed(2));
+}
+
+function formatInrFare(amount) {
+    const n = Number(amount);
+    return Number.isFinite(n) && n > 0 ? ('₹' + n.toFixed(2)) : 'Fare unavailable';
 }
 
 function openSchedule() {
@@ -2313,13 +2458,18 @@ function setACPreference(pref) {
         btnAc.classList.remove('btn-brand');
     }
 
-    // Recalculate based on current route
+    updateRideOptionsVisibility();
     if (lastCalculatedDistance > 0) {
         updateFareByDistance(lastCalculatedDistance);
+    } else {
+        updateTotal();
     }
 }
 
 async function startSearching() {
+    keepTypedLocation(document.getElementById('pickup-location'));
+    keepTypedLocation(document.getElementById('drop-location'));
+    keepTypedLocation(document.getElementById('stop-location'));
     const dropInput = document.getElementById('drop-location');
     const dropText = dropInput.value.trim();
     const pickupInput = document.getElementById('pickup-location');
@@ -2488,6 +2638,7 @@ async function startSearching() {
     setTimeout(() => {
         document.getElementById('searching-sheet').classList.add('d-none');
         document.getElementById('ride-options-sheet').classList.remove('d-none');
+        expandBookingSheet();
         
         // Hide service tabs to save space
         const serviceTabs = document.getElementById('service-tabs-container');
@@ -2509,6 +2660,7 @@ async function startSearching() {
 }
 
 function cancelSearch() {
+    restoreBookingSheet();
     document.getElementById('searching-sheet').classList.add('d-none');
     document.getElementById('location-sheet').classList.remove('d-none');
     document.getElementById('center-pin').classList.remove('d-none'); // Show pin again
@@ -2519,6 +2671,7 @@ function cancelSearch() {
 }
 
 function goBackToLocation() {
+    restoreBookingSheet();
     document.getElementById('ride-options-sheet').classList.add('d-none');
     document.getElementById('location-sheet').classList.remove('d-none');
     document.getElementById('center-pin').classList.remove('d-none'); // Show pin again
@@ -2535,10 +2688,13 @@ let isSubmittingBooking = false;
 function confirmBooking() {
     if (isSubmittingBooking) return;
 
+    keepTypedLocation(document.getElementById('pickup-location'));
+    keepTypedLocation(document.getElementById('drop-location'));
     const pickup = (document.getElementById('pickup-location').value || '').trim();
     const drop = (document.getElementById('drop-location').value || '').trim();
-    const fareRaw = (document.getElementById('total-fare').innerText || '').replace(/[^\d.]/g, '');
-    const totalFare = parseFloat(fareRaw);
+    const fareText = document.getElementById('total-fare')?.innerText || '';
+    const fareMatch = fareText.match(/\d+(?:\.\d+)?/);
+    const totalFare = fareMatch ? parseFloat(fareMatch[0]) : 0;
     const activeCategory = document.querySelector('.ride-option.active:not(.d-none)');
     const catId = activeCategory ? activeCategory.getAttribute('data-id') : null;
 
@@ -2576,8 +2732,8 @@ function confirmBooking() {
         alert('Please select a vehicle category.');
         return;
     }
-    if (isNaN(totalFare) || totalFare < 0) {
-        alert('Fare is invalid. Please reselect a vehicle category.');
+    if (!Number.isFinite(totalFare) || totalFare <= 0 || /unavailable/i.test(document.getElementById('total-fare').innerText || '')) {
+        alert('Fare is not ready. Wait for the route, then choose a vehicle.');
         return;
     }
 
@@ -2599,7 +2755,6 @@ function confirmBooking() {
     if (currentService === 'parcel') {
         notesText += ' | Parcel Note: ' + document.getElementById('parcel-note').value;
     }
-
     const formData = {
         _token: '{{ csrf_token() }}',
         pickup_location: pickup,
@@ -2612,6 +2767,11 @@ function confirmBooking() {
         service_type: currentService === 'rental' ? 'ride' : currentService,
         vehicle_category_id: catId,
         fare: totalFare,
+        offer_extra: Number.isFinite(customerOfferExtra) && customerOfferExtra > 0 ? customerOfferExtra : 0,
+        ac_preference: acPreference,
+        coupon_code: discount > 0 ? ((document.getElementById('coupon-code') || {}).value || '') : '',
+        parcel_weight: currentService === 'parcel' ? (parseFloat((document.getElementById('parcel-weight') || {}).value) || 0) : 0,
+        is_rental: currentService === 'rental',
         payment_method: selectedPaymentMethod || 'cash',
         parcel_details: currentService === 'parcel' ? document.getElementById('parcel-note').value : null,
         notes: notesText
@@ -2646,8 +2806,15 @@ function confirmBooking() {
     .then(data => {
         if (data.success) {
             currentBookingId = data.booking.id;
+            const quoted = document.getElementById('quoted-fare');
+            if (quoted) quoted.textContent = formatInrFare(data.booking.fare);
             document.getElementById('ride-options-sheet').classList.add('d-none');
             document.getElementById('bids-sheet').classList.remove('d-none');
+            const sheet = document.getElementById('main-sheet');
+            if (sheet) {
+                sheet.classList.remove('sheet-picking');
+                sheet.scrollTop = 0;
+            }
             const waiting = document.querySelector('#bids-sheet .opacity-50 p, #bids-sheet p');
             startBidPolling();
         } else {
@@ -2660,6 +2827,14 @@ function confirmBooking() {
         alert(error.message || 'Something went wrong. Please try again.');
         restoreConfirmBtn();
     });
+}
+
+function showTrackingRoute(booking) {
+    const el = document.getElementById('tracking-route');
+    if (!el || !booking) return;
+    const pickup = booking.pickup_location || '';
+    const drop = booking.dropoff_location || '';
+    el.textContent = drop ? (pickup + ' → ' + drop) : pickup;
 }
 
 function showRideOtp(booking) {
@@ -2706,6 +2881,8 @@ function fetchBids() {
     .then(data => {
         if (data.success) {
             const booking = data.booking;
+            const quoted = document.getElementById('quoted-fare');
+            if (quoted && booking) quoted.textContent = formatInrFare(booking.fare);
             
             // Check if booking has already been accepted/confirmed by a driver (e.g. Instant Accept or accepted bid)
             if (booking && (booking.status === 'accepted' || booking.status === 'arrived' || booking.status === 'ongoing' || booking.status === 'completed')) {
@@ -2715,12 +2892,14 @@ function fetchBids() {
                 // Update UI to tracking sheet
                 document.getElementById('bids-sheet').classList.add('d-none');
                 document.getElementById('tracking-sheet').classList.remove('d-none');
+                const sheet = document.getElementById('main-sheet');
+                if (sheet) sheet.scrollTop = 0;
                 
                 if (driver) {
                     document.getElementById('driver-name').innerText = driver.name;
                     document.getElementById('driver-info').innerHTML = `<i class="bi bi-star-fill text-brand"></i> 4.9 Driver • ${driver.vehicle_type || 'Vehicle'}`;
                     document.getElementById('vehicle-reg').innerText = driver.vehicle_number || 'N/A';
-                    document.getElementById('final-fare').innerText = `Rs. ${booking.fare}`;
+                    document.getElementById('final-fare').innerText = formatInrFare(booking.fare);
                     document.getElementById('driver-photo').src = driver.profile_image ? (String(driver.profile_image).startsWith('http') ? driver.profile_image : `/storage/${driver.profile_image}`) : `https://i.pravatar.cc/100?u=${driver.id}`;
                     document.getElementById('driver-phone').href = `tel:${driver.mobile}`;
                 }
@@ -2745,6 +2924,7 @@ function fetchBids() {
                 }
 
                 showRideOtp(booking);
+                showTrackingRoute(booking);
                 if (booking.service_type === 'parcel') {
                     title.innerText = 'Partner Assigned';
                     const badge = document.getElementById('parcel-badge');
@@ -2768,7 +2948,7 @@ function fetchBids() {
                 bidContainer.innerHTML = `
                     <div class="text-center py-5 opacity-50">
                         <div class="spinner-border text-brand spinner-border-sm mb-3" role="status"></div>
-                        <p>Waiting for drivers to bid...</p>
+                        <p>Waiting for a driver to accept your offer...</p>
                     </div>`;
                 return;
             }
@@ -2791,7 +2971,8 @@ function fetchBids() {
                             </div>
                         </div>
                         <div class="text-end">
-                            <h5 class="mb-2 fw-bold text-brand">Rs. ${bid.bid_amount}</h5>
+                            <div class="extra-small text-secondary">Driver offer</div>
+                            <h5 class="mb-2 fw-bold text-brand">${formatInrFare(bid.bid_amount)}</h5>
                             <div class="d-flex gap-2">
                                 <button onclick="acceptBid(${bid.id})" class="btn btn-brand btn-sm px-3 rounded-pill fw-bold shadow">Accept</button>
                                 <button onclick="rejectBid(${bid.id})" class="btn btn-outline-danger btn-sm px-3 rounded-pill">Reject</button>
@@ -2804,14 +2985,26 @@ function fetchBids() {
     });
 }
 
+let acceptingBid = false;
 function acceptBid(bidId) {
+    if (acceptingBid) return;
     if (!confirm('Are you sure you want to accept this offer?')) return;
+    acceptingBid = true;
 
     fetch(`/rider/bookings/bids/${bidId}/accept`, {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to accept this bid.');
+        }
+        return data;
+    })
     .then(data => {
         if (data.success) {
             clearInterval(bidPollingInterval);
@@ -2825,7 +3018,7 @@ function acceptBid(bidId) {
             document.getElementById('driver-name').innerText = driver.name;
             document.getElementById('driver-info').innerHTML = `<i class="bi bi-star-fill text-brand"></i> 4.9 Driver • ${driver.vehicle_type || 'Vehicle'}`;
             document.getElementById('vehicle-reg').innerText = driver.vehicle_number || 'N/A';
-            document.getElementById('final-fare').innerText = `Rs. ${booking.fare}`;
+            document.getElementById('final-fare').innerText = formatInrFare(booking.fare);
             document.getElementById('driver-photo').src = driver.profile_image ? `/uploads/profiles/${driver.profile_image}` : `https://i.pravatar.cc/100?u=${driver.id}`;
             document.getElementById('driver-phone').href = `tel:${driver.mobile}`;
 
@@ -2841,8 +3034,13 @@ function acceptBid(bidId) {
             // Set chat link
             document.getElementById('chat-driver-link').href = `/chat/${currentBookingId}`;
         } else {
-            alert(data.message);
+            acceptingBid = false;
+            alert(data.message || 'Unable to accept this bid.');
         }
+    })
+    .catch(err => {
+        acceptingBid = false;
+        alert(err.message || 'Unable to accept this bid.');
     });
 }
 
@@ -2979,6 +3177,7 @@ function fetchStatus() {
             
             const title = document.getElementById('tracking-title');
             const desc = document.getElementById('tracking-desc');
+            showTrackingRoute(booking);
 
             // Render/Update driver's real-time live location on the map!
             if (booking.driver && booking.driver.current_lat && booking.driver.current_lng) {
@@ -3095,6 +3294,17 @@ function submitReview() {
     });
 }
 function openCancelModal() { document.getElementById('cancel-modal').classList.remove('d-none'); }
+
+function openDriverChat() {
+    const link = document.getElementById('chat-driver-link');
+    const href = link ? link.getAttribute('href') : '';
+    if (!currentBookingId || !href || href === '#') {
+        alert('Chat is available after a partner accepts the ride.');
+        return false;
+    }
+    window.location.href = href;
+    return false;
+}
 function closeCancelModal() { document.getElementById('cancel-modal').classList.add('d-none'); }
 
 function submitCancellation() {
@@ -3119,25 +3329,61 @@ function submitCancellation() {
     });
 }
 
+const rejectingBids = new Set();
 function rejectBid(bidId) {
+    const id = String(bidId);
+    if (rejectingBids.has(id)) return;
+    rejectingBids.add(id);
     fetch(`/rider/bookings/bids/${bidId}/reject`, {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            fetchBids(); // Refresh bid list
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
         }
-    });
+    })
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to reject this bid.');
+        }
+        fetchBids();
+    })
+    .catch(err => alert(err.message || 'Unable to reject this bid.'))
+    .finally(() => rejectingBids.delete(id));
 }
 
 function cancelBookingAction() {
+    if (!currentBookingId) return;
     if (!confirm('Are you sure you want to cancel this request?')) return;
-    clearInterval(bidPollingInterval);
-    document.getElementById('bids-sheet').classList.add('d-none');
-    document.getElementById('location-sheet').classList.remove('d-none');
-    document.getElementById('center-pin').classList.remove('d-none'); // Show pin again
+    const btn = document.querySelector('#bids-sheet button');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Cancelling...';
+    }
+    fetch(`/rider/bookings/${currentBookingId}/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ reason: 'Cancelled by customer' })
+    })
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Unable to cancel this ride.');
+        }
+        if (bidPollingInterval) clearInterval(bidPollingInterval);
+        window.location.reload();
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Cancel Request';
+        }
+        alert(err.message || 'Unable to cancel this ride.');
+    });
 }
 
 function initializeDropTimes() {

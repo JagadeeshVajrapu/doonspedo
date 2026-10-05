@@ -62,7 +62,7 @@
                 </ul>
 
                 <div class="mt-4 d-flex flex-wrap gap-2">
-                    <a href="{{ route('login') }}" class="btn btn-outline-brand btn-sm px-3">Rider Login</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-brand btn-sm px-3">Customer Login</a>
                     <a href="{{ route('driver.login') }}" class="btn btn-outline-brand btn-sm px-3">Partner Login</a>
                 </div>
             </div>

@@ -19,7 +19,7 @@
                 <div class="text-center mb-4">
                     <i class="bi bi-broadcast text-muted mb-3" style="font-size: 3rem;"></i>
                     <h4 class="fw-bold text-dark">Send Broadcast Message</h4>
-                    <p class="text-muted small px-4">Send a push notification directly to users' devices (Riders, Drivers, or All).</p>
+                    <p class="text-muted small px-4">Send a push notification directly to users' devices (Customers, Drivers, or All).</p>
                 </div>
                 
                 <form action="{{ route('admin.notifications.push.store') }}" method="POST">
@@ -28,7 +28,7 @@
                         <label class="form-label fw-bold small text-muted">Target Audience</label>
                         <select name="audience" class="form-select">
                             <option value="all">All Users & Drivers</option>
-                            <option value="riders">Only Registered Riders</option>
+                            <option value="riders">Only Registered Customers</option>
                             <option value="drivers">Only Active Drivers</option>
                         </select>
                     </div>

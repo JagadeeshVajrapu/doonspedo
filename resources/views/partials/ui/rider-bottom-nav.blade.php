@@ -5,7 +5,7 @@
 @php
     $active = $active ?? '';
 @endphp
-<nav class="rider-bottom-nav" aria-label="Rider navigation">
+<nav class="rider-bottom-nav" aria-label="Customer navigation">
     <a href="{{ route('rider.app') }}" class="rider-nav-item {{ $active === 'home' ? 'is-active' : '' }}" @if($active === 'home') aria-current="page" @endif>
         <i class="bi bi-house-door{{ $active === 'home' ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Home</span>

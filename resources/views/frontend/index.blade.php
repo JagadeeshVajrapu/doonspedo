@@ -93,7 +93,7 @@
                     <ul class="pub-hero-trust">
                         <li><i class="bi bi-shield-check" aria-hidden="true"></i> Verified drivers</li>
                         <li><i class="bi bi-phone" aria-hidden="true"></i> Easy in-app booking</li>
-                        <li><i class="bi bi-headset" aria-hidden="true"></i> Rider &amp; driver support</li>
+                        <li><i class="bi bi-headset" aria-hidden="true"></i> Customer &amp; driver support</li>
                     </ul>
                 </div>
 
@@ -587,7 +587,7 @@
             <h2 id="final-cta-heading" class="pub-title">Ready to ride with {{ $brand }}?</h2>
             <p class="pub-lead mx-auto mb-4">Book a trip in minutes, or partner with us and start accepting rides.</p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{{ route('register') }}" class="btn btn-brand btn-lg px-5 py-3 active-scale pub-cta-rider">Join as a Rider</a>
+                <a href="{{ route('register') }}" class="btn btn-brand btn-lg px-5 py-3 active-scale pub-cta-rider">Join as a Customer</a>
                 <a href="{{ route('rider.app') }}" class="btn btn-outline-brand btn-lg px-5 py-3">Book Now</a>
                 <a href="{{ route('driver.register') }}" class="btn btn-outline-brand btn-lg px-5 py-3">Partner with Us</a>
             </div>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rider Login - Doonspedo')
+@section('title', 'Customer Login - Doonspedo')
 @section('body_class', 'clean-login-bg')
 
 @section('content')
@@ -12,7 +12,7 @@
                     <a href="{{ url('/') }}">
                         <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" class="img-fluid mb-3" style="max-height: 60px;">
                     </a>
-                    <h1 class="h2 text-dark-custom fw-bold mb-1">Rider Login</h1>
+                    <h1 class="h2 text-dark-custom fw-bold mb-1">Customer Login</h1>
                     <p class="text-muted small mb-0">Sign in to book your next ride</p>
                 </div>
 

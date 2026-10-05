@@ -8,6 +8,7 @@ use App\Models\DriverRegistration;
 use App\Models\Booking;
 use App\Models\Transaction;
 use App\Services\WalletService;
+use App\Support\DriverRideRejections;
 use App\Support\Geo;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -45,10 +46,20 @@ class DriverRideController extends Controller
             return response()->json(['success' => true, 'requests' => [], 'needs_location' => true]);
         }
 
+        $categoryId = DriverRideRejections::activeCategoryId($driver);
+        if (!$categoryId) {
+            return response()->json(['success' => true, 'requests' => []]);
+        }
+
         $radius = Geo::nearbyRadiusKm($driver);
+        $rejectedIds = DriverRideRejections::idsFor($driver->id);
         $requests = Booking::with('user', 'vehicleCategory')
             ->where('status', 'pending')
             ->whereNull('driver_id')
+            ->where('vehicle_category_id', $categoryId)
+            ->when($rejectedIds !== [], function ($query) use ($rejectedIds) {
+                $query->whereNotIn('id', $rejectedIds);
+            })
             ->whereNotNull('pickup_lat')
             ->whereNotNull('pickup_lng')
             ->latest()
@@ -63,7 +74,7 @@ class DriverRideController extends Controller
                 );
                 $booking->setAttribute('distance_km', round($km, 1));
 
-                return $km <= $radius;
+                return Geo::sameOperatingState($driver, $booking) && $km <= $radius;
             })
             ->sortBy('distance_km')
             ->take(20)
@@ -97,17 +108,42 @@ class DriverRideController extends Controller
             return back()->with('error', $tooFar);
         }
 
+        if (!DriverRideRejections::matchesCategory($driver, $booking)) {
+            return back()->with('error', 'This ride does not match your active vehicle.');
+        }
+
         $blocked = app(WalletService::class)->acceptanceBlock($driver, $booking);
         if ($blocked) {
             return back()->with('error', $blocked)->with('needs_wallet', true);
         }
 
-        $booking->update([
-            'driver_id' => $driver->id,
-            'status' => 'accepted',
-            'accepted_at' => now(),
-            'ride_otp' => $booking->ride_otp ?: Booking::generateRideOtp(),
-        ]);
+        $claimed = DB::transaction(function () use ($driver, $booking) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->first();
+            if (!$locked || $locked->status !== 'pending' || $locked->driver_id !== null) {
+                return false;
+            }
+
+            $hasActive = Booking::where('driver_id', $driver->id)
+                ->whereIn('status', ['accepted', 'ongoing'])
+                ->lockForUpdate()
+                ->exists();
+            if ($hasActive) {
+                return false;
+            }
+
+            $locked->update([
+                'driver_id' => $driver->id,
+                'status' => 'accepted',
+                'accepted_at' => now(),
+                'ride_otp' => $locked->ride_otp ?: Booking::generateRideOtp(),
+            ]);
+
+            return true;
+        });
+
+        if (!$claimed) {
+            return back()->with('error', 'Ride request is no longer available.');
+        }
 
         return redirect()->route('driver.rides.details', $booking->id)->with('success', 'Ride accepted! Navigate to pickup.');
     }
@@ -132,7 +168,22 @@ class DriverRideController extends Controller
 
     public function rejectRide($id)
     {
-        // For now, just a dummy reject. In real app, this might track rejection rates.
+        if (!session('driver_id')) {
+            return request()->expectsJson()
+                ? response()->json(['success' => false, 'message' => 'Unauthorized'], 401)
+                : redirect()->route('driver.login');
+        }
+
+        $driver = $this->getDriver();
+        $booking = Booking::query()->find($id);
+        if ($driver && $booking && $booking->status === 'pending' && $booking->driver_id === null) {
+            DriverRideRejections::remember($driver->id, $booking->id);
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Request rejected.']);
+        }
+
         return back()->with('success', 'Request rejected.');
     }
 

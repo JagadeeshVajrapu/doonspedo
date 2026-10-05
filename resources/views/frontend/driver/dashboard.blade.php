@@ -197,6 +197,14 @@
                         toggleBtn.innerHTML = `<i class="bi bi-power me-2" aria-hidden="true"></i> ${isOnline ? 'GO OFFLINE' : 'GO ONLINE NOW'}`;
                         toggleBtn.setAttribute('aria-pressed', isOnline ? 'true' : 'false');
 
+                        document.querySelectorAll('#driver-presence-badge, #driver-presence-label').forEach(function (badge) {
+                            badge.textContent = isOnline ? 'Online' : 'Offline';
+                            if (badge.id === 'driver-presence-badge') {
+                                badge.classList.toggle('ds-badge-success', isOnline);
+                                badge.classList.toggle('ds-badge-neutral', !isOnline);
+                            }
+                        });
+
                         if(isOnline) startPolling();
                         else stopPolling();
                     } else {
@@ -216,41 +224,78 @@
         }
 
         let pollInterval;
-        let lastAlertedRequestId = null;
+        let pollInFlight = false;
+        const submittingRideIds = new Set();
+        const dismissedRideIds = new Set(readDismissedRides());
+
+        function readDismissedRides() {
+            try {
+                const saved = JSON.parse(sessionStorage.getItem('doonspedo_dismissed_rides') || '[]');
+                return Array.isArray(saved) ? saved.map(String) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function rememberDismissed(id) {
+            dismissedRideIds.add(String(id));
+            try {
+                sessionStorage.setItem('doonspedo_dismissed_rides', JSON.stringify([...dismissedRideIds]));
+            } catch (e) {}
+        }
+
+        function inrAmount(amount) {
+            const n = Number(amount);
+            return Number.isFinite(n) && n > 0 ? n : null;
+        }
+
+        function inrLabel(amount) {
+            const n = inrAmount(amount);
+            return n === null ? 'Fare unavailable' : '₹' + n.toFixed(2);
+        }
+
         function startPolling() {
             if(pollInterval) return;
             checkRequests();
-            pollInterval = setInterval(checkRequests, 5000); // Check every 5 seconds
+            pollInterval = setInterval(checkRequests, 5000);
         }
 
         function stopPolling() {
             clearInterval(pollInterval);
             pollInterval = null;
-            lastAlertedRequestId = null;
             const box = document.getElementById('new-requests-container');
             if (box) box.innerHTML = '';
         }
 
         function checkRequests() {
+            if (pollInFlight) return;
+            pollInFlight = true;
             fetch('{{ route("driver.rides.requests") }}', { headers: { 'Accept': 'application/json' } })
             .then(res => res.json())
             .then(data => {
+                const box = document.getElementById('new-requests-container');
+                if (!box) return;
                 if (data.needs_location) {
-                    const box = document.getElementById('new-requests-container');
-                    if (box) {
-                        box.innerHTML = '<div class="alert alert-warning small mb-0 shadow" style="pointer-events:auto;">Allow location to receive nearby ride requests.</div>';
-                    }
+                    box.innerHTML = '<div class="alert alert-warning small mb-0 shadow" style="pointer-events:auto;">Allow location to receive nearby ride requests.</div>';
                     return;
                 }
-                if(data.success && data.requests && data.requests.length > 0) {
-                    const latest = data.requests[0];
-                    if (latest.id !== lastAlertedRequestId) {
-                        lastAlertedRequestId = latest.id;
-                        showRequestAlert(latest);
-                    }
-                }
+                const requests = (data.success && Array.isArray(data.requests)) ? data.requests : [];
+                const activeIds = new Set();
+                requests.forEach(request => {
+                    const id = String(request.id);
+                    if (dismissedRideIds.has(id)) return;
+                    activeIds.add(id);
+                    const existing = document.getElementById('ride-alert-' + id);
+                    if (existing) updateRequestAlert(existing, request);
+                    else showRequestAlert(request);
+                });
+                box.querySelectorAll('[data-ride-request]').forEach(card => {
+                    const id = card.getAttribute('data-ride-request');
+                    if (!activeIds.has(id) && !submittingRideIds.has(id)) card.remove();
+                });
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => { pollInFlight = false; });
         }
 
         // Synthesize a loud "Ding-Dong!" taxi bell ringtone natively with zero network delay
@@ -302,142 +347,139 @@
             }
         }
 
-        function showRequestAlert(request) {
-            if(document.getElementById('ride-alert-' + request.id)) return;
+        function updateRequestAlert(card, request) {
+            const fare = card.querySelector('.js-est-fare');
+            if (fare) fare.textContent = 'Offer ' + inrLabel(request.fare);
+            const offer = card.querySelector('.js-customer-offer');
+            if (offer) offer.textContent = inrLabel(request.fare);
+            const from = card.querySelector('.js-ride-from');
+            if (from) from.textContent = (request.pickup_location || '') + (request.distance_km != null ? ' · ' + request.distance_km + ' km away' : '');
+            const to = card.querySelector('.js-ride-to');
+            if (to) to.textContent = request.dropoff_location || '';
+        }
 
-            // Trigger bell and vibration
-            playBookingBell();
-            triggerVibration();
+        function announcedRides() {
+            try {
+                const saved = JSON.parse(sessionStorage.getItem('doonspedo_announced_rides') || '[]');
+                return new Set(Array.isArray(saved) ? saved.map(String) : []);
+            } catch (e) {
+                return new Set();
+            }
+        }
+
+        function markAnnounced(id) {
+            const ids = announcedRides();
+            ids.add(String(id));
+            try {
+                sessionStorage.setItem('doonspedo_announced_rides', JSON.stringify([...ids].slice(-100)));
+            } catch (e) {}
+        }
+
+        function showRequestAlert(request) {
+            const rideId = String(request.id);
+            if(document.getElementById('ride-alert-' + rideId)) return;
+
+            if (!announcedRides().has(rideId)) {
+                markAnnounced(rideId);
+                playBookingBell();
+                triggerVibration();
+            }
 
             const container = document.getElementById('new-requests-container');
+            if (!container) return;
             
-            // Service type styling
             let typeLabel = "NEW RIDE REQUEST";
             let typeIcon = "bi-person-circle";
-            let typeColor = "#cddc29"; // Default brand color
+            let typeColor = "#cddc29";
             let typeTextColor = "text-dark";
 
             if(request.service_type === 'parcel') {
                 typeLabel = "PARCEL DELIVERY";
                 typeIcon = "bi-box-seam-fill";
-                typeColor = "#36b9cc"; // Info blue
+                typeColor = "#36b9cc";
                 typeTextColor = "text-white";
             } else if(request.service_type === 'freight') {
                 typeLabel = "FREIGHT JOB";
                 typeIcon = "bi-truck";
-                typeColor = "#f6c23e"; // Warning yellow
+                typeColor = "#f6c23e";
                 typeTextColor = "text-dark";
             } else if(request.service_type === 'rental') {
                 typeLabel = "RENTAL BOOKING";
                 typeIcon = "bi-calendar-event";
-                typeColor = "#4e73df"; // Primary blue
+                typeColor = "#4e73df";
                 typeTextColor = "text-white";
             }
 
-            const currencySymbol = "{{ $driverCurrency->symbol ?? '₹' }}";
-            const exchangeRate = {{ $driverCurrency->exchange_rate ?? 1.0 }};
+            const customerName = (request.user && request.user.name) ? request.user.name : 'Customer';
+            const serviceName = (request.service_type || 'ride');
 
             const alertHtml = `
-                <div id="ride-alert-${request.id}" class="card border-0 shadow-lg mb-3 animate__animated animate__fadeInRight pulse-booking-card" 
+                <div id="ride-alert-${rideId}" data-ride-request="${rideId}" class="card border-0 shadow-lg mb-3 animate__animated animate__fadeInRight pulse-booking-card" 
                      style="background: #1a1a1a; color: white; border-radius: 15px; border-left: 5px solid ${typeColor}; pointer-events: auto;">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge rounded-pill" style="background: ${typeColor}; color: ${typeTextColor === 'text-white' ? '#fff' : '#000'};">
                                 <i class="bi ${typeIcon} me-1"></i> ${typeLabel}
                             </span>
-                            <span class="fw-bold text-white small">EST: ${currencySymbol}${(request.fare * exchangeRate).toFixed(2)}</span>
+                            <span class="js-est-fare fw-bold text-white small">Offer ${inrLabel(request.fare)}</span>
                         </div>
                         <div class="d-flex align-items-center mb-3">
-                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(request.user.name)}&background=${typeColor.replace('#', '')}&color=${typeTextColor === 'text-white' ? 'fff' : '000'}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=${typeColor.replace('#', '')}&color=${typeTextColor === 'text-white' ? 'fff' : '000'}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
                             <div>
-                                <h6 class="fw-bold mb-0">${request.user.name}</h6>
-                                <div class="extra-small opacity-75">${request.service_type.charAt(0).toUpperCase() + request.service_type.slice(1)} Service</div>
+                                <h6 class="fw-bold mb-0">${customerName}</h6>
+                                <div class="extra-small opacity-75">${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} Service</div>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <div class="small mb-1"><i class="bi bi-geo-alt-fill text-brand"></i> <strong>From:</strong> ${request.pickup_location}${request.distance_km != null ? ' · ' + request.distance_km + ' km away' : ''}</div>
-                            <div class="small"><i class="bi bi-flag-fill text-brand"></i> <strong>To:</strong> ${request.dropoff_location}</div>
+                            <div class="small mb-1"><i class="bi bi-geo-alt-fill text-brand"></i> <strong>From:</strong> <span class="js-ride-from">${request.pickup_location || ''}${request.distance_km != null ? ' · ' + request.distance_km + ' km away' : ''}</span></div>
+                            <div class="small"><i class="bi bi-flag-fill text-brand"></i> <strong>To:</strong> <span class="js-ride-to">${request.dropoff_location || ''}</span></div>
                             ${request.parcel_details ? `<div class="extra-small text-muted mt-2 p-2 bg-dark rounded border border-secondary border-opacity-25"><i class="bi bi-info-circle me-1"></i> ${request.parcel_details}</div>` : ''}
                         </div>
 
-                        <div class="bg-dark p-2 rounded-3 mb-3 border border-secondary border-opacity-25">
-                            <label class="extra-small text-muted fw-bold mb-1 d-block text-uppercase">Your Bid Amount (${currencySymbol})</label>
-                            <input type="number" id="bid-amount-${request.id}" class="form-control form-control-sm bg-transparent border-0 text-white fw-bold shadow-none p-0" value="${((request.fare || 100) * exchangeRate).toFixed(0)}" style="font-size: 1.2rem;">
+                        <div class="bg-dark p-3 rounded-3 mb-3 border border-secondary border-opacity-25">
+                            <div class="extra-small text-white-50 fw-bold text-uppercase mb-1">Customer offer</div>
+                            <div class="js-customer-offer fw-bold text-white" style="font-size: 1.35rem;">${inrLabel(request.fare)}</div>
+                            <div class="extra-small text-white-50 mt-1">This is the amount the customer is offering for this ride.</div>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button onclick="placeBid(${request.id})" id="bid-btn-${request.id}" class="btn btn-brand btn-sm w-100 rounded-pill fw-bold">PLACE BID</button>
-                            <div class="d-flex gap-2">
-                                <form action="/driver/rides/${request.id}/accept" method="POST" class="w-100">
-                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-outline-light btn-sm w-100 rounded-pill fw-bold" style="font-size: 0.7rem;">INSTANT ACCEPT</button>
-                                </form>
-                                <button onclick="document.getElementById('ride-alert-${request.id}').remove()" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold" style="font-size: 0.7rem;">REJECT</button>
-                            </div>
+                            <form action="/driver/rides/${rideId}/accept" method="POST" onsubmit="return submitInstantAccept(this, '${rideId}')">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-brand btn-sm w-100 rounded-pill fw-bold">ACCEPT</button>
+                            </form>
+                            <button type="button" onclick="dismissRideRequest('${rideId}')" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold">REJECT</button>
                         </div>
                     </div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', alertHtml);
-            
-            // Auto hide after 60 seconds for bidding
-            setTimeout(() => {
-                const el = document.getElementById('ride-alert-' + request.id);
-                if(el) el.remove();
-            }, 60000);
         }
 
-        window.placeBid = function(rideId) {
-            const amount = document.getElementById('bid-amount-' + rideId).value;
-            const btn = document.getElementById('bid-btn-' + rideId);
-            
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
-
-            fetch('{{ route("driver.bids.store") }}', {
+        window.dismissRideRequest = function(rideId) {
+            rememberDismissed(rideId);
+            const el = document.getElementById('ride-alert-' + rideId);
+            if (el) el.remove();
+            fetch('/driver/rides/' + encodeURIComponent(rideId) + '/reject', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    booking_id: rideId,
-                    bid_amount: amount / exchangeRate
-                })
-            })
-            .then(async res => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    throw new Error(data.message || 'Unable to place bid');
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-                return data;
-            })
-            .then(data => {
-                const alertEl = document.getElementById('ride-alert-' + rideId);
-                if(data.success) {
-                    alertEl.innerHTML = `
-                        <div class="card-body p-4 text-center">
-                            <i class="bi bi-check-circle-fill text-brand display-6 mb-2 d-block"></i>
-                            <h6 class="fw-bold text-white">BID PLACED!</h6>
-                            <p class="extra-small text-muted mb-3">Wait for customer response.</p>
-                            <a href="{{ route('driver.bids.index') }}" class="btn btn-brand btn-sm rounded-pill px-4 fw-bold">VIEW MY BIDS</a>
-                        </div>
-                    `;
-                    setTimeout(() => alertEl.remove(), 10000);
-                } else {
-                    alert(data.message || 'Unable to place bid');
-                    btn.disabled = false;
-                    btn.innerHTML = 'PLACE BID';
-                }
-            })
-            .catch(err => {
-                btn.disabled = false;
-                btn.innerHTML = 'PLACE BID';
-                alert(err.message || 'Connection error. Try again.');
-            });
-        }
+            }).catch(function () {});
+        };
+
+        window.submitInstantAccept = function(form, rideId) {
+            const id = String(rideId);
+            if (submittingRideIds.has(id)) return false;
+            submittingRideIds.add(id);
+            const card = document.getElementById('ride-alert-' + id);
+            if (card) card.querySelectorAll('button').forEach(button => { button.disabled = true; });
+            const submit = form.querySelector('button[type="submit"]');
+            if (submit) submit.innerHTML = 'Accepting...';
+            return true;
+        };
 
         @if($driver->is_online)
         startPolling();
