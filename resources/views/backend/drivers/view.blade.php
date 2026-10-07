@@ -75,7 +75,7 @@
                         
                         <div class="position-relative z-1 mb-2">
                             @if(!empty($sys_settings['app_logo']))
-                                <img src="{{ asset($sys_settings['app_logo']) }}" alt="Logo" style="max-height: 45px; width: auto; object-fit: contain;">
+                                @include('partials.ui.brand-logo', ['size' => 'sm'])
                             @else
                                 <span class="fw-bold fs-4 text-dark">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</span>
                             @endif
@@ -140,7 +140,7 @@
                     <div class="p-4 pt-4 pb-3">
                         <div class="mb-3">
                             @if(!empty($sys_settings['app_logo']))
-                                <img src="{{ asset($sys_settings['app_logo']) }}" alt="Logo" style="max-height: 40px; width: auto; object-fit: contain;">
+                                @include('partials.ui.brand-logo', ['size' => 'sm'])
                             @else
                                 <span class="fw-bold fs-5 text-dark">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</span>
                             @endif

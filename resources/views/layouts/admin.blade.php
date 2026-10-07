@@ -47,6 +47,15 @@
         .admin-shell .btn-brand {
             color: var(--ds-brand-ink) !important;
         }
+        .admin-shell .sidebar,
+        .admin-shell .offcanvas.sidebar {
+            background: #cddc29 !important;
+            color: #1c2208 !important;
+        }
+        .admin-shell .sidebar .text-brand,
+        .admin-shell .offcanvas.sidebar .text-brand {
+            color: #1c2208 !important;
+        }
     </style>
     @endif
 
@@ -61,7 +70,7 @@
             <h2 class="offcanvas-title h5 text-brand fw-bold mb-0" id="adminMobileMenuLabel">
                 {{ auth('branch')->check() ? 'Branch Menu' : 'Admin Menu' }}
             </h2>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
         </div>
         <div class="offcanvas-body p-0">
             @include('backend.inc.sidebar', ['sidebarVariant' => 'mobile'])

@@ -6,7 +6,7 @@
     <div class="mb-3 px-2 text-center text-lg-start {{ ($sidebarVariant ?? '') === 'mobile' ? 'd-none' : '' }}">
         <a href="{{ auth('branch')->check() ? route('branch.dashboard') : route('admin.dashboard') }}" class="text-decoration-none">
             @if(!empty($sys_settings['app_logo']))
-                <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" style="max-height: 44px; width: auto; object-fit: contain;" class="img-fluid">
+                @include('partials.ui.brand-logo', ['size' => 'sm'])
             @else
                 <h2 class="h4 text-brand mb-0 fw-bold">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</h2>
             @endif

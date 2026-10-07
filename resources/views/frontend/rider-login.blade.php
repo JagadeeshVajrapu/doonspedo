@@ -9,9 +9,9 @@
         <div class="col-md-5 col-lg-4">
             <div class="clean-card p-4 p-md-5">
                 <div class="text-center mb-4">
-                    <a href="{{ url('/') }}">
-                        <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" class="img-fluid mb-3" style="max-height: 60px;">
-                    </a>
+                    <div class="mb-3">
+                        @include('partials.ui.brand-logo', ['size' => 'md'])
+                    </div>
                     <h1 class="h2 text-dark-custom fw-bold mb-1">Customer Login</h1>
                     <p class="text-muted small mb-0">Sign in to book your next ride</p>
                 </div>
@@ -65,8 +65,7 @@
                 </form>
 
                 <div class="text-center">
-                    <p class="text-muted small mb-3">Don't have an account? <a href="{{ route('register') }}" class="text-dark-custom text-decoration-none fw-bold">Sign Up</a></p>
-                    <a href="{{ url('/') }}" class="text-muted text-decoration-none small">← Back to website</a>
+                    <p class="text-muted small mb-0">Don't have an account? <a href="{{ route('register') }}" class="text-dark-custom text-decoration-none fw-bold">Sign Up</a></p>
                 </div>
             </div>
         </div>

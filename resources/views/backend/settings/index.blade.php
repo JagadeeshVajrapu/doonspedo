@@ -85,7 +85,7 @@
                                     <div class="d-flex align-items-center bg-light p-4 rounded-4 border border-dashed text-center justify-content-center" style="cursor: pointer;">
                                         @if(isset($settings['app_logo']))
                                             <div class="me-4 text-start">
-                                                <img src="{{ asset($settings['app_logo']) }}" alt="Logo" class="rounded shadow-sm" style="max-height: 50px;">
+                                                @include('partials.ui.brand-logo', ['logo' => $settings['app_logo'], 'size' => 'sm', 'alt' => 'Logo'])
                                                 <div class="small text-muted mt-2">Current Logo</div>
                                             </div>
                                         @endif

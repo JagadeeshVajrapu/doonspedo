@@ -7,7 +7,7 @@
 <div class="rider-auth-card mx-auto" id="main-content">
     <div class="text-center mb-4">
         <a href="{{ url('/') }}">
-            <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" class="auth-logo mb-3">
+            <span class="d-inline-block mb-3">@include('partials.ui.brand-logo', ['size' => 'md'])</span>
         </a>
         <h1 class="h3 fw-bold mb-1 text-dark-custom">Create new password</h1>
         <p class="text-muted small mb-0">Choose a strong password for your account.</p>

@@ -2,7 +2,7 @@
     <div class="mb-3 px-2 text-center">
         <a href="{{ route('driver.dashboard') }}" class="text-decoration-none">
             @if(!empty($sys_settings['app_logo']))
-                <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" style="max-height: 44px; width: auto; object-fit: contain;" class="img-fluid">
+                @include('partials.ui.brand-logo', ['size' => 'sm'])
             @else
                 <h3 class="text-brand mb-0 fw-bold fs-4">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</h3>
             @endif

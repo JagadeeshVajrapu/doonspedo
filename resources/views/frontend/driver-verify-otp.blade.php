@@ -10,9 +10,9 @@
         <div class="col-md-5 col-lg-4">
             <div class="clean-card p-4 p-md-5">
                 <div class="text-center mb-4">
-                    <a href="/">
-                        <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="Logo" class="img-fluid mb-3" style="max-height: 60px;">
-                    </a>
+                    <div class="mb-3">
+                        @include('partials.ui.brand-logo', ['size' => 'md'])
+                    </div>
                     <h2 class="text-dark-custom fw-bold mb-1">Verify OTP</h2>
                     <p class="text-muted small">Sent to <strong>{{ session('mobile') }}</strong></p>
                 </div>

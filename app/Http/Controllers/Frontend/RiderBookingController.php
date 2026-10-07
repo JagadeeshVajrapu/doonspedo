@@ -12,9 +12,20 @@ use App\Support\RideFare;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class RiderBookingController extends Controller
 {
+    public const CANCEL_REASONS = [
+        'Driver is taking too long',
+        'Changed my plans',
+        'Booked by mistake',
+        'Found another ride',
+        'Wrong pickup or drop location',
+        'Fare is too high',
+        'Driver asked me to cancel',
+    ];
+
     public function store(Request $request)
     {
         $request->validate([
@@ -263,12 +274,16 @@ class RiderBookingController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot cancel a completed or already cancelled ride.'], 403);
         }
 
+        $validated = $request->validate([
+            'reason' => ['required', 'string', Rule::in(self::CANCEL_REASONS)],
+        ]);
+
         $wasPending = $booking->status === 'pending';
 
         $booking->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
-            'notes' => trim(($booking->notes ?? '') . "\nCancellation Reason: " . ($request->reason ?? 'Cancelled by rider')),
+            'notes' => trim(($booking->notes ?? '') . "\nCancellation Reason: " . $validated['reason']),
         ]);
 
         // Reject open bids for cancelled pending requests

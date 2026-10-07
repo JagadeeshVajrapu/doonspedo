@@ -64,23 +64,31 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 12px !important;
         }
-        .nav-link:hover {
+        .sidebar .nav-link:hover,
+        #mobileMenu .nav-link:hover {
             transform: translateX(3px);
-            background: rgba(255, 255, 255, 0.06) !important;
-            color: var(--ds-text-on-dark, #f4f5f7) !important;
-        }
-        .nav-link.active {
-            background: var(--ds-brand, var(--admin-primary, #cddc29)) !important;
+            background: #ffffff !important;
             color: #111 !important;
-            box-shadow: none;
+        }
+        .sidebar .nav-link.active,
+        #mobileMenu .nav-link.active {
+            background: #ffffff !important;
+            color: #111 !important;
+            box-shadow: inset 4px 0 0 #1c2208, 0 8px 18px rgba(28, 34, 8, 0.12);
+        }
+        #mobileMenu .nav-link {
+            background: #ffffff !important;
+            color: #1c2208 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 1px 2px rgba(28, 34, 8, 0.06);
         }
         .offcanvas {
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.45);
+            border-right: 1px solid rgba(28, 34, 8, 0.12);
+            box-shadow: 10px 0 30px rgba(28, 34, 8, 0.18);
             z-index: 10000 !important;
             transition: transform 0.3s ease-in-out !important;
-            background: var(--ds-charcoal, #14171c) !important;
-            color: var(--ds-text-on-dark, #f4f5f7) !important;
+            background: #cddc29 !important;
+            color: #1c2208 !important;
         }
         .offcanvas.manual-show {
             transform: none !important;
@@ -114,7 +122,7 @@
         <div class="offcanvas-overlay" onclick="(function(){var m=document.getElementById('mobileMenu');var t=document.getElementById('mobileMenuToggle');if(m){m.classList.remove('manual-show');}if(t){t.setAttribute('aria-expanded','false');}})()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: -1; display: none; backdrop-filter: blur(2px);"></div>
         <div class="offcanvas-header border-bottom border-secondary border-opacity-25 p-4">
             <h2 class="offcanvas-title h5 text-brand fw-bold mb-0" id="driverMobileMenuLabel">Driver Menu</h2>
-            <button type="button" class="btn-close btn-close-white" aria-label="Close menu" onclick="(function(){var m=document.getElementById('mobileMenu');var t=document.getElementById('mobileMenuToggle');if(m){m.classList.remove('manual-show');}if(t){t.setAttribute('aria-expanded','false');t.focus();}})()"></button>
+            <button type="button" class="btn-close" aria-label="Close menu" onclick="(function(){var m=document.getElementById('mobileMenu');var t=document.getElementById('mobileMenuToggle');if(m){m.classList.remove('manual-show');}if(t){t.setAttribute('aria-expanded','false');t.focus();}})()"></button>
         </div>
         <div class="offcanvas-body p-4">
             <div class="text-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">

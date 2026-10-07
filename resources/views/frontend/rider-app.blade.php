@@ -19,7 +19,7 @@
 <!-- Splash Screen / Loader (Hidden after load) -->
 <div id="splash" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex flex-column align-items-center justify-content-center" style="z-index: 9999; transition: opacity 0.5s;">
     @if(!empty($sys_settings['app_logo']))
-        <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" class="img-fluid mb-4" style="max-height: 80px;">
+        <div class="mb-4">@include('partials.ui.brand-logo', ['size' => 'lg'])</div>
     @else
         <h1 class="text-brand fw-bold display-3 mb-3">DOONS<span class="text-dark">PEDO</span></h1>
     @endif
@@ -594,6 +594,29 @@
         </div>
     </div>
 
+    <div id="cancel-modal" class="modal-backdrop-custom d-none" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title" aria-hidden="true">
+        <div class="modal-content-custom bg-white p-4 shadow-lg border-top border-light">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0" id="cancel-modal-title">Cancel this ride</h5>
+                <button type="button" onclick="closeCancelModal()" class="btn btn-link text-dark p-0" aria-label="Close cancel dialog"><i class="bi bi-x-circle fs-4" aria-hidden="true"></i></button>
+            </div>
+            <p class="text-secondary small mb-3">Choose a reason. The ride is cancelled only after you select one.</p>
+            <div class="d-grid gap-2 mb-3" id="cancel-reason-list">
+                @foreach(\App\Http\Controllers\Frontend\RiderBookingController::CANCEL_REASONS as $reason)
+                    <label class="cancel-reason-option">
+                        <input type="radio" name="cancel_reason" value="{{ $reason }}">
+                        <span>{{ $reason }}</span>
+                    </label>
+                @endforeach
+            </div>
+            <p id="cancel-reason-error" class="text-danger small d-none mb-3">Please select a reason to cancel this ride.</p>
+            <div class="d-grid gap-2">
+                <button type="button" id="cancel-confirm-btn" onclick="submitCancellation()" class="btn btn-danger w-100 py-3 rounded-4 fw-bold">Cancel ride</button>
+                <button type="button" onclick="closeCancelModal()" class="btn btn-light w-100 py-3 rounded-4 fw-bold border">Keep this ride</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Location Permission Modal (Floating) -->
     <div id="location-permission-modal" class="modal-backdrop-custom d-none" role="dialog" aria-modal="true" aria-labelledby="permission-status-title" aria-hidden="true">
         <div class="modal-content-custom bg-white p-4 shadow-lg border-top border-light">
@@ -764,6 +787,34 @@
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
     animation: slideUp 0.3s ease-out;
+}
+#cancel-modal .modal-content-custom {
+    max-height: 88vh;
+    overflow-y: auto;
+}
+.cancel-reason-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e6e8ee;
+    border-radius: 14px;
+    background: #f7f8fa;
+    cursor: pointer;
+    font-weight: 600;
+    color: #1c2208;
+}
+.cancel-reason-option:has(input:checked) {
+    border-color: #1c2208;
+    background: #fff;
+    box-shadow: inset 4px 0 0 #cddc29;
+}
+.cancel-reason-option input {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: #1c2208;
+    flex: 0 0 auto;
 }
 @keyframes slideUp {
     from { transform: translateY(100%); }
@@ -3293,7 +3344,20 @@ function submitReview() {
         }
     });
 }
-function openCancelModal() { document.getElementById('cancel-modal').classList.remove('d-none'); }
+function openCancelModal() {
+    const modal = document.getElementById('cancel-modal');
+    if (!modal || !currentBookingId) return;
+    modal.querySelectorAll('input[name="cancel_reason"]').forEach(input => { input.checked = false; });
+    const error = document.getElementById('cancel-reason-error');
+    if (error) error.classList.add('d-none');
+    const btn = document.getElementById('cancel-confirm-btn');
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Cancel ride';
+    }
+    modal.classList.remove('d-none');
+    modal.setAttribute('aria-hidden', 'false');
+}
 
 function openDriverChat() {
     const link = document.getElementById('chat-driver-link');
@@ -3305,27 +3369,51 @@ function openDriverChat() {
     window.location.href = href;
     return false;
 }
-function closeCancelModal() { document.getElementById('cancel-modal').classList.add('d-none'); }
+function closeCancelModal() {
+    const modal = document.getElementById('cancel-modal');
+    if (!modal) return;
+    modal.classList.add('d-none');
+    modal.setAttribute('aria-hidden', 'true');
+}
 
 function submitCancellation() {
-    const reason = document.getElementById('cancel-reason').value;
-    
+    if (!currentBookingId) return;
+    const selected = document.querySelector('#cancel-modal input[name="cancel_reason"]:checked');
+    const error = document.getElementById('cancel-reason-error');
+    if (!selected) {
+        if (error) error.classList.remove('d-none');
+        return;
+    }
+    if (error) error.classList.add('d-none');
+    const btn = document.getElementById('cancel-confirm-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Cancelling...';
+    }
+
     fetch(`/rider/bookings/${currentBookingId}/cancel`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({ reason: reason })
+        body: JSON.stringify({ reason: selected.value })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            window.location.reload();
-        } else {
-            alert(data.message);
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Please select a reason to cancel this ride.');
         }
+        if (typeof bidPollingInterval !== 'undefined' && bidPollingInterval) clearInterval(bidPollingInterval);
+        window.location.reload();
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Cancel ride';
+        }
+        alert(err.message || 'Unable to cancel this ride.');
     });
 }
 
@@ -3353,37 +3441,7 @@ function rejectBid(bidId) {
 }
 
 function cancelBookingAction() {
-    if (!currentBookingId) return;
-    if (!confirm('Are you sure you want to cancel this request?')) return;
-    const btn = document.querySelector('#bids-sheet button');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Cancelling...';
-    }
-    fetch(`/rider/bookings/${currentBookingId}/cancel`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ reason: 'Cancelled by customer' })
-    })
-    .then(async response => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Unable to cancel this ride.');
-        }
-        if (bidPollingInterval) clearInterval(bidPollingInterval);
-        window.location.reload();
-    })
-    .catch(err => {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'Cancel Request';
-        }
-        alert(err.message || 'Unable to cancel this ride.');
-    });
+    openCancelModal();
 }
 
 function initializeDropTimes() {

@@ -12,7 +12,7 @@
             <div class="col-lg-4 col-md-6 pe-lg-5">
                 <a href="{{ url('/') }}" class="d-inline-block mb-3 text-decoration-none">
                     @if(!empty($sys_settings['app_logo']))
-                        <img class="public-logo public-logo--footer" src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $footerName }}" width="160" height="56" loading="lazy" decoding="async">
+                        @include('partials.ui.brand-logo', ['size' => 'footer', 'alt' => $footerName])
                     @else
                         <h3 class="text-brand fw-bold mb-0">{{ $footerName }}</h3>
                     @endif

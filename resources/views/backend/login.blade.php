@@ -9,9 +9,9 @@
         <div class="col-md-5 col-lg-4">
             <div class="login-card p-4 p-md-5">
                 <div class="text-center mb-4">
-                    @if(!empty($sys_settings['app_logo']))
-                        <img src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" style="max-height: 60px;" class="mb-3">
-                    @endif
+                    <div class="mb-3">
+                        @include('partials.ui.brand-logo', ['size' => 'md'])
+                    </div>
                     <h1 class="h3 text-dark fw-bold mb-1">Admin access</h1>
                     <p class="text-muted small mb-0">Manage your Doonspedo operations panel</p>
                 </div>

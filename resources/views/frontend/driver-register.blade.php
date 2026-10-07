@@ -10,9 +10,9 @@
         <div class="col-lg-8">
             <div class="clean-card p-4 p-md-5">
                 <div class="text-center mb-5">
-                    <a href="/">
-                        <img src="{{ asset($sys_settings['app_logo'] ?? 'uploads/logo/logo.webp') }}" alt="Logo" class="img-fluid mb-3" style="max-height: 80px;">
-                    </a>
+                    <div class="mb-3">
+                        @include('partials.ui.brand-logo', ['size' => 'md'])
+                    </div>
                     <h2 class="text-dark-custom fw-bold mb-1 display-6">Partner With Us</h2>
                     <p class="text-muted fs-5">Join our fleet of professional partners and start earning today.</p>
                 </div>

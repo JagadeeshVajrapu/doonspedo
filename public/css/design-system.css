@@ -682,42 +682,50 @@ img {
 
 /* ------------------------------------------------------------------ */
 /* 12. Sidebar shell (admin / driver / branch)                          */
-/* Dark charcoal canvas + lime for active / accents only                */
+/* Brand yellow canvas, white buttons, dark labels                      */
 /* ------------------------------------------------------------------ */
 .ds-sidebar,
 .sidebar {
     min-width: var(--ds-sidebar-width);
     max-width: var(--ds-sidebar-width);
     min-height: 100vh;
-    background: var(--ds-charcoal) !important;
-    color: var(--ds-text-on-dark) !important;
-    border-right: 1px solid var(--ds-border-dark) !important;
+    background: #cddc29 !important;
+    color: #1c2208 !important;
+    border-right: 1px solid rgba(28, 34, 8, 0.12) !important;
     transition: transform var(--ds-duration-slow) var(--ds-ease),
                 box-shadow var(--ds-duration) var(--ds-ease);
 }
 
 .ds-sidebar .nav-link,
 .sidebar .nav-link {
-    color: var(--ds-text-on-dark-secondary) !important;
-    border-radius: var(--ds-radius-md);
-    margin: 2px 0;
+    color: #1c2208 !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 14px;
+    margin: 5px 0;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
     font-weight: var(--ds-fw-semibold);
+    box-shadow: 0 1px 2px rgba(28, 34, 8, 0.06);
     transition: background-color var(--ds-duration) var(--ds-ease),
                 color var(--ds-duration) var(--ds-ease),
+                box-shadow var(--ds-duration) var(--ds-ease),
                 transform var(--ds-duration) var(--ds-ease);
 }
 
 .ds-sidebar .nav-link:hover,
 .sidebar .nav-link:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
-    color: var(--ds-text-on-dark) !important;
+    background: #ffffff !important;
+    color: #111 !important;
+    box-shadow: 0 8px 18px rgba(28, 34, 8, 0.12);
 }
 
 .ds-sidebar .nav-link.active,
 .sidebar .nav-link.active {
-    background: var(--ds-brand) !important;
-    color: var(--ds-text-on-brand) !important;
-    box-shadow: none;
+    background: #ffffff !important;
+    color: #111 !important;
+    font-weight: var(--ds-fw-bold);
+    box-shadow: inset 4px 0 0 #1c2208, 0 8px 18px rgba(28, 34, 8, 0.12);
 }
 
 .ds-sidebar .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] i.bi-chevron-down,
@@ -732,22 +740,25 @@ img {
 
 .ds-sidebar .collapse ul .nav-link,
 .sidebar .collapse ul .nav-link {
-    color: var(--ds-text-on-dark-secondary) !important;
+    color: #1c2208 !important;
+    background: rgba(255, 255, 255, 0.78) !important;
     opacity: 1;
     font-size: 0.9rem;
     font-weight: var(--ds-fw-medium);
+    box-shadow: none;
 }
 
 .ds-sidebar .collapse ul .nav-link:hover,
 .sidebar .collapse ul .nav-link:hover {
-    color: var(--ds-text-on-dark) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
+    color: #111 !important;
+    background: #ffffff !important;
 }
 
 .ds-sidebar .collapse ul .nav-link.active,
 .sidebar .collapse ul .nav-link.active {
-    background: var(--ds-brand-soft) !important;
-    color: var(--ds-brand) !important;
+    background: #ffffff !important;
+    color: #111 !important;
+    box-shadow: inset 3px 0 0 #1c2208;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1112,9 +1123,10 @@ button:focus-visible,
 }
 
 .ds-sidebar .nav-link.active,
-.driver-shell .nav-link.active {
+.sidebar .nav-link.active,
+#mobileMenu .nav-link.active {
     text-decoration: none;
-    box-shadow: inset 3px 0 0 var(--ds-ink);
+    box-shadow: inset 4px 0 0 #1c2208, 0 8px 18px rgba(28, 34, 8, 0.12);
 }
 
 /* Brand buttons: never rely on white-on-lime */
@@ -1211,4 +1223,46 @@ button:focus-visible,
         animation: none !important;
         transition: none !important;
     }
+}
+
+/* Circular brand mark — crops the white square baked into the JPG */
+.brand-logo-ring {
+    --logo-size: 72px;
+    width: var(--logo-size);
+    height: var(--logo-size);
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    line-height: 0;
+    flex: 0 0 auto;
+    vertical-align: middle;
+}
+
+.brand-logo-ring--nav { --logo-size: 52px; }
+.brand-logo-ring--sm { --logo-size: 48px; }
+.brand-logo-ring--md { --logo-size: 84px; }
+.brand-logo-ring--footer { --logo-size: 64px; }
+.brand-logo-ring--lg { --logo-size: 104px; }
+
+.brand-logo-mark {
+    width: 118% !important;
+    height: 118% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    mix-blend-mode: multiply;
+    display: block;
 }

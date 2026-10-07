@@ -12,7 +12,7 @@
     <div class="container">
         <a class="navbar-brand fw-bold fs-3 mb-0" href="{{ url('/') }}">
             @if(!empty($sys_settings['app_logo']))
-                <img class="public-logo" src="{{ asset($sys_settings['app_logo']) }}" alt="{{ $sys_settings['app_name'] ?? 'Doonspedo' }}" width="148" height="44" decoding="async">
+                @include('partials.ui.brand-logo', ['size' => 'nav'])
             @else
                 <span class="text-brand">{{ $sys_settings['app_name'] ?? 'Doonspedo' }}</span>
             @endif
