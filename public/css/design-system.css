@@ -1227,7 +1227,7 @@ button:focus-visible,
 
 /* Circular brand mark — clips the white square baked into the JPG */
 .brand-logo-ring {
-    --logo-size: 56px;
+    --logo-size: 72px;
     width: var(--logo-size) !important;
     height: var(--logo-size) !important;
     min-width: var(--logo-size) !important;
@@ -1247,21 +1247,21 @@ button:focus-visible,
     vertical-align: middle;
 }
 
-.brand-logo-ring--nav { --logo-size: 44px; }
-.brand-logo-ring--sm { --logo-size: 40px; }
-.brand-logo-ring--md { --logo-size: 56px; }
-.brand-logo-ring--footer { --logo-size: 52px; }
-.brand-logo-ring--lg { --logo-size: 72px; }
+.brand-logo-ring--nav { --logo-size: 60px; }
+.brand-logo-ring--sm { --logo-size: 56px; }
+.brand-logo-ring--md { --logo-size: 72px; }
+.brand-logo-ring--footer { --logo-size: 68px; }
+.brand-logo-ring--lg { --logo-size: 88px; }
 
 .sidebar .brand-logo-ring,
 .ds-sidebar .brand-logo-ring {
-    --logo-size: 52px;
+    --logo-size: 68px;
 }
 
 .clean-card .brand-logo-ring,
 .login-card .brand-logo-ring,
 .rider-auth-card .brand-logo-ring {
-    --logo-size: 56px;
+    --logo-size: 72px;
 }
 
 .brand-logo-mark {
