@@ -1,6 +1,6 @@
 <div class="sidebar ds-sidebar d-none d-lg-flex flex-column p-3 p-xl-4 shadow sticky-top" style="z-index: 1050; max-height: 100vh; overflow-y: auto;">
     <div class="mb-3 px-2 text-center">
-        <a href="{{ route('driver.dashboard') }}" class="text-decoration-none">
+        <a href="{{ route('driver.dashboard') }}" class="d-inline-block text-decoration-none">
             @if(!empty($sys_settings['app_logo']))
                 @include('partials.ui.brand-logo', ['size' => 'sm'])
             @else

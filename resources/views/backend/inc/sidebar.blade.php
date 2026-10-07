@@ -3,8 +3,8 @@
 @endphp
 <!-- Sidebar -->
 <div class="sidebar ds-sidebar d-flex flex-column p-3 p-xl-4 shadow {{ ($sidebarVariant ?? '') === 'mobile' ? 'border-0 w-100 max-width-100' : '' }}" @if(($sidebarVariant ?? '') === 'mobile') style="min-width:0;max-width:100%;min-height:auto;" @endif>
-    <div class="mb-3 px-2 text-center text-lg-start {{ ($sidebarVariant ?? '') === 'mobile' ? 'd-none' : '' }}">
-        <a href="{{ auth('branch')->check() ? route('branch.dashboard') : route('admin.dashboard') }}" class="text-decoration-none">
+    <div class="mb-3 px-2 text-center {{ ($sidebarVariant ?? '') === 'mobile' ? 'd-none' : '' }}">
+        <a href="{{ auth('branch')->check() ? route('branch.dashboard') : route('admin.dashboard') }}" class="d-inline-block text-decoration-none">
             @if(!empty($sys_settings['app_logo']))
                 @include('partials.ui.brand-logo', ['size' => 'sm'])
             @else

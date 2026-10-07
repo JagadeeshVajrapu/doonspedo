@@ -1225,44 +1225,63 @@ button:focus-visible,
     }
 }
 
-/* Circular brand mark — crops the white square baked into the JPG */
+/* Circular brand mark — clips the white square baked into the JPG */
 .brand-logo-ring {
-    --logo-size: 72px;
-    width: var(--logo-size);
-    height: var(--logo-size);
-    border-radius: 50%;
-    overflow: hidden;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    --logo-size: 56px;
+    width: var(--logo-size) !important;
+    height: var(--logo-size) !important;
+    min-width: var(--logo-size) !important;
+    min-height: var(--logo-size) !important;
+    max-width: var(--logo-size) !important;
+    max-height: var(--logo-size) !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    display: inline-block !important;
+    position: relative;
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
-    line-height: 0;
+    line-height: 0 !important;
     flex: 0 0 auto;
     vertical-align: middle;
 }
 
-.brand-logo-ring--nav { --logo-size: 52px; }
-.brand-logo-ring--sm { --logo-size: 48px; }
-.brand-logo-ring--md { --logo-size: 84px; }
-.brand-logo-ring--footer { --logo-size: 64px; }
-.brand-logo-ring--lg { --logo-size: 104px; }
+.brand-logo-ring--nav { --logo-size: 44px; }
+.brand-logo-ring--sm { --logo-size: 40px; }
+.brand-logo-ring--md { --logo-size: 56px; }
+.brand-logo-ring--footer { --logo-size: 52px; }
+.brand-logo-ring--lg { --logo-size: 72px; }
+
+.sidebar .brand-logo-ring,
+.ds-sidebar .brand-logo-ring {
+    --logo-size: 52px;
+}
+
+.clean-card .brand-logo-ring,
+.login-card .brand-logo-ring,
+.rider-auth-card .brand-logo-ring {
+    --logo-size: 56px;
+}
 
 .brand-logo-mark {
-    width: 118% !important;
-    height: 118% !important;
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
     max-width: none !important;
     max-height: none !important;
     object-fit: cover !important;
-    object-position: center !important;
+    object-position: center center !important;
     background: transparent !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 50% !important;
     box-shadow: none !important;
+    outline: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    mix-blend-mode: multiply;
+    transform: scale(1.16);
+    transform-origin: center;
+    mix-blend-mode: normal !important;
     display: block;
 }
