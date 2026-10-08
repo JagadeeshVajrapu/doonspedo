@@ -24,6 +24,7 @@
                     <th>Mobile</th>
                     <th>Vehicle</th>
                     <th>KYC status</th>
+                    <th>Documents</th>
                     <th class="text-end px-4">Action</th>
                 </tr>
             </thead>
@@ -51,7 +52,17 @@
                             @include('partials.ui.status-badge', ['label' => 'Rejected', 'variant' => 'danger'])
                         @endif
                     </td>
+                    <td>
+                        @php $docLabel = $driver->documentVerificationLabel(); @endphp
+                        @include('partials.ui.status-badge', [
+                            'label' => $docLabel,
+                            'variant' => $docLabel === 'Verified' ? 'success' : ($docLabel === 'Rejected' ? 'danger' : 'warning'),
+                        ])
+                    </td>
                     <td class="text-end px-4">
+                        <button type="button" class="btn btn-sm btn-outline-dark px-2 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#docModal_{{ $driver->id }}" title="View documents">
+                            Documents
+                        </button>
                         <a href="{{ route('admin.drivers.view', $driver->id) }}" class="btn btn-sm btn-outline-primary px-2 rounded-pill shadow-sm" title="View Details" aria-label="View driver">
                             <i class="bi bi-eye"></i>
                         </a>
@@ -68,7 +79,7 @@
                     @endforeach
                 @else
                 <tr>
-                    <td colspan="6" class="p-4">
+                    <td colspan="7" class="p-4">
                         @include('partials.ui.empty-state', [
                             'title' => 'No drivers found',
                             'message' => 'Add a driver or wait for new registrations.',
@@ -109,7 +120,7 @@
                                     </h6>
                                     <div>
                                         <span class="badge bg-{{ $doc->status == 'approved' ? 'success' : ($doc->status == 'rejected' ? 'danger' : 'warning') }} rounded-pill">
-                                            {{ ucfirst($doc->status) }}
+                                            {{ $doc->status == 'approved' ? 'Verified' : ucfirst($doc->status) }}
                                         </span>
                                     </div>
                                 </div>
@@ -138,7 +149,7 @@
                                             @csrf
                                             <input type="hidden" name="status" value="approved">
                                             <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" {{ $doc->status == 'approved' ? 'disabled' : '' }}>
-                                                Approve
+                                                Verify
                                             </button>
                                         </form>
                                         <form action="{{ route('admin.drivers.documents.status', $doc->id) }}" method="POST">

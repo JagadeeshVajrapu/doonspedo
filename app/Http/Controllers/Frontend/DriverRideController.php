@@ -42,6 +42,14 @@ class DriverRideController extends Controller
             return response()->json(['success' => true, 'requests' => []]);
         }
 
+        if (!$driver->canReceiveRides()) {
+            return response()->json([
+                'success' => true,
+                'requests' => [],
+                'documents_pending' => !$driver->rideDocumentsVerified(),
+            ]);
+        }
+
         if ($driver->current_lat === null || $driver->current_lng === null) {
             return response()->json(['success' => true, 'requests' => [], 'needs_location' => true]);
         }
@@ -74,7 +82,7 @@ class DriverRideController extends Controller
                 );
                 $booking->setAttribute('distance_km', round($km, 1));
 
-                return Geo::sameOperatingState($driver, $booking) && $km <= $radius;
+                return Geo::sameOperatingState($driver, $booking) && Geo::withinRadius($km, $radius);
             })
             ->sortBy('distance_km')
             ->take(20)
@@ -90,22 +98,33 @@ class DriverRideController extends Controller
         $driver = $this->getDriver();
         $booking = Booking::findOrFail($id);
 
+        if (!$driver || !$driver->canReceiveRides()) {
+            $message = ($driver && $driver->status === 'approved')
+                ? 'Your documents must be verified before you can accept rides.'
+                : 'Your account must be approved before you can accept rides.';
+
+            return request()->expectsJson()
+                ? response()->json(['success' => false, 'message' => $message], 403)
+                : back()->with('error', $message);
+        }
+
         if ($booking->status !== 'pending' || $booking->driver_id !== null) {
             return back()->with('error', 'Ride request is no longer available.');
         }
 
-        // Check if driver is already on a ride
         $hasActive = Booking::where('driver_id', $driver->id)
             ->whereIn('status', ['accepted', 'ongoing'])
             ->exists();
-            
+
         if ($hasActive) {
             return back()->with('error', 'You already have an active ride.');
         }
 
         $tooFar = Geo::outOfRangeMessage($driver, $booking);
         if ($tooFar) {
-            return back()->with('error', $tooFar);
+            return request()->expectsJson()
+                ? response()->json(['success' => false, 'message' => $tooFar], 403)
+                : back()->with('error', $tooFar);
         }
 
         if (!DriverRideRejections::matchesCategory($driver, $booking)) {

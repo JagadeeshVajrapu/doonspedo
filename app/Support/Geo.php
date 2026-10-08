@@ -11,6 +11,11 @@ class Geo
 
     public const MAX_RADIUS_KM = 15.0;
 
+    public const DEFAULT_ACCEPTANCE_KM = 3.0;
+
+    /** Test seam. Production leaves this null and reads the admin setting. */
+    public static ?float $acceptanceKmOverride = null;
+
     public static function kilometers(float $lat1, float $lng1, float $lat2, float $lng2): float
     {
         $earth = 6371.0;
@@ -29,12 +34,30 @@ class Geo
         return max(1, (int) round($roadKm * 2.5));
     }
 
+    public static function adminAcceptanceRadiusKm(): float
+    {
+        if (self::$acceptanceKmOverride !== null) {
+            return max(0.1, self::$acceptanceKmOverride);
+        }
+
+        $configured = get_settings('max_driver_acceptance_km', self::DEFAULT_ACCEPTANCE_KM);
+        $km = is_numeric($configured) ? (float) $configured : self::DEFAULT_ACCEPTANCE_KM;
+
+        return max(0.1, min(100.0, $km));
+    }
+
     public static function nearbyRadiusKm(DriverRegistration $driver): float
     {
         $preference = $driver->ride_preferences['max_distance'] ?? null;
         $km = is_numeric($preference) ? (float) $preference : self::DEFAULT_RADIUS_KM;
+        $driverRadius = max(1.0, min(self::MAX_RADIUS_KM, $km));
 
-        return max(1.0, min(self::MAX_RADIUS_KM, $km));
+        return min($driverRadius, self::adminAcceptanceRadiusKm());
+    }
+
+    public static function withinRadius(float $km, float $radius): bool
+    {
+        return $km <= $radius + 0.000001;
     }
 
     public static function outOfRangeMessage(?DriverRegistration $driver, Booking $booking): ?string
@@ -59,7 +82,7 @@ class Geo
             return 'This pickup is outside your operating state.';
         }
 
-        if ($km > $radius) {
+        if (!self::withinRadius($km, $radius)) {
             return 'This pickup is '.number_format($km, 1).' km away, outside your '.number_format($radius, 0).' km nearby area.';
         }
 

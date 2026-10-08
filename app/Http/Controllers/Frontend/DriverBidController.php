@@ -49,6 +49,14 @@ class DriverBidController extends Controller
             return response()->json(['success' => false, 'message' => 'This ride is no longer open for bidding.'], 403);
         }
 
+        if (!$driver || !$driver->canReceiveRides()) {
+            $message = ($driver && $driver->status === 'approved')
+                ? 'Your documents must be verified before you can accept rides.'
+                : 'Your account must be approved before you can accept rides.';
+
+            return response()->json(['success' => false, 'message' => $message], 403);
+        }
+
         $tooFar = Geo::outOfRangeMessage($driver, $booking);
         if ($tooFar) {
             return response()->json(['success' => false, 'message' => $tooFar], 403);

@@ -93,19 +93,20 @@
         </div>
         @endif
 
+        @php $fareParts = \App\Support\RideFare::breakdown((float) $booking->fare); @endphp
         <div class="rider-card">
             <p class="x-small text-muted fw-bold text-uppercase ls-1 mb-3">Fare Breakdown</p>
             <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted small">Base Fare</span>
-                <span class="fw-bold">₹{{ number_format($booking->fare * 0.8, 2) }}</span>
+                <span class="fw-bold">₹{{ number_format($fareParts['base_fare'], 2) }}</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted small">Taxes &amp; Fees (18% GST)</span>
-                <span class="fw-bold">₹{{ number_format($booking->fare * 0.18, 2) }}</span>
+                <span class="text-muted small">Tax / GST</span>
+                <span class="fw-bold">₹{{ number_format($fareParts['tax'], 2) }}</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted small">Service Fee</span>
-                <span class="fw-bold">₹{{ number_format($booking->fare * 0.02, 2) }}</span>
+                <span class="fw-bold">₹{{ number_format($fareParts['service_fee'], 2) }}</span>
             </div>
             <hr class="my-3">
             <div class="d-flex justify-content-between align-items-center">

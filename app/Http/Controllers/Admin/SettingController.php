@@ -63,6 +63,13 @@ class SettingController extends Controller
             }
         }
 
+        if ($request->exists('max_driver_acceptance_km')) {
+            $validated = $request->validate([
+                'max_driver_acceptance_km' => 'required|numeric|min:0.1|max:100',
+            ]);
+            $settings['max_driver_acceptance_km'] = round((float) $validated['max_driver_acceptance_km'], 1);
+        }
+
         // Handle File upload particularly for webp/png/jpg
         if ($request->hasFile('app_logo')) {
             $file = $request->file('app_logo');

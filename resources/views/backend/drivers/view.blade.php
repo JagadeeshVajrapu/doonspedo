@@ -245,8 +245,10 @@
 
         <!-- Document Verification -->
         <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-white py-3 border-0">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-check text-success me-2"></i> Document Verification</h5>
+                @php $docLabel = $driver->documentVerificationLabel(); @endphp
+                <span class="badge {{ $docLabel === 'Verified' ? 'bg-success' : ($docLabel === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark') }} rounded-pill px-3">{{ $docLabel }}</span>
             </div>
             <div class="card-body p-4 pt-0">
                 <div class="row g-4">
@@ -286,6 +288,37 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
+
+                <h6 class="fw-bold text-dark mt-4 mb-3">Uploaded KYC documents</h6>
+                <div class="row g-3">
+                    @forelse($driver->documents as $doc)
+                        <div class="col-lg-6">
+                            <div class="border rounded-4 p-3 bg-white d-flex justify-content-between align-items-center gap-3">
+                                <div>
+                                    <div class="fw-bold">{{ $doc->kycRequirement->document_name ?? 'Document' }}</div>
+                                    <div class="small text-muted">{{ $doc->status === 'approved' ? 'Verified' : ucfirst($doc->status) }}</div>
+                                    @if($doc->document_path)
+                                        <a href="{{ media_url($doc->document_path) }}" target="_blank" class="small">View document</a>
+                                    @endif
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form action="{{ route('admin.drivers.documents.status', $doc->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="status" value="approved">
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill" {{ $doc->status === 'approved' ? 'disabled' : '' }}>Verify</button>
+                                    </form>
+                                    <form action="{{ route('admin.drivers.documents.status', $doc->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="status" value="rejected">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" {{ $doc->status === 'rejected' ? 'disabled' : '' }}>Reject</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-muted small">No KYC documents uploaded yet.</div>
+                    @endforelse
                 </div>
             </div>
         </div>

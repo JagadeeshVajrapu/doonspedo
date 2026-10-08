@@ -71,7 +71,7 @@ class DriverController extends Controller
 
     public function viewDetails($id)
     {
-        $driver = DriverRegistration::with(['vehicles.category', 'vehicles.documents'])->findOrFail($id);
+        $driver = DriverRegistration::with(['documents.kycRequirement', 'vehicles.category', 'vehicles.documents'])->findOrFail($id);
         return view('backend.drivers.view', compact('driver'));
     }
 
@@ -176,6 +176,8 @@ class DriverController extends Controller
         $doc = DriverDocument::findOrFail($id);
         $doc->update(['status' => $request->status]);
 
-        return back()->with('success', 'Document status updated to ' . $request->status);
+        $label = $request->status === 'approved' ? 'Verified' : 'Rejected';
+
+        return back()->with('success', 'Document status updated to ' . $label);
     }
 }

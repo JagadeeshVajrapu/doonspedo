@@ -56,6 +56,25 @@ class RideFare
         return round($fare, 2);
     }
 
+    /**
+     * GST is not charged. The amount previously shown as 18% GST stays inside
+     * the base fare. The existing 2% service fee stays separate. The total is
+     * the server fare and is not increased.
+     */
+    public static function breakdown(float $total): array
+    {
+        $total = round(max(0, $total), 2);
+        $serviceFee = round($total * 0.02, 2);
+        $baseFare = round($total - $serviceFee, 2);
+
+        return [
+            'base_fare' => $baseFare,
+            'tax' => 0.0,
+            'service_fee' => $serviceFee,
+            'total' => $total,
+        ];
+    }
+
     public static function normalizePreference(?string $value): ?string
     {
         $value = strtolower(trim((string) $value));

@@ -279,6 +279,10 @@
                     box.innerHTML = '<div class="alert alert-warning small mb-0 shadow" style="pointer-events:auto;">Allow location to receive nearby ride requests.</div>';
                     return;
                 }
+                if (data.documents_pending) {
+                    box.innerHTML = '<div class="alert alert-warning small mb-0 shadow" style="pointer-events:auto;">Your documents are not verified yet. You can receive rides after admin verifies them.</div>';
+                    return;
+                }
                 const requests = (data.success && Array.isArray(data.requests)) ? data.requests : [];
                 const activeIds = new Set();
                 requests.forEach(request => {

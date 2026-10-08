@@ -44,6 +44,77 @@ class DriverRegistration extends Model
         return $this->hasMany(DriverDocument::class, 'driver_id');
     }
 
+    /**
+     * Required, active KYC documents must all be approved before this driver
+     * can receive or accept a ride. Account approval is checked separately.
+     */
+    public function rideDocumentsVerified(): bool
+    {
+        $requiredIds = KycRequirement::query()
+            ->where('is_active', true)
+            ->where('is_required', true)
+            ->pluck('id');
+
+        if ($requiredIds->isEmpty()) {
+            return true;
+        }
+
+        $documents = $this->relationLoaded('documents')
+            ? $this->documents
+            : $this->documents()->get(['kyc_requirement_id', 'status']);
+
+        $approved = $documents
+            ->where('status', 'approved')
+            ->pluck('kyc_requirement_id')
+            ->unique()
+            ->map(fn ($id) => (int) $id);
+
+        return $requiredIds->map(fn ($id) => (int) $id)->diff($approved)->isEmpty();
+    }
+
+    public function documentVerificationLabel(): string
+    {
+        $requiredIds = KycRequirement::query()
+            ->where('is_active', true)
+            ->where('is_required', true)
+            ->pluck('id');
+
+        if ($requiredIds->isEmpty()) {
+            return $this->status === 'rejected' ? 'Rejected' : ($this->status === 'approved' ? 'Verified' : 'Pending');
+        }
+
+        $documents = $this->relationLoaded('documents')
+            ? $this->documents
+            : $this->documents()->get(['kyc_requirement_id', 'status']);
+
+        $rejected = false;
+        $waiting = false;
+        foreach ($requiredIds as $id) {
+            $document = $documents->firstWhere('kyc_requirement_id', (int) $id)
+                ?? $documents->firstWhere('kyc_requirement_id', $id);
+            if (!$document || $document->status === 'pending') {
+                $waiting = true;
+            } elseif ($document->status === 'rejected') {
+                $rejected = true;
+            } elseif ($document->status !== 'approved') {
+                $waiting = true;
+            }
+        }
+
+        if (!$rejected && !$waiting) {
+            return 'Verified';
+        }
+
+        return $rejected ? 'Rejected' : 'Pending';
+    }
+
+    public function canReceiveRides(): bool
+    {
+        return $this->status === 'approved'
+            && !$this->is_blocked
+            && $this->rideDocumentsVerified();
+    }
+
     public function vehicles()
     {
         return $this->hasMany(Vehicle::class, 'driver_id');

@@ -78,15 +78,15 @@
                 <tr>
                     <th>DESCRIPTION</th>
                     <th>BASE PRICE</th>
-                    <th>TAX (18%)</th>
+                    <th>TAX / GST</th>
                     <th style="text-align: right;">TOTAL</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Ride Fare (Booking #{{ $booking->id }})</td>
-                    <td>₹{{ number_format($booking->fare / 1.18, 2) }}</td>
-                    <td>₹{{ number_format($booking->fare - ($booking->fare / 1.18), 2) }}</td>
+                    <td>₹{{ number_format($booking->fare, 2) }}</td>
+                    <td>₹0.00</td>
                     <td style="text-align: right;">₹{{ number_format($booking->fare, 2) }}</td>
                 </tr>
             </tbody>
@@ -95,12 +95,12 @@
         <div class="total-section">
             <div class="total-box">
                 <div class="total-row">
-                    <span>Subtotal</span>
-                    <span>₹{{ number_format($booking->fare / 1.18, 2) }}</span>
+                    <span>Base Fare</span>
+                    <span>₹{{ number_format($booking->fare, 2) }}</span>
                 </div>
                 <div class="total-row">
-                    <span>GST (18%)</span>
-                    <span>₹{{ number_format($booking->fare - ($booking->fare / 1.18), 2) }}</span>
+                    <span>Tax / GST</span>
+                    <span>₹0.00</span>
                 </div>
                 <div class="total-row grand-total">
                     <span>Total Amount</span>

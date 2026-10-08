@@ -158,6 +158,15 @@
                                 </div>
                             </div>
                             
+                            <div class="mb-4 p-4 bg-light rounded-4 border">
+                                <label class="form-label fw-bold text-dark" for="max-driver-acceptance-km">Maximum Driver Acceptance Distance</label>
+                                <div class="input-group" style="max-width: 220px;">
+                                    <input type="number" id="max-driver-acceptance-km" name="max_driver_acceptance_km" class="form-control" min="0.1" max="100" step="0.1" value="{{ $settings['max_driver_acceptance_km'] ?? 3 }}" required>
+                                    <span class="input-group-text">KM</span>
+                                </div>
+                                <div class="form-text small mt-2">Drivers farther than this from the pickup do not receive the ride. Applies to every driver.</div>
+                            </div>
+
                             <div class="mb-3 p-4 bg-light rounded-4 border">
                                 <label class="form-label fw-bold text-dark">Google Maps API Key</label>
                                 <input type="text" name="google_maps_key" class="form-control font-monospace text-muted" value="{{ $settings['google_maps_key'] ?? '' }}" placeholder="AIzaSyB*************************">
