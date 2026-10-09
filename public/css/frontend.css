@@ -215,14 +215,38 @@ body.bg-light .form-select {
     letter-spacing: -0.02em;
 }
 
-.public-nav .navbar-brand img {
-    max-height: none;
+.public-nav .navbar-brand img:not(.brand-logo-mark) {
+    max-height: 44px;
     width: auto;
     object-fit: contain;
     border: 0;
     border-radius: 0;
     box-shadow: none;
     background: transparent;
+}
+
+.public-nav .navbar-brand .brand-logo-ring--nav,
+.public-nav .navbar-brand .brand-logo-mark {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+}
+
+@media (max-width: 575.98px) {
+    .public-nav .navbar-brand .brand-logo-ring--nav,
+    .public-nav .navbar-brand .brand-logo-mark {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        max-width: 48px !important;
+        max-height: 48px !important;
+    }
 }
 
 .public-nav .nav-link {

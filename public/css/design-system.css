@@ -1249,7 +1249,7 @@ button:focus-visible,
     max-width: var(--logo-size) !important;
     max-height: var(--logo-size) !important;
     border-radius: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     display: inline-block !important;
     position: relative;
     background: transparent !important;
@@ -1284,8 +1284,8 @@ button:focus-visible,
     inset: 0;
     width: 100% !important;
     height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
     object-fit: contain !important;
     object-position: center center !important;
     background: transparent !important;
@@ -1298,4 +1298,32 @@ button:focus-visible,
     transform: none !important;
     mix-blend-mode: normal !important;
     display: block;
+}
+
+/* Beat broader navbar img rules (including width/height: auto !important) */
+.public-nav .navbar-brand .brand-logo-ring--nav,
+.public-nav .navbar-brand .brand-logo-mark {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    object-fit: contain !important;
+}
+
+.public-nav .navbar-brand .brand-logo-ring--nav {
+    overflow: hidden !important;
+}
+
+@media (max-width: 575.98px) {
+    .public-nav .navbar-brand .brand-logo-ring--nav,
+    .public-nav .navbar-brand .brand-logo-mark {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        max-width: 48px !important;
+        max-height: 48px !important;
+    }
 }
