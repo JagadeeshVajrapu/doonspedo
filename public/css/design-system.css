@@ -684,6 +684,20 @@ img {
 /* 12. Sidebar shell (admin / driver / branch)                          */
 /* Brand yellow canvas, white buttons, dark labels                      */
 /* ------------------------------------------------------------------ */
+.ds-sidebar .text-white,
+.sidebar .text-white,
+#mobileMenu .text-white,
+#adminMobileMenu .text-white {
+    color: #1c2208 !important;
+}
+
+.ds-sidebar .text-white-50,
+.sidebar .text-white-50,
+#mobileMenu .text-white-50,
+#adminMobileMenu .text-white-50 {
+    color: rgba(28, 34, 8, 0.72) !important;
+}
+
 .ds-sidebar,
 .sidebar {
     min-width: var(--ds-sidebar-width);

@@ -61,9 +61,10 @@
                     </li>
                 </ul>
 
-                <div class="mt-4 d-flex flex-wrap gap-2">
+                <div class="mt-4 d-flex flex-wrap gap-2 footer-login-actions">
                     <a href="{{ route('login') }}" class="btn btn-outline-brand btn-sm px-3">Customer Login</a>
                     <a href="{{ route('driver.login') }}" class="btn btn-outline-brand btn-sm px-3">Partner Login</a>
+                    <a href="{{ route('admin.login') }}" class="btn btn-outline-brand btn-sm px-3">Admin Login</a>
                 </div>
             </div>
         </div>
@@ -72,10 +73,9 @@
             <p class="text-secondary mb-0 small">
                 &copy; {{ date('Y') }} Doonspedo. All rights reserved.
             </p>
-            <p class="text-secondary mb-0 small text-md-center flex-grow-1">
-                Developed by
-                <a href="https://webfasttech.com/" target="_blank" rel="noopener noreferrer" class="text-brand fw-bold text-decoration-none">WebFastTechnology</a>
-            </p>
+            <div class="text-secondary small text-md-center flex-grow-1">
+                @include('partials.ui.developer-credit')
+            </div>
         </div>
     </div>
 </footer>

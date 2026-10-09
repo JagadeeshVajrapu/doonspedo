@@ -112,7 +112,7 @@
         <div class="footer">
             <p>Thank you for choosing Doonspedo!</p>
             <p>For support, please contact us at support@doonspedo.com</p>
-            <p>&copy; {{ date('Y') }} Doonspedo | Developed by <a href="https://webexpertsworld.com" target="_blank">WebExpertsWorld</a></p>
+            <p>&copy; {{ date('Y') }} Doonspedo | Developed by <a href="https://webfasttech.com/" target="_blank" rel="noopener noreferrer">Webfast Technology</a></p>
         </div>
     </div>
 </body>

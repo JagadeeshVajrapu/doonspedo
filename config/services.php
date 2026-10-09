@@ -47,6 +47,13 @@ return [
         'redirect'      => env('FACEBOOK_REDIRECT_URL'),
     ],
 
+    'aadhaar' => [
+        'provider' => env('AADHAAR_PROVIDER'),
+        'base_url' => env('AADHAAR_BASE_URL'),
+        'api_key' => env('AADHAAR_API_KEY'),
+        'api_secret' => env('AADHAAR_API_SECRET'),
+    ],
+
     'cloudinary' => [
         'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
         'api_key' => env('CLOUDINARY_API_KEY'),

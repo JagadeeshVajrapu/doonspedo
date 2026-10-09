@@ -4,6 +4,7 @@
 --}}
 @php $active = $active ?? ''; @endphp
 <nav class="driver-bottom-nav" aria-label="Driver primary">
+    <div class="driver-bottom-nav-row">
     <a href="{{ route('driver.dashboard') }}" class="driver-nav-item {{ $active === 'home' || request()->routeIs('driver.dashboard') ? 'is-active' : '' }}" @if($active === 'home' || request()->routeIs('driver.dashboard')) aria-current="page" @endif>
         <i class="bi bi-house-door{{ ($active === 'home' || request()->routeIs('driver.dashboard')) ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Home</span>
@@ -24,4 +25,6 @@
         <i class="bi bi-person{{ ($active === 'profile' || request()->routeIs('driver.profile')) ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Profile</span>
     </a>
+    </div>
+    @include('partials.ui.developer-credit')
 </nav>

@@ -6,6 +6,7 @@
     $active = $active ?? '';
 @endphp
 <nav class="rider-bottom-nav" aria-label="Customer navigation">
+    <div class="rider-bottom-nav-row">
     <a href="{{ route('rider.app') }}" class="rider-nav-item {{ $active === 'home' ? 'is-active' : '' }}" @if($active === 'home') aria-current="page" @endif>
         <i class="bi bi-house-door{{ $active === 'home' ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Home</span>
@@ -22,4 +23,6 @@
         <i class="bi bi-person{{ $active === 'account' ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Account</span>
     </a>
+    </div>
+    @include('partials.ui.developer-credit')
 </nav>

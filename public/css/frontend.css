@@ -1319,7 +1319,7 @@ body.bg-light.text-dark {
 
 .rider-content {
     flex: 1;
-    padding: 1rem 1rem 5.5rem;
+    padding: 1rem 1rem 7rem;
 }
 
 .rider-card {
@@ -1359,14 +1359,43 @@ body.bg-light.text-dark {
     bottom: 0;
     z-index: 1030;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.65rem 0.5rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--ds-border);
     box-shadow: 0 -8px 24px rgba(11, 13, 16, 0.06);
+}
+
+.rider-bottom-nav-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.25rem;
+}
+
+.dashboard-developer {
+    margin: 0;
+    padding: 0 0.35rem;
+    text-align: center;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: #64748B;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-developer a {
+    color: #0F766E;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.dashboard-developer a:hover,
+.dashboard-developer a:focus-visible {
+    text-decoration: underline;
 }
 
 .rider-nav-item {
@@ -2492,6 +2521,21 @@ img, svg, video, canvas, iframe {
 }
 
 @media (max-width: 575.98px) {
+    .footer-login-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .footer-login-actions .btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .footer-bottom {
+        text-align: center;
+    }
+
     .container, .container-sm, .container-md {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -2626,6 +2670,17 @@ img, svg, video, canvas, iframe {
         padding-right: 0.85rem;
     }
 
+    .rider-card .d-flex.justify-content-between,
+    .rider-booking-sheet .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        row-gap: 0.45rem;
+    }
+
+    .rider-card .btn,
+    .rider-booking-sheet .btn {
+        max-width: 100%;
+    }
+
     .rider-kyc-page .btn-brand,
     .rider-kyc-page .form-control,
     .rider-kyc-page .form-select {
@@ -2646,5 +2701,23 @@ img, svg, video, canvas, iframe {
     .driver-shell .card img {
         max-width: 100%;
         height: auto;
+    }
+
+    .public-footer .footer-link,
+    .public-footer .footer-brand-copy,
+    .dashboard-developer,
+    .rider-card p,
+    .admin-footer {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+        max-width: calc(100% - 1.5rem);
+    }
+
+    .table {
+        font-size: 0.9rem;
     }
 }

@@ -333,14 +333,22 @@ body {
     bottom: 0;
     z-index: 1040;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.15rem;
-    padding: 0.55rem 0.35rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.4rem 0.35rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--ds-border);
     box-shadow: 0 -8px 24px rgba(11, 13, 16, 0.08);
+}
+
+.driver-bottom-nav-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.15rem;
 }
 
 @media (min-width: 992px) {
@@ -716,7 +724,7 @@ body {
 
 /* Ensure fixed driver bottom nav never covers last actions */
 .driver-shell .main-content {
-    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 992px) {
@@ -727,6 +735,16 @@ body {
 
 /* Admin filter collapse helper for very small screens */
 @media (max-width: 575.98px) {
+    .admin-topbar-titles {
+        flex: 1 1 12rem;
+        min-width: 0;
+    }
+
+    .admin-topbar-titles h1,
+    .admin-topbar-titles p {
+        overflow-wrap: anywhere;
+    }
+
     .admin-filter-bar .form-select,
     .admin-filter-bar .form-control,
     .admin-topbar-search .form-control {

@@ -676,11 +676,12 @@
                 <span>Logout</span>
             </a>
         </div>
-        <div class="d-flex justify-content-center gap-3 pt-2 border-top w-100 mt-1" style="font-size: 11px;">
+        <div class="d-flex justify-content-center flex-wrap gap-3 pt-2 border-top w-100 mt-1" style="font-size: 11px;">
             <a href="/policy/privacy" class="text-secondary text-decoration-none fw-semibold">Privacy</a>
             <a href="/policy/data-deletion" class="text-secondary text-decoration-none fw-semibold">Data Deletion</a>
             <a href="/policy/refund" class="text-secondary text-decoration-none fw-semibold">Refunds</a>
         </div>
+        @include('partials.ui.developer-credit')
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
             @csrf
         </form>
