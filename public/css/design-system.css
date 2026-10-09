@@ -1239,7 +1239,7 @@ button:focus-visible,
     }
 }
 
-/* Circular brand mark — clips the white square baked into the JPG */
+/* Brand mark — the artwork is already circular; no frame or border */
 .brand-logo-ring {
     --logo-size: 72px;
     width: var(--logo-size) !important;
@@ -1248,13 +1248,14 @@ button:focus-visible,
     min-height: var(--logo-size) !important;
     max-width: var(--logo-size) !important;
     max-height: var(--logo-size) !important;
-    border-radius: 50% !important;
-    overflow: hidden !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
     display: inline-block !important;
     position: relative;
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
+    outline: 0 !important;
     padding: 0 !important;
     line-height: 0 !important;
     flex: 0 0 auto;
@@ -1285,17 +1286,16 @@ button:focus-visible,
     height: 100% !important;
     max-width: none !important;
     max-height: none !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
     object-position: center center !important;
     background: transparent !important;
     border: 0 !important;
-    border-radius: 50% !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
     outline: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    transform: scale(1.16);
-    transform-origin: center;
+    transform: none !important;
     mix-blend-mode: normal !important;
     display: block;
 }

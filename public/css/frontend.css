@@ -216,10 +216,13 @@ body.bg-light .form-select {
 }
 
 .public-nav .navbar-brand img {
-    max-height: 44px;
+    max-height: none;
     width: auto;
     object-fit: contain;
-    border-radius: 8px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
 }
 
 .public-nav .nav-link {
@@ -1655,9 +1658,14 @@ body.pub-home .text-brand {
 }
 
 .public-nav .navbar-brand .brand-logo-ring,
-.public-footer .brand-logo-ring {
+.public-nav .navbar-brand .brand-logo-mark,
+.public-footer .brand-logo-ring,
+.public-footer .brand-logo-mark {
     background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
+    outline: 0 !important;
 }
 
 /* Light public navbar */
