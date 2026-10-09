@@ -9,7 +9,7 @@
     <div class="col-md-8">
         <div class="card shadow-sm border-0 border-top border-4 border-primary">
             <div class="card-header bg-white py-3 border-0">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i> Update details for ID #{{ 1000 + $user->id }}</h5>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i> Update details for Customer {{ $user->displayReference() }}</h5>
             </div>
             <div class="card-body p-4">
                 <form action="{{ route('admin.users.update', $user->id) }}" method="POST">

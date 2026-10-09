@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Driver - Doonspedo')</title>
+    @include('partials.ui.favicon')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -133,7 +134,8 @@
                         <i class="bi bi-person text-brand fs-4"></i>
                     </div>
                 @endif
-                <div class="fw-bold text-white">{{ $driver->name ?? 'Captain' }}</div>
+                <div class="fw-bold" style="color:#1c2208;">{{ $driver->name ?? 'Captain' }}</div>
+                <div class="small fw-semibold" style="color:#1c2208;">Partner {{ $driver->displayReference() }}</div>
                 <div id="driver-presence-label" class="small text-white-50">{{ ($driver->is_online ?? false) ? 'Online' : 'Offline' }}</div>
             </div>
             <ul class="nav flex-column gap-1 mb-4">

@@ -66,12 +66,13 @@
                     @foreach($bookings as $ride)
                 <tr>
                     <td class="px-4">
-                        <div class="fw-bold text-dark">#{{ $ride->id }}</div>
+                        <div class="fw-bold text-dark">{{ $ride->displayReference() }}</div>
                         <div class="small text-muted">{{ $ride->service_type }}</div>
                     </td>
                     <td>
-                        <div class="small fw-bold">{{ $ride->completed_at->format('d M, Y') }}</div>
-                        <div class="extra-small text-muted">{{ $ride->completed_at->format('h:i A') }}</div>
+                        @php $completed = $ride->completed_at ?? $ride->created_at; @endphp
+                        <div class="small fw-bold">{{ $completed ? $completed->format('d M, Y') : '—' }}</div>
+                        <div class="extra-small text-muted">{{ $completed ? $completed->format('h:i A') : '' }}</div>
                     </td>
                     <td>
                         <div class="small">{{ $ride->distance }} km</div>
@@ -114,8 +115,9 @@
             <div class="border rounded-4 p-3 mb-2">
                 <div class="d-flex justify-content-between mb-2">
                     <div>
-                        <div class="fw-bold">#{{ $ride->id }}</div>
-                        <div class="extra-small text-muted">{{ $ride->service_type }} · {{ $ride->completed_at->format('d M, Y') }}</div>
+                        @php $completed = $ride->completed_at ?? $ride->created_at; @endphp
+                        <div class="fw-bold">{{ $ride->displayReference() }}</div>
+                        <div class="extra-small text-muted">{{ $ride->service_type }} · {{ $completed ? $completed->format('d M, Y') : '—' }}</div>
                     </div>
                     <div class="fw-bold text-success">{{ $sym }}{{ number_format(($ride->net_amount > 0 ? $ride->net_amount : ($ride->fare - $commission)) * $rate, 2) }}</div>
                 </div>

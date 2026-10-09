@@ -3,9 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\DisplayNumber;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable
 {
@@ -26,6 +28,7 @@ class User extends Authenticatable
         'wallet_balance',
         'google_id',
         'facebook_id',
+        'display_no',
     ];
 
     /**
@@ -41,6 +44,22 @@ class User extends Authenticatable
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (!Schema::hasColumn($user->getTable(), 'display_no') || $user->display_no) {
+                return;
+            }
+
+            $user->display_no = ((int) static::query()->max('display_no')) + 1;
+        });
+    }
+
+    public function displayReference(): string
+    {
+        return DisplayNumber::format((int) ($this->display_no ?: $this->id));
     }
 
     /**

@@ -18,7 +18,8 @@
                 <i class="bi bi-person text-brand fs-3"></i>
             </div>
         @endif
-        <h6 class="fw-bold text-white mb-1">{{ $driver->name }}</h6>
+        <h6 class="fw-bold mb-0" style="color:#1c2208;">{{ $driver->name }}</h6>
+        <div class="small fw-semibold mb-1" style="color:#1c2208;">Partner {{ $driver->displayReference() }}</div>
         <div class="d-flex justify-content-center gap-2 flex-wrap">
             <span class="ds-badge {{ $driver->status == 'approved' ? 'ds-badge-success' : 'ds-badge-warning' }}">{{ ucfirst($driver->status) }}</span>
             <span id="driver-presence-badge" class="ds-badge {{ $driver->is_online ? 'ds-badge-success' : 'ds-badge-neutral' }}">{{ $driver->is_online ? 'Online' : 'Offline' }}</span>

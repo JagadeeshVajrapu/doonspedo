@@ -25,7 +25,7 @@
                     @if(isset($blockedUsers) && count($blockedUsers) > 0)
                         @foreach($blockedUsers as $user)
                     <tr>
-                        <td class="px-4 fw-bold text-muted">#{{ 1000 + $user->id }}</td>
+                        <td class="px-4 fw-bold text-muted">{{ $user->displayReference() }}</td>
                         <td>
                             <div class="fw-bold">{{ $user->name }}</div>
                             <small class="text-muted">{{ $user->email }}</small>

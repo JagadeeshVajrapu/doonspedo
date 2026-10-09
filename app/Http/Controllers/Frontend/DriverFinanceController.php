@@ -21,31 +21,46 @@ class DriverFinanceController extends Controller
     public function earnings()
     {
         if (!session('driver_id')) return redirect()->route('driver.login');
-        
+
         $driver = $this->getDriver();
+        if (!$driver) {
+            session()->forget(['driver_id', 'driver_name']);
+            return redirect()->route('driver.login');
+        }
+
         $bookings = \App\Models\Booking::where('driver_id', $driver->id)
             ->where('status', 'completed')
             ->latest()
             ->get();
 
         $commissionRate = $driver->commission_rate ?? config('taxi.default_commission_rate', 15);
+        $netOf = function ($booking) use ($commissionRate) {
+            if ((float) $booking->net_amount > 0) {
+                return (float) $booking->net_amount;
+            }
+
+            return (float) $booking->fare - (($commissionRate / 100) * (float) $booking->fare);
+        };
+        $period = function ($start) use ($bookings, $netOf) {
+            $rows = $bookings->filter(function ($booking) use ($start) {
+                $when = $booking->completed_at ?? $booking->created_at;
+
+                return $when && $when->greaterThanOrEqualTo($start);
+            });
+
+            return [
+                'gross' => $rows->sum('fare'),
+                'net' => $rows->sum(fn ($booking) => $netOf($booking)),
+            ];
+        };
 
         $stats = [
-            'today' => [
-                'gross' => $bookings->where('completed_at', '>=', now()->startOfDay())->sum('fare'),
-                'net'   => $bookings->where('completed_at', '>=', now()->startOfDay())->sum(fn($b) => $b->net_amount > 0 ? $b->net_amount : ($b->fare - (($commissionRate/100) * $b->fare))),
-            ],
-            'week' => [
-                'gross' => $bookings->where('completed_at', '>=', now()->startOfWeek())->sum('fare'),
-                'net'   => $bookings->where('completed_at', '>=', now()->startOfWeek())->sum(fn($b) => $b->net_amount > 0 ? $b->net_amount : ($b->fare - (($commissionRate/100) * $b->fare))),
-            ],
-            'month' => [
-                'gross' => $bookings->where('completed_at', '>=', now()->startOfMonth())->sum('fare'),
-                'net'   => $bookings->where('completed_at', '>=', now()->startOfMonth())->sum(fn($b) => $b->net_amount > 0 ? $b->net_amount : ($b->fare - (($commissionRate/100) * $b->fare))),
-            ],
+            'today' => $period(now()->startOfDay()),
+            'week' => $period(now()->startOfWeek()),
+            'month' => $period(now()->startOfMonth()),
             'total' => [
                 'gross' => $bookings->sum('fare'),
-                'net'   => $bookings->sum(fn($b) => $b->net_amount > 0 ? $b->net_amount : ($b->fare - (($commissionRate/100) * $b->fare))),
+                'net' => $bookings->sum(fn ($booking) => $netOf($booking)),
             ],
         ];
 

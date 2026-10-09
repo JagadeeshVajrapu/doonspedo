@@ -394,10 +394,14 @@ class DriverDashboardController extends Controller
     {
         $driver = DriverRegistration::find(session('driver_id'));
         if ($driver) {
-            $driver->is_online = false;
-            $driver->save();
+            try {
+                $driver->is_online = false;
+                $driver->save();
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
-        session()->forget(['driver_id', 'driver_name']);
+        session()->forget(['driver_id', 'driver_name', 'otp', 'mobile', 'branch_id']);
         return redirect()->route('driver.login')->with('success', 'Logged out successfully.');
     }
 }

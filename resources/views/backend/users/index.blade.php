@@ -29,7 +29,7 @@
                     @if(isset($users) && count($users) > 0)
                         @foreach($users as $user)
                         <tr>
-                            <td class="px-4 fw-bold">#{{ 1000 + $user->id }}</td>
+                            <td class="px-4 fw-bold">{{ $user->displayReference() }}</td>
                             <td>
                                 <div class="fw-bold">{{ $user->name }}</div>
                             </td>

@@ -69,7 +69,7 @@
                 <tr>
                     <td class="px-4 fw-bold">
                         <div>{{ $user->name }}</div>
-                        <small class="text-muted fw-light">ID: #{{ 1000 + $user->id }}</small>
+                        <small class="text-muted fw-light">Customer {{ $user->displayReference() }}</small>
                     </td>
                     <td>{{ $user->mobile ?? 'N/A' }}</td>
                     <td>
@@ -99,7 +99,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p class="small text-muted mb-4">You are modifying the wallet balance for ID: #{{ 1000 + $user->id }}</p>
+                                    <p class="small text-muted mb-4">You are modifying the wallet balance for Customer {{ $user->displayReference() }}</p>
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold" for="type{{ $user->id }}">Transaction type</label>

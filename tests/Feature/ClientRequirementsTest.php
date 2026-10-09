@@ -225,6 +225,39 @@ class ClientRequirementsTest extends TestCase
         $this->assertSame('002', $second->fresh()->displayReference());
     }
 
+    public function test_partner_otp_customer_numbers_earnings_and_logout(): void
+    {
+        $this->withSession(['mobile' => '9999900001', 'branch_id' => 1])
+            ->get(route('driver.login.verifyOtpForm'))
+            ->assertOk()
+            ->assertDontSee('Back to login', false)
+            ->assertSee('Resend OTP', false);
+
+        $first = User::factory()->create();
+        $second = User::factory()->create();
+        $this->assertSame('001', $first->displayReference());
+        $this->assertSame('002', $second->displayReference());
+        $this->assertSame($first->id, $first->fresh()->id);
+
+        $driver = $this->driver('9100000099');
+        Booking::create(array_merge($this->bookingRow($first, $this->category('Bike', 25, 8)), [
+            'driver_id' => $driver->id,
+            'status' => 'completed',
+            'completed_at' => null,
+            'fare' => 80,
+        ]));
+
+        $this->withSession(['driver_id' => $driver->id])
+            ->get(route('driver.earnings'))
+            ->assertOk()
+            ->assertSee('Earnings', false);
+
+        $this->actingAs($first)->post(route('logout'))->assertRedirect(route('login'));
+        $this->withSession(['driver_id' => $driver->id])
+            ->post(route('driver.logout'))
+            ->assertRedirect(route('driver.login'));
+    }
+
     private function category(string $name, float $base, float $rate): VehicleCategory
     {
         return VehicleCategory::create([

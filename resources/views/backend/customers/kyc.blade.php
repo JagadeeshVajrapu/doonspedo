@@ -21,7 +21,7 @@
                     <tr>
                         <td>
                             <div class="fw-bold">{{ $submission->user->name ?? $submission->full_name }}</div>
-                            <div class="small text-muted">#{{ $submission->user_id }} · {{ $submission->user->mobile ?? $submission->user->email ?? '' }}</div>
+                            <div class="small text-muted">{{ $submission->user?->displayReference() ?? $submission->user_id }} · {{ $submission->user->mobile ?? $submission->user->email ?? '' }}</div>
                         </td>
                         <td>{{ $submission->document_label ?: str_replace('_', ' ', $submission->document_type) }}<br><span class="small text-muted">{{ \App\Support\CustomerKycGate::mask($submission->document_type, $submission->document_number) }}</span></td>
                         <td>{{ \App\Support\CustomerKycGate::statusLabel($submission->status) }}</td>

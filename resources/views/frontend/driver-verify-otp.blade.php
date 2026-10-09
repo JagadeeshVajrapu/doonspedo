@@ -52,9 +52,6 @@
                         <input type="hidden" name="branch_id" value="{{ session('branch_id') }}">
                         <button type="submit" class="btn btn-link text-dark-custom text-decoration-none fw-bold p-0 small">Resend OTP</button>
                     </form>
-                    <div class="mt-4">
-                        <a href="{{ route('driver.login') }}" class="text-muted text-decoration-none small">← Back to login</a>
-                    </div>
                 </div>
             </div>
         </div>
