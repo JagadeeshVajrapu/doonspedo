@@ -911,8 +911,26 @@ const pricingSettings = {
     night_premium_enabled: "{{ $sys_settings['night_premium_enabled'] ?? '0' }}" === '1',
     night_premium_amount: parseFloat("{{ $sys_settings['night_premium_amount'] ?? '5.0' }}"),
     ac_rate_per_km: parseFloat("{{ $sys_settings['ac_rate_per_km'] ?? '15.0' }}"),
-    non_ac_rate_per_km: parseFloat("{{ $sys_settings['non_ac_rate_per_km'] ?? '10.0' }}")
+    non_ac_rate_per_km: parseFloat("{{ $sys_settings['non_ac_rate_per_km'] ?? '10.0' }}"),
+    dehradun_bike_rate_per_km: parseFloat("{{ $sys_settings['dehradun_bike_rate_per_km'] ?? '8' }}"),
+    dehradun_auto_rate_per_km: parseFloat("{{ $sys_settings['dehradun_auto_rate_per_km'] ?? '12' }}"),
+    dehradun_car_rate_per_km: parseFloat("{{ $sys_settings['dehradun_car_rate_per_km'] ?? '20' }}"),
+    dehradun_max_local_km: parseFloat("{{ $sys_settings['dehradun_max_local_km'] ?? '40' }}")
 };
+
+function dehradunLocalRate(catName) {
+    if (currentService !== 'ride') return null;
+    const pickup = (document.getElementById('pickup-location')?.value || '');
+    const point = (typeof toPlainLatLng === 'function' && pickupLatLng) ? toPlainLatLng(pickupLatLng) : null;
+    const inBox = point && point.lat >= 30.24 && point.lat <= 30.42 && point.lng >= 77.93 && point.lng <= 78.18;
+    if (point && !inBox) return null;
+    if (!inBox && !/\bdehradun\b/i.test(pickup)) return null;
+    const name = (catName || '').toLowerCase();
+    if (name.includes('bike') || name.includes('cycle') || name.includes('moto')) return pricingSettings.dehradun_bike_rate_per_km;
+    if (name.includes('auto')) return pricingSettings.dehradun_auto_rate_per_km;
+    if (name.includes('cab') || name.includes('car') || name.includes('suv') || name.includes('sedan')) return pricingSettings.dehradun_car_rate_per_km;
+    return null;
+}
 let acPreference = 'ac';
 
 // Map Variables
@@ -1800,6 +1818,8 @@ function updateFareByDistance(km) {
         const nameNode = option.querySelector('h6');
         const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
+        const localRate = dehradunLocalRate(catName);
+        if (localRate !== null) rate = localRate;
         
         // Removing global overrides to use the rate specific to the vehicle category
         if (!isBikeOrAuto) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
@@ -2018,6 +2038,8 @@ function updateTotal() {
         const nameNode = activeOption.querySelector('h6');
         const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
+        const localRate = dehradunLocalRate(catName);
+        if (localRate !== null) rate = localRate;
         
         if (!isBikeOrAuto) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
         ratePerKm = rate;
@@ -2776,6 +2798,11 @@ function confirmBooking() {
         if (!lastCalculatedDistance || lastCalculatedDistance <= 0) {
             alert('Unable to calculate route. Please wait for the route to finish or try again.');
             calculateRoute();
+            return;
+        }
+        const localCategory = activeCategory ? (activeCategory.querySelector('h6')?.innerText || '') : '';
+        if (dehradunLocalRate(localCategory) !== null && lastCalculatedDistance > pricingSettings.dehradun_max_local_km) {
+            alert('This trip is beyond the ' + pricingSettings.dehradun_max_local_km + ' km Dehradun local limit. Local rates cannot be used for this trip.');
             return;
         }
     }

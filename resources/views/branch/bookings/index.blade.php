@@ -20,7 +20,7 @@
                 <tbody>
                     @forelse($bookings as $booking)
                     <tr>
-                        <td class="px-4 fw-bold text-dark">#{{ $booking->id }}</td>
+                        <td class="px-4 fw-bold text-dark">{{ $booking->displayReference() }}</td>
                         <td class="small">{{ \Illuminate\Support\Str::limit($booking->pickup_location, 50) }}</td>
                         <td class="fw-bold">₹{{ number_format($booking->fare) }}</td>
                         <td>

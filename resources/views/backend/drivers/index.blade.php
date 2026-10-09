@@ -32,7 +32,7 @@
                 @if(isset($drivers) && count($drivers) > 0)
                     @foreach($drivers as $driver)
                 <tr>
-                    <td class="px-4">#{{ 1000 + $driver->id }}</td>
+                    <td class="px-4">{{ $driver->displayReference() }}</td>
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="bg-secondary bg-opacity-10 p-2 rounded-circle me-2">

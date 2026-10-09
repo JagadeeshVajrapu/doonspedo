@@ -29,7 +29,7 @@
                     @if(isset($drivers) && count($drivers) > 0)
                         @foreach($drivers as $driver)
                     <tr>
-                        <td class="px-4">#{{ 1000 + $driver->id }}</td>
+                        <td class="px-4">{{ $driver->displayReference() }}</td>
                         <td>{{ $driver->name }}</td>
                         <td>{{ $driver->mobile }}</td>
                         <td>{{ $driver->created_at->format('d M Y') }}</td>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Bid;
 use App\Models\VehicleCategory;
+use App\Support\CustomerKycGate;
 use App\Support\Geo;
 use App\Support\RideFare;
 use Illuminate\Support\Facades\Auth;
@@ -58,15 +59,42 @@ class RiderBookingController extends Controller
             ], 422);
         }
 
-        $category = VehicleCategory::findOrFail($request->vehicle_category_id);
-        $preference = RideFare::normalizePreference($request->input('ac_preference'))
-            ?? RideFare::preferenceFromNotes($request->notes);
-        $fare = RideFare::calculate($category, $distance, [
-            'ac_preference' => $preference,
-            'service_type' => $request->service_type,
+        $fareContext = [
+            'ac_preference' => RideFare::normalizePreference($request->input('ac_preference'))
+                ?? RideFare::preferenceFromNotes($request->notes),
+            'service_type' => $isRental ? 'rental' : $request->service_type,
+            'is_rental' => $isRental,
             'parcel_weight' => $request->input('parcel_weight'),
             'coupon_code' => $request->input('coupon_code'),
-        ]);
+            'pickup_location' => $request->pickup_location,
+            'pickup_lat' => $request->pickup_lat,
+            'pickup_lng' => $request->pickup_lng,
+            'dropoff_lat' => $request->dropoff_lat,
+            'dropoff_lng' => $request->dropoff_lng,
+        ];
+        if (!$isRental) {
+            $distance = RideFare::measuredDistance($distance, $fareContext);
+        }
+
+        $category = VehicleCategory::findOrFail($request->vehicle_category_id);
+        $limitMessage = RideFare::dehradunLimitMessage($category, $distance, $fareContext);
+        if ($limitMessage) {
+            return response()->json([
+                'success' => false,
+                'message' => $limitMessage,
+            ], 422);
+        }
+
+        $kycMessage = CustomerKycGate::bookingMessage(Auth::user());
+        if ($kycMessage) {
+            return response()->json([
+                'success' => false,
+                'message' => $kycMessage,
+            ], 422);
+        }
+
+        $preference = $fareContext['ac_preference'];
+        $fare = RideFare::calculate($category, $distance, $fareContext);
 
         if ($fare <= 0) {
             return response()->json([

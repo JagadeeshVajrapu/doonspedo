@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [\App\Http\Controllers\Frontend\UserController::class, 'updateProfile'])->name('profile.update');
     Route::get('/kyc', [\App\Http\Controllers\Frontend\UserController::class, 'showKyc'])->name('rider.kyc');
     Route::post('/kyc', [\App\Http\Controllers\Frontend\UserController::class, 'storeKyc'])->name('rider.kyc.store');
+    Route::post('/kyc/aadhaar/otp', [\App\Http\Controllers\Frontend\UserController::class, 'requestAadhaarOtp'])->middleware('throttle:5,1')->name('rider.kyc.aadhaar.otp');
+    Route::post('/kyc/aadhaar/verify', [\App\Http\Controllers\Frontend\UserController::class, 'verifyAadhaarOtp'])->middleware('throttle:10,1')->name('rider.kyc.aadhaar.verify');
 
     // Rider Booking & Bidding
     Route::group(['prefix' => 'rider/bookings', 'as' => 'rider.bookings.'], function () {

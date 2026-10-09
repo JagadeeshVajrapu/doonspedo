@@ -15,6 +15,10 @@ class RideFare
     {
         $settings = $context['settings'] ?? load_sys_settings();
         $rate = (float) $category->rate_per_km;
+        $localRate = self::dehradunRate($category, $distance, $context, $settings);
+        if ($localRate !== null) {
+            $rate = $localRate;
+        }
         $preference = self::normalizePreference($context['ac_preference'] ?? null);
 
         if ($preference && !self::isBikeOrAuto($category->name)) {
@@ -54,6 +58,124 @@ class RideFare
         }
 
         return round($fare, 2);
+    }
+
+    public static function dehradunRates(array $settings = []): array
+    {
+        $bike = $settings['dehradun_bike_rate_per_km'] ?? 8;
+        $auto = $settings['dehradun_auto_rate_per_km'] ?? 12;
+        $car = $settings['dehradun_car_rate_per_km'] ?? 20;
+        $max = $settings['dehradun_max_local_km'] ?? 40;
+
+        return [
+            'bike' => max(0, (float) $bike),
+            'auto' => max(0, (float) $auto),
+            'car' => max(0, (float) $car),
+            'max_km' => max(0.1, (float) $max),
+        ];
+    }
+
+    public static function isDehradunPickup(?string $pickup, $lat = null, $lng = null): bool
+    {
+        $inside = self::pointInDehradun($lat, $lng);
+        if ($inside === true) {
+            return true;
+        }
+        if ($inside === false) {
+            return false;
+        }
+
+        return (bool) preg_match('/\bdehradun\b/i', (string) $pickup);
+    }
+
+    /**
+     * Local Dehradun rides use the admin per-km rate. Trips past the configured
+     * distance are refused by the booking controller and are not given another rate.
+     */
+    public static function dehradunLimitMessage(VehicleCategory $category, float $distance, array $context = []): ?string
+    {
+        unset($category);
+        $settings = $context['settings'] ?? load_sys_settings();
+        if (($context['service_type'] ?? 'ride') !== 'ride' || !empty($context['is_rental'])) {
+            return null;
+        }
+        if (!self::isDehradunPickup($context['pickup_location'] ?? null, $context['pickup_lat'] ?? null, $context['pickup_lng'] ?? null)) {
+            return null;
+        }
+
+        $measured = self::measuredDistance($distance, $context);
+        $max = self::dehradunRates($settings)['max_km'];
+        if ($measured <= $max + 0.000001) {
+            return null;
+        }
+
+        return 'This trip is '.number_format($measured, 1).' km, beyond the '.number_format($max, 0).' km Dehradun local limit. Local rates cannot be used for this trip.';
+    }
+
+    public static function measuredDistance(float $distance, array $context): float
+    {
+        $distance = max(0, $distance);
+        $pickupLat = $context['pickup_lat'] ?? null;
+        $pickupLng = $context['pickup_lng'] ?? null;
+        $dropLat = $context['dropoff_lat'] ?? null;
+        $dropLng = $context['dropoff_lng'] ?? null;
+        if (!is_numeric($pickupLat) || !is_numeric($pickupLng) || !is_numeric($dropLat) || !is_numeric($dropLng)) {
+            return round($distance, 2);
+        }
+
+        $straight = Geo::kilometers((float) $pickupLat, (float) $pickupLng, (float) $dropLat, (float) $dropLng);
+
+        return round(max($distance, $straight), 2);
+    }
+
+    private static function dehradunRate(VehicleCategory $category, float $distance, array $context, array $settings): ?float
+    {
+        if (self::dehradunLimitMessage($category, $distance, $context + ['settings' => $settings])) {
+            return null;
+        }
+        if (($context['service_type'] ?? 'ride') !== 'ride' || !empty($context['is_rental'])) {
+            return null;
+        }
+        if (!self::isDehradunPickup($context['pickup_location'] ?? null, $context['pickup_lat'] ?? null, $context['pickup_lng'] ?? null)) {
+            return null;
+        }
+
+        $class = self::dehradunVehicleClass($category->name);
+        if ($class === null) {
+            return null;
+        }
+
+        return self::dehradunRates($settings)[$class];
+    }
+
+    public static function dehradunVehicleClass(?string $name): ?string
+    {
+        $name = strtolower((string) $name);
+        if (str_contains($name, 'bike') || str_contains($name, 'cycle') || str_contains($name, 'moto')) {
+            return 'bike';
+        }
+        if (str_contains($name, 'auto')) {
+            return 'auto';
+        }
+        if (str_contains($name, 'cab') || str_contains($name, 'car') || str_contains($name, 'suv') || str_contains($name, 'sedan') || str_contains($name, 'taxi')) {
+            return 'car';
+        }
+
+        return null;
+    }
+
+    private static function pointInDehradun($lat, $lng): ?bool
+    {
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return null;
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+
+        $inside = $lat >= 30.24 && $lat <= 30.42 && $lng >= 77.93 && $lng <= 78.18;
+
+        return $inside;
     }
 
     /**

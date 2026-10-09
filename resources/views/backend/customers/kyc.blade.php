@@ -23,8 +23,8 @@
                             <div class="fw-bold">{{ $submission->user->name ?? $submission->full_name }}</div>
                             <div class="small text-muted">#{{ $submission->user_id }} · {{ $submission->user->mobile ?? $submission->user->email ?? '' }}</div>
                         </td>
-                        <td>{{ str_replace('_', ' ', $submission->document_type) }}<br><span class="small text-muted">{{ $submission->document_number }}</span></td>
-                        <td>{{ ucfirst($submission->status) }}</td>
+                        <td>{{ $submission->document_label ?: str_replace('_', ' ', $submission->document_type) }}<br><span class="small text-muted">{{ \App\Support\CustomerKycGate::mask($submission->document_type, $submission->document_number) }}</span></td>
+                        <td>{{ \App\Support\CustomerKycGate::statusLabel($submission->status) }}</td>
                         <td>{{ $submission->created_at->format('d M Y H:i') }}</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.customers.kyc.download', $submission) }}">Document</a>

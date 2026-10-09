@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('title', 'Edit Booking Status')
-@section('page_title', 'Update Booking #' . $booking->id)
+@section('page_title', 'Update Booking ' . $booking->displayReference())
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pencil-square text-brand me-2"></i> Update Status for Booking #{{ $booking->id }}</h5>
+    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pencil-square text-brand me-2"></i> Update Status for Booking {{ $booking->displayReference() }}</h5>
     <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
         <i class="bi bi-arrow-left me-1"></i> Back to List
     </a>

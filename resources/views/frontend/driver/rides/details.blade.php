@@ -14,7 +14,7 @@
 @section('content')
 <div class="drv-page-header">
     <div>
-        <h1>Ride request #{{ $ride->id }}</h1>
+        <h1>Ride request {{ $ride->displayReference() }}</h1>
         <p class="text-muted mb-0 small">Review and manage this ride request.</p>
     </div>
     <a href="{{ route('driver.rides.index') }}" class="btn btn-light border rounded-pill px-4 fw-bold">

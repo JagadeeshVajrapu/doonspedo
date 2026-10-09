@@ -36,7 +36,7 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark">{{ $driver->name }}</div>
-                                        <div class="text-muted small">ID: #{{ str_pad($driver->id, 5, '0', STR_PAD_LEFT) }}</div>
+                                        <div class="text-muted small">{{ $driver->displayReference() }}</div>
                                     </div>
                                 </div>
                             </td>

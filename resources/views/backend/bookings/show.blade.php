@@ -1,7 +1,7 @@
 ﻿@extends('layouts.admin')
 
 @section('title', 'Booking Details')
-@section('page_title', 'View Booking #' . $booking->id)
+@section('page_title', 'View Booking ' . $booking->displayReference())
 
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
@@ -27,7 +27,7 @@
                     <tbody>
                         <tr>
                             <td class="text-muted" width="40%">Booking ID</td>
-                            <td class="fw-bold fs-5">#{{ $booking->id }}</td>
+                            <td class="fw-bold fs-5">{{ $booking->displayReference() }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">Type</td>

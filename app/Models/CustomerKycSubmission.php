@@ -10,6 +10,7 @@ class CustomerKycSubmission extends Model
         'user_id',
         'full_name',
         'document_type',
+        'document_label',
         'document_number',
         'document_path',
         'status',

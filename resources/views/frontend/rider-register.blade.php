@@ -58,8 +58,7 @@
     </form>
 
     <div class="text-center">
-        <p class="text-muted small mb-3">Already have an account? <a href="{{ route('login') }}" class="text-dark-custom text-decoration-none fw-bold">Login</a></p>
-        <a href="{{ url('/') }}" class="text-muted text-decoration-none small">← Back to website</a>
+        <p class="text-muted small mb-0">Already have an account? <a href="{{ route('login') }}" class="text-dark-custom text-decoration-none fw-bold">Login</a></p>
     </div>
 </div>
 @endsection

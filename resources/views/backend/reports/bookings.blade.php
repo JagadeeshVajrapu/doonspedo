@@ -70,7 +70,7 @@
                         <tr>
                             <td>
                                 <div class="fw-bold small">{{ $booking->created_at->format('M d, Y') }}</div>
-                                <span class="badge bg-light text-dark font-monospace user-select-all px-2 py-1 shadow-sm mt-1 border">#{{ $booking->id }}</span>
+                                <span class="badge bg-light text-dark font-monospace user-select-all px-2 py-1 shadow-sm mt-1 border">{{ $booking->displayReference() }}</span>
                             </td>
                             <td>
                                 @if($booking->user)

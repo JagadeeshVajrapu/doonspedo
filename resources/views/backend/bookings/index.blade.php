@@ -61,7 +61,7 @@
                 @if(isset($bookings) && count($bookings) > 0)
                     @foreach($bookings as $booking)
                     <tr>
-                        <td class="fw-bold px-4" data-label="Booking">#{{ $booking->id }}</td>
+                        <td class="fw-bold px-4" data-label="Booking">{{ $booking->displayReference() }}</td>
                         <td data-label="Customer">{{ $booking->user ? $booking->user->name : 'N/A' }}</td>
                         <td data-label="Type">
                             <span class="badge bg-info bg-opacity-10 text-info px-2 py-1 rounded-pill">

@@ -70,6 +70,20 @@ class SettingController extends Controller
             $settings['max_driver_acceptance_km'] = round((float) $validated['max_driver_acceptance_km'], 1);
         }
 
+        if ($request->exists('dehradun_bike_rate_per_km')) {
+            $validated = $request->validate([
+                'dehradun_bike_rate_per_km' => 'required|numeric|min:0|max:10000',
+                'dehradun_auto_rate_per_km' => 'required|numeric|min:0|max:10000',
+                'dehradun_car_rate_per_km' => 'required|numeric|min:0|max:10000',
+                'dehradun_max_local_km' => 'required|numeric|gt:0|max:500',
+            ]);
+            $settings['dehradun_bike_rate_per_km'] = round((float) $validated['dehradun_bike_rate_per_km'], 2);
+            $settings['dehradun_auto_rate_per_km'] = round((float) $validated['dehradun_auto_rate_per_km'], 2);
+            $settings['dehradun_car_rate_per_km'] = round((float) $validated['dehradun_car_rate_per_km'], 2);
+            $settings['dehradun_max_local_km'] = round((float) $validated['dehradun_max_local_km'], 1);
+            $settings['customer_kyc_required'] = $request->input('customer_kyc_required') === '1' ? '1' : '0';
+        }
+
         // Handle File upload particularly for webp/png/jpg
         if ($request->hasFile('app_logo')) {
             $file = $request->file('app_logo');

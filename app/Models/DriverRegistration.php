@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\DisplayNumber;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class DriverRegistration extends Model
 {
     protected $fillable = [
+        'display_no',
         'branch_id',
         'name',
         'mobile',
@@ -133,6 +136,22 @@ class DriverRegistration extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class, 'driver_id')->where('is_driver_review', false);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (DriverRegistration $driver) {
+            if (!Schema::hasColumn($driver->getTable(), 'display_no') || $driver->display_no) {
+                return;
+            }
+
+            $driver->display_no = ((int) static::query()->max('display_no')) + 1;
+        });
+    }
+
+    public function displayReference(): string
+    {
+        return DisplayNumber::format((int) ($this->display_no ?: $this->id));
     }
 
     protected $casts = [

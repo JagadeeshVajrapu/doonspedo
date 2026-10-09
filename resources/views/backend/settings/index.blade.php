@@ -96,6 +96,34 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="mt-4 p-4 bg-light rounded-4 border">
+                                <h5 class="fw-bold mb-1 text-dark">Dehradun Local Fare</h5>
+                                <p class="small text-muted">These rates apply only to rides that start in Dehradun and stay within the maximum local distance. Trips farther than that limit cannot be booked on the local rate. Other cities keep their existing vehicle rates.</p>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" for="dehradun-bike-rate">Bike rate per KM</label>
+                                        <input type="number" id="dehradun-bike-rate" name="dehradun_bike_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_bike_rate_per_km'] ?? 8 }}" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" for="dehradun-auto-rate">Auto rate per KM</label>
+                                        <input type="number" id="dehradun-auto-rate" name="dehradun_auto_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_auto_rate_per_km'] ?? 12 }}" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" for="dehradun-car-rate">Car rate per KM</label>
+                                        <input type="number" id="dehradun-car-rate" name="dehradun_car_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_car_rate_per_km'] ?? 20 }}" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-bold" for="dehradun-max-km">Maximum local distance (KM)</label>
+                                        <input type="number" id="dehradun-max-km" name="dehradun_max_local_km" class="form-control" min="0.1" max="500" step="0.1" value="{{ $settings['dehradun_max_local_km'] ?? 40 }}" required>
+                                    </div>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input type="hidden" name="customer_kyc_required" value="0">
+                                    <input class="form-check-input" type="checkbox" name="customer_kyc_required" id="customer-kyc-required" value="1" {{ ($settings['customer_kyc_required'] ?? '0') === '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="customer-kyc-required">Require verified customer KYC before a new booking</label>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Theme & RTL Panel -->

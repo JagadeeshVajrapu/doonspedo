@@ -103,7 +103,7 @@
                         <!-- Fake Barcode -->
                         <div class="mb-3">
                             <i class="bi bi-upc" style="font-size: 2.5rem; color: #333; line-height: 1;"></i>
-                            <div class="fw-bold text-dark" style="font-size: 0.95rem; letter-spacing: 3px;">EMP-{{ 1000 + $driver->id }}</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.95rem; letter-spacing: 3px;">{{ $driver->displayReference() }}</div>
                         </div>
                         
                         <div class="bg-light rounded-3 p-2 text-start small border">

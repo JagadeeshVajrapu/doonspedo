@@ -5,8 +5,10 @@
 
 @section('content')
 @php
-    $canEdit = !$submission || $submission->status !== 'approved';
-    $selectedType = old('document_type', $submission->document_type ?? 'aadhaar');
+    $submissions = $submissions ?? collect();
+    $aadhaarStatus = $aadhaar->status ?? null;
+    $aadhaarLabel = \App\Support\CustomerKycGate::statusLabel($aadhaarStatus, (bool) $aadhaar);
+    $selectedType = old('document_type', 'aadhaar');
 @endphp
 <div class="rider-shell-page rider-kyc-page">
     <header class="rider-topbar">
@@ -33,87 +35,80 @@
         @endif
 
         <div class="rider-card mb-3">
-            <p class="small text-muted mb-1">Status</p>
-            @if(!$submission)
-                <span class="badge bg-secondary">Not submitted</span>
-                <p class="small text-muted mt-2 mb-0">Submit the details below. You can update them until an admin approves the KYC.</p>
-            @elseif($submission->status === 'pending')
-                <span class="badge bg-warning text-dark">Pending review</span>
-                <p class="small text-muted mt-2 mb-0">Your documents are with the admin. You can still replace them if something is wrong.</p>
-            @elseif($submission->status === 'approved')
-                <span class="badge bg-success">Approved</span>
-                <p class="small text-muted mt-2 mb-0">Your KYC is approved. No further update is needed.</p>
-            @else
-                <span class="badge bg-danger">Rejected</span>
-                @if($submission->rejection_reason)
-                    <p class="small text-danger mt-2 mb-0">{{ $submission->rejection_reason }}</p>
-                @endif
-                <p class="small text-muted mt-2 mb-0">Upload a clearer copy using the form below.</p>
+            <p class="small text-muted mb-1">Aadhaar verification</p>
+            <span class="badge {{ $aadhaarLabel === 'Verified' ? 'bg-success' : ($aadhaarLabel === 'Rejected' ? 'bg-danger' : ($aadhaarLabel === 'Pending Verification' ? 'bg-warning text-dark' : 'bg-secondary')) }}">{{ $aadhaarLabel }}</span>
+            @if($aadhaar && $aadhaar->aadhaar_last4)
+                <p class="small text-muted mt-2 mb-0">Aadhaar ending {{ $aadhaar->aadhaar_last4 }}</p>
             @endif
+            <p class="small text-muted mt-2 mb-0">OTP verification uses an authorized Aadhaar provider. It is not sent as a normal SMS login code.</p>
         </div>
+
+        @if($aadhaarLabel !== 'Verified')
+        <form class="rider-card mb-3" method="POST" action="{{ route('rider.kyc.aadhaar.otp') }}">
+            @csrf
+            <h2 class="h6 fw-bold mb-3">Start Aadhaar verification</h2>
+            <label class="form-label" for="aadhaar-number">Aadhaar number</label>
+            <input id="aadhaar-number" name="aadhaar_number" class="form-control mb-3" inputmode="numeric" autocomplete="off" maxlength="12" pattern="[0-9]{12}" placeholder="12 digits" required>
+            <button class="btn btn-brand w-100" type="submit">Send Aadhaar OTP</button>
+        </form>
+        <form class="rider-card mb-3" method="POST" action="{{ route('rider.kyc.aadhaar.verify') }}">
+            @csrf
+            <label class="form-label" for="aadhaar-otp">Aadhaar OTP</label>
+            <input id="aadhaar-otp" name="otp" class="form-control mb-3" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required>
+            <button class="btn btn-outline-dark w-100" type="submit">Verify OTP</button>
+        </form>
+        @endif
 
         <div class="rider-card mb-3">
-            <h2 class="h6 fw-bold mb-3">What you need</h2>
-            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                <li class="d-flex gap-2 small">
-                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
-                    <span><strong>Full name</strong> as printed on your ID.</span>
-                </li>
-                <li class="d-flex gap-2 small">
-                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
-                    <span><strong>Aadhaar</strong> is the required ID. Use PAN or a driving licence only if you do not have Aadhaar.</span>
-                </li>
-                <li class="d-flex gap-2 small">
-                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
-                    <span><strong>ID number</strong> — 12 digits for Aadhaar, or the number printed on PAN / licence.</span>
-                </li>
-                <li class="d-flex gap-2 small">
-                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
-                    <span><strong>Clear photo or PDF</strong> of that ID. JPG, PNG, or PDF, up to 5 MB. All four corners should be visible.</span>
-                </li>
-            </ul>
+            <h2 class="h6 fw-bold mb-3">Documents</h2>
+            @forelse($submissions as $item)
+                <div class="d-flex justify-content-between gap-3 py-2 border-bottom">
+                    <div>
+                        <div class="fw-bold">{{ $item->document_label ?: ucfirst(str_replace('_', ' ', $item->document_type)) }}</div>
+                        <div class="small text-muted">{{ \App\Support\CustomerKycGate::mask($item->document_type, $item->document_number) }}</div>
+                        @if($item->status === 'rejected' && $item->rejection_reason)
+                            <div class="small text-danger">{{ $item->rejection_reason }}</div>
+                        @endif
+                    </div>
+                    <span class="badge align-self-start {{ $item->status === 'approved' ? 'bg-success' : ($item->status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">{{ \App\Support\CustomerKycGate::statusLabel($item->status) }}</span>
+                </div>
+            @empty
+                <p class="small text-muted mb-0">Not Submitted</p>
+            @endforelse
         </div>
 
-        @if($canEdit)
         <form class="rider-card" method="POST" action="{{ route('rider.kyc.store') }}" enctype="multipart/form-data">
             @csrf
+            <h2 class="h6 fw-bold mb-3">Add a document</h2>
             <div class="mb-3">
                 <label class="form-label" for="kyc-name">Full name</label>
                 <input id="kyc-name" name="full_name" class="form-control" value="{{ old('full_name', $submission->full_name ?? auth()->user()->name) }}" required autocomplete="name">
             </div>
             <div class="mb-3">
-                <label class="form-label" for="kyc-type">Document</label>
+                <label class="form-label" for="kyc-type">Document type</label>
                 <select id="kyc-type" name="document_type" class="form-select" required>
-                    <option value="aadhaar" @selected($selectedType === 'aadhaar')>Aadhaar (required)</option>
+                    <option value="aadhaar" @selected($selectedType === 'aadhaar')>Aadhaar</option>
                     <option value="pan" @selected($selectedType === 'pan')>PAN</option>
                     <option value="driving_licence" @selected($selectedType === 'driving_licence')>Driving licence</option>
+                    <option value="voter_id" @selected($selectedType === 'voter_id')>Voter ID</option>
+                    <option value="other" @selected($selectedType === 'other')>Other document</option>
                 </select>
             </div>
             <div class="mb-3">
+                <label class="form-label" for="kyc-label">Other document name</label>
+                <input id="kyc-label" name="document_label" class="form-control" value="{{ old('document_label') }}" maxlength="80" placeholder="Required only for Other document">
+            </div>
+            <div class="mb-3">
                 <label class="form-label" for="kyc-number">Document number</label>
-                <input id="kyc-number" name="document_number" class="form-control" value="{{ old('document_number', $submission->document_number ?? '') }}" required inputmode="text" autocomplete="off" placeholder="Aadhaar is 12 digits">
+                <input id="kyc-number" name="document_number" class="form-control" value="{{ old('document_number') }}" required autocomplete="off">
             </div>
             <div class="mb-3">
                 <label class="form-label" for="kyc-file">Upload document</label>
-                <input id="kyc-file" name="document" type="file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" @if(!$submission || $submission->status === 'rejected') required @endif>
-                <p class="form-text mb-0">
-                    @if($submission && $submission->status === 'pending')
-                        A file is already on record. Choose a new file only if you want to replace it.
-                    @else
-                        Take a photo or choose a file from your phone.
-                    @endif
-                </p>
+                <input id="kyc-file" name="document" type="file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" required>
+                <p class="form-text mb-0">JPG, PNG, or PDF, up to 5 MB. The file is stored privately.</p>
             </div>
-            <button class="btn btn-brand w-100" type="submit">{{ $submission ? 'Update KYC' : 'Submit KYC' }}</button>
+            <button class="btn btn-brand w-100" type="submit">Submit document</button>
         </form>
-        @elseif($submission)
-        <div class="rider-card">
-            <p class="small text-muted mb-1">Submitted name</p>
-            <p class="fw-bold mb-3">{{ $submission->full_name }}</p>
-            <p class="small text-muted mb-1">Document</p>
-            <p class="mb-0">{{ ucfirst(str_replace('_', ' ', $submission->document_type)) }} · {{ $submission->document_number }}</p>
-        </div>
-        @endif
     </main>
 </div>
 @endsection

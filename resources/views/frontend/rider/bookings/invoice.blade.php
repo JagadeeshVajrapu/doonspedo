@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #{{ $booking->id }} - Doonspedo</title>
+    <title>Invoice {{ $booking->displayReference() }} - Doonspedo</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; background: #fff; color: #333; }
         .invoice-container { max-width: 800px; margin: auto; border: 1px solid #eee; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
@@ -43,7 +43,7 @@
         <div class="header">
             <div class="logo">DOON<span>SPEDO</span></div>
             <div class="invoice-meta">
-                <h2>INVOICE #{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</h2>
+                <h2>INVOICE {{ $booking->displayReference() }}</h2>
                 <p>Date: {{ $booking->created_at->format('d M, Y') }}</p>
                 <p>Status: {{ strtoupper($booking->status) }}</p>
             </div>
@@ -84,7 +84,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Ride Fare (Booking #{{ $booking->id }})</td>
+                    <td>Ride Fare (Booking {{ $booking->displayReference() }})</td>
                     <td>₹{{ number_format($booking->fare, 2) }}</td>
                     <td>₹0.00</td>
                     <td style="text-align: right;">₹{{ number_format($booking->fare, 2) }}</td>

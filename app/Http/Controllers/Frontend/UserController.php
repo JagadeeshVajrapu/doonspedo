@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\CustomerAadhaarVerification;
+use App\Models\CustomerKycSubmission;
 use App\Models\User;
+use App\Services\Aadhaar\AadhaarVerificationService;
+use App\Support\CustomerKycGate;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class UserController extends Controller
 {
@@ -161,24 +166,26 @@ class UserController extends Controller
 
     public function showKyc()
     {
-        $submission = \App\Models\CustomerKycSubmission::where('user_id', auth()->id())->latest()->first();
-        return view('frontend.rider.kyc', compact('submission'));
+        $submissions = CustomerKycSubmission::where('user_id', auth()->id())->latest()->get();
+        $submission = $submissions->first();
+        $aadhaar = CustomerAadhaarVerification::where('user_id', auth()->id())->latest()->first();
+
+        return view('frontend.rider.kyc', compact('submission', 'submissions', 'aadhaar'));
     }
 
     public function storeKyc(Request $request)
     {
         $user = auth()->user();
-        $existing = \App\Models\CustomerKycSubmission::where('user_id', $user->id)->latest()->first();
-        if ($existing && $existing->status === 'approved') {
-            return back()->with('error', 'Your KYC is already approved.');
-        }
-
         $documentType = (string) $request->input('document_type');
+        $documentLabel = trim((string) $request->input('document_label'));
         $documentNumber = preg_replace('/\s+/', '', (string) $request->input('document_number'));
         if ($documentType === 'pan') {
             $documentNumber = strtoupper($documentNumber);
         }
-        $request->merge(['document_number' => $documentNumber]);
+        $request->merge([
+            'document_number' => $documentNumber,
+            'document_label' => $documentLabel,
+        ]);
 
         $numberRules = ['required', 'string', 'max:80'];
         if ($documentType === 'aadhaar') {
@@ -189,46 +196,94 @@ class UserController extends Controller
             $numberRules[] = 'min:5';
         }
 
-        $replacingPending = $existing && $existing->status === 'pending' && $existing->document_path;
+        $existing = CustomerKycSubmission::query()
+            ->where('user_id', $user->id)
+            ->where('document_type', $documentType)
+            ->when($documentType === 'other', function ($query) use ($documentLabel) {
+                $query->where('document_label', $documentLabel);
+            })
+            ->latest()
+            ->first();
+
+        if ($existing && $existing->status === 'approved') {
+            return back()->with('error', 'This document is already verified.');
+        }
+
+        $replacing = $existing && in_array($existing->status, ['pending', 'rejected'], true) && $existing->document_path;
         $request->validate([
             'full_name' => 'required|string|max:255',
-            'document_type' => 'required|in:aadhaar,pan,driving_licence',
+            'document_type' => 'required|in:aadhaar,pan,driving_licence,voter_id,other',
+            'document_label' => 'required_if:document_type,other|nullable|string|max:80',
             'document_number' => $numberRules,
-            'document' => ($replacingPending ? 'nullable' : 'required').'|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'document' => ($replacing ? 'nullable' : 'required').'|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ], [
             'document_number.regex' => $documentType === 'aadhaar'
                 ? 'Enter the 12-digit Aadhaar number.'
                 : 'Enter a valid PAN in the format ABCDE1234F.',
             'document.required' => 'Upload a clear photo or PDF of your ID.',
+            'document.mimes' => 'Upload a JPG, PNG, or PDF file.',
         ]);
 
-        $path = $replacingPending ? $existing->document_path : null;
+        $storedNumber = $documentType === 'aadhaar'
+            ? CustomerKycGate::mask('aadhaar', $documentNumber)
+            : $documentNumber;
+
+        $path = $replacing ? $existing->document_path : null;
         if ($request->hasFile('document')) {
-            try {
-                $path = app(\App\Services\CloudinaryStorage::class)->storeUploadedFile($request->file('document'), 'customer-kyc/'.$user->id);
-            } catch (\RuntimeException $e) {
-                return back()->with('error', $e->getMessage())->withInput();
-            }
+            $path = $request->file('document')->store('customer-kyc/'.$user->id, 'local');
         }
 
         $payload = [
             'full_name' => $request->full_name,
             'document_type' => $documentType,
-            'document_number' => $documentNumber,
+            'document_label' => $documentType === 'other' ? $documentLabel : null,
+            'document_number' => $storedNumber,
             'document_path' => $path,
             'status' => 'pending',
             'rejection_reason' => null,
             'reviewed_at' => null,
         ];
 
-        if ($replacingPending) {
+        if ($replacing) {
             $existing->update($payload);
-            $message = 'KYC updated. Status: pending review.';
+            $message = 'Document updated. Status: Pending Verification.';
         } else {
-            \App\Models\CustomerKycSubmission::create($payload + ['user_id' => $user->id]);
-            $message = 'KYC submitted. Status: pending review.';
+            CustomerKycSubmission::create($payload + ['user_id' => $user->id]);
+            $message = 'Document submitted. Status: Pending Verification.';
         }
 
         return back()->with('success', $message);
+    }
+
+    public function requestAadhaarOtp(Request $request, AadhaarVerificationService $aadhaar)
+    {
+        $request->validate([
+            'aadhaar_number' => 'required|regex:/^[0-9]{12}$/',
+        ], [
+            'aadhaar_number.regex' => 'Enter the 12-digit Aadhaar number.',
+        ]);
+
+        try {
+            $aadhaar->request($request->user(), (string) $request->input('aadhaar_number'));
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Aadhaar verification was sent to the provider. Enter the OTP from the authorized Aadhaar service.');
+    }
+
+    public function verifyAadhaarOtp(Request $request, AadhaarVerificationService $aadhaar)
+    {
+        $request->validate([
+            'otp' => 'required|regex:/^[0-9]{4,8}$/',
+        ]);
+
+        try {
+            $aadhaar->verify($request->user(), (string) $request->input('otp'));
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Aadhaar status: Verified.');
     }
 }

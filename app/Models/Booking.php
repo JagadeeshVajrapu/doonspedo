@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\DisplayNumber;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Booking extends Model
 {
     protected $fillable = [
+        'reference_no',
         'user_id',
         'driver_id',
         'vehicle_category_id',
@@ -51,6 +54,22 @@ class Booking extends Model
     public static function generateRideOtp(): string
     {
         return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Booking $booking) {
+            if (!Schema::hasColumn($booking->getTable(), 'reference_no') || $booking->reference_no) {
+                return;
+            }
+
+            $booking->reference_no = ((int) static::query()->max('reference_no')) + 1;
+        });
+    }
+
+    public function displayReference(): string
+    {
+        return DisplayNumber::format((int) ($this->reference_no ?: $this->id));
     }
 
     public function user()

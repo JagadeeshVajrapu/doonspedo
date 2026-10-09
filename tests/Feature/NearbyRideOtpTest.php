@@ -175,16 +175,16 @@ class NearbyRideOtpTest extends TestCase
         ]);
 
         $this->actingAs($user)->postJson(route('rider.bookings.store'), [
-            'pickup_location' => 'Clock Tower, Dehradun',
-            'dropoff_location' => 'ISBT, Dehradun',
+            'pickup_location' => 'Connaught Place, Delhi',
+            'dropoff_location' => 'Karol Bagh, Delhi',
             'service_type' => 'ride',
             'vehicle_category_id' => $category->id,
             'fare' => 0,
             'payment_method' => 'cash',
-            'pickup_lat' => 30.3165,
-            'pickup_lng' => 78.0322,
-            'dropoff_lat' => 30.2890,
-            'dropoff_lng' => 78.0420,
+            'pickup_lat' => 28.6315,
+            'pickup_lng' => 77.2167,
+            'dropoff_lat' => 28.6400,
+            'dropoff_lng' => 77.2200,
             'distance' => 4,
         ])->assertOk()
             ->assertJsonPath('booking.fare', 120);
@@ -206,7 +206,15 @@ class NearbyRideOtpTest extends TestCase
             'dropoff_lng' => 78.0420,
             'distance' => 4.2,
         ];
-        $expected = RideFare::calculate($category, 4.2, ['ac_preference' => 'ac']);
+        $expected = RideFare::calculate($category, 4.2, [
+            'ac_preference' => 'ac',
+            'service_type' => 'ride',
+            'pickup_location' => 'Clock Tower, Dehradun',
+            'pickup_lat' => 30.3165,
+            'pickup_lng' => 78.0322,
+            'dropoff_lat' => 30.2890,
+            'dropoff_lng' => 78.0420,
+        ]);
 
         foreach ([0, 0.18, 59.10, 99999, $expected] as $clientFare) {
             $user = User::factory()->create();
