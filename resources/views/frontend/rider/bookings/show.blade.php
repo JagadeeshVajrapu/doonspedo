@@ -128,6 +128,5 @@
         </div>
     </main>
 
-    @include('partials.ui.rider-bottom-nav', ['active' => 'activity'])
 </div>
 @endsection

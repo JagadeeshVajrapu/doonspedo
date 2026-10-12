@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('direction', 'ltr') }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@yield('title', 'Doonspedo')</title>
     @include('partials.ui.favicon')
     <!-- CSRF Token -->
@@ -87,7 +87,12 @@
     @stack('head')
     @yield('styles')
 </head>
-<body class="@yield('body_class')">
+@php
+    $guestCustomerLogin = !session()->has('driver_id') && !auth()->check() && request()->routeIs('login');
+    $guestPartnerLogin = !session()->has('driver_id') && !auth()->check() && request()->routeIs('driver.login');
+@endphp
+<body class="@yield('body_class'){{ (session()->has('driver_id') || auth()->check() || $guestCustomerLogin || $guestPartnerLogin) ? ' has-apk-nav' : '' }}">
+    @include('partials.ui.app-drawer')
     <a class="ds-skip-link" href="#main-content">Skip to main content</a>
     @yield('content')
 
@@ -139,6 +144,12 @@
     @endif
 
     @include('partials.ui.a11y-enhancements')
+
+    @if(session()->has('driver_id') || $guestPartnerLogin)
+        @include('partials.ui.driver-bottom-nav')
+    @elseif(auth()->check() || $guestCustomerLogin)
+        @include('partials.ui.rider-bottom-nav')
+    @endif
 
     <!-- Popup Ad Modal -->
     @if(($sys_settings['popup_enabled'] ?? '0') == '1')

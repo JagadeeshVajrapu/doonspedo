@@ -2,7 +2,7 @@
     "name": "Doonspedo - Premium Rides",
     "short_name": "Doonspedo",
     "description": "Book your premium ride with Doonspedo instantly.",
-    "start_url": "/app",
+    "start_url": "/get-started",
     "display": "standalone",
     "background_color": "#0b0d10",
     "theme_color": "#cddc29",

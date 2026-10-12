@@ -18,6 +18,18 @@ Route::get('/policy/terms', function () { return view('policy.terms'); })->name(
 use Illuminate\Support\Facades\DB;
 use App\Models\VehicleCategory;
 
+// App entry: choose customer or partner, then use the existing login pages.
+Route::get('/get-started', function () {
+    if (session()->has('driver_id')) {
+        return redirect()->route('driver.dashboard');
+    }
+    if (auth()->check()) {
+        return redirect()->route('rider.app');
+    }
+
+    return view('frontend.login-choose');
+})->name('login.choose');
+
 // Rider Auth Routes
 Route::get('/login', [\App\Http\Controllers\Frontend\UserController::class, 'showLoginForm'])->name('login');
 Route::get('/login/verify-otp', function () { 

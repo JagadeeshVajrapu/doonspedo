@@ -65,6 +65,5 @@
         </div>
     </main>
 
-    @include('partials.ui.rider-bottom-nav', ['active' => 'account'])
 </div>
 @endsection

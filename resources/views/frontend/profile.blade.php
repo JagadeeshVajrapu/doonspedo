@@ -73,6 +73,10 @@
                 </button>
             </form>
 
+            <a href="{{ route('rider.wallet.index') }}" class="btn btn-outline-brand w-100 py-3 rounded-4 mb-3 fw-bold">
+                <i class="bi bi-wallet2 me-2"></i> Wallet
+            </a>
+
             <a href="{{ route('rider.support.index') }}" class="btn btn-outline-brand w-100 py-3 rounded-4 mb-3 fw-bold">
                 <i class="bi bi-headset me-2"></i> Help &amp; Support
             </a>
@@ -125,7 +129,6 @@
         </div>
     </main>
 
-    @include('partials.ui.rider-bottom-nav', ['active' => 'account'])
 </div>
 
 <script>

@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('branch.login');
             }
 
-            return route('login');
+            return route('login.choose');
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {

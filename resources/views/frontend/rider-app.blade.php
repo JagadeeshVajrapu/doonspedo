@@ -652,40 +652,6 @@
         </div>
     </div>
 
-    <!-- Mobile Bottom Nav -->
-    <footer class="rider-bottom-nav flex-column align-items-stretch" style="z-index: 1000;">
-        <div class="d-flex justify-content-around w-100">
-            <a href="{{ route('rider.app') }}" class="rider-nav-item {{ Request::routeIs('rider.app') ? 'is-active' : '' }}">
-                <i class="bi bi-house-door{{ Request::routeIs('rider.app') ? '-fill' : '' }}"></i>
-                <span>Home</span>
-            </a>
-            <a href="{{ route('rider.bookings.index') }}" class="rider-nav-item {{ Request::routeIs('rider.bookings.*') ? 'is-active' : '' }}">
-                <i class="bi bi-clock-history"></i>
-                <span>Activity</span>
-            </a>
-            <a href="{{ route('rider.wallet.index') }}" class="rider-nav-item {{ Request::routeIs('rider.wallet.*') ? 'is-active' : '' }}">
-                <i class="bi bi-wallet2"></i>
-                <span>Wallet</span>
-            </a>
-            <a href="{{ route('profile.edit') }}" class="rider-nav-item {{ Request::routeIs('profile.edit') ? 'is-active' : '' }}">
-                <i class="bi bi-person{{ Request::routeIs('profile.edit') ? '-fill' : '' }}"></i>
-                <span>Account</span>
-            </a>
-            <a href="#" onclick="event.preventDefault(); if(confirm('Are you sure you want to logout?')) { document.getElementById('logout-form').submit(); }" class="rider-nav-item text-danger">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Logout</span>
-            </a>
-        </div>
-        <div class="d-flex justify-content-center flex-wrap gap-3 pt-2 border-top w-100 mt-1" style="font-size: 11px;">
-            <a href="/policy/privacy" class="text-secondary text-decoration-none fw-semibold">Privacy</a>
-            <a href="/policy/data-deletion" class="text-secondary text-decoration-none fw-semibold">Data Deletion</a>
-            <a href="/policy/refund" class="text-secondary text-decoration-none fw-semibold">Refunds</a>
-        </div>
-        @include('partials.ui.developer-credit')
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-            @csrf
-        </form>
-    </footer>
 </div>
 
 <style>

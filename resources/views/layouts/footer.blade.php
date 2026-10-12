@@ -64,7 +64,6 @@
                 <div class="mt-4 d-flex flex-wrap gap-2 footer-login-actions">
                     <a href="{{ route('login') }}" class="btn btn-outline-brand btn-sm px-3">Customer Login</a>
                     <a href="{{ route('driver.login') }}" class="btn btn-outline-brand btn-sm px-3">Partner Login</a>
-                    <a href="{{ route('admin.login') }}" class="btn btn-outline-brand btn-sm px-3">Admin Login</a>
                 </div>
             </div>
         </div>

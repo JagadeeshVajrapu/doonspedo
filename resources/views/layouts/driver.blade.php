@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $dir ?? 'ltr' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@yield('title', 'Driver - Doonspedo')</title>
     @include('partials.ui.favicon')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -112,6 +112,9 @@
             }
             #mobileMenu:not(.manual-show):not(.show) {
                 transform: translateX(-100%) !important;
+            }
+            #mobileMenu .offcanvas-body {
+                padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
             }
         }
     </style>
@@ -315,8 +318,37 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const myOffcanvas = document.getElementById('mobileMenu');
+            const menuToggle = document.getElementById('mobileMenuToggle');
             if (myOffcanvas) {
                 bootstrap.Offcanvas.getOrCreateInstance(myOffcanvas);
+            }
+            if (myOffcanvas && menuToggle) {
+                menuToggle.addEventListener('click', function () {
+                    setTimeout(function () {
+                        if (myOffcanvas.classList.contains('manual-show') && !(history.state && history.state.driverMenu)) {
+                            history.pushState({ driverMenu: 1 }, '');
+                        }
+                    }, 0);
+                });
+                myOffcanvas.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        myOffcanvas.classList.remove('manual-show');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                        if (history.state && history.state.driverMenu) {
+                            history.replaceState({}, '');
+                        }
+                    });
+                });
+                myOffcanvas.addEventListener('click', function (event) {
+                    if (!event.target.closest('.btn-close, .offcanvas-overlay')) return;
+                    if (history.state && history.state.driverMenu) {
+                        history.back();
+                    }
+                });
+                window.addEventListener('popstate', function () {
+                    myOffcanvas.classList.remove('manual-show');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                });
             }
             
             // Auto-detect all permissions on page load

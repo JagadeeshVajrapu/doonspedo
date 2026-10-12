@@ -61,7 +61,6 @@
         @endif
     </main>
 
-    @include('partials.ui.rider-bottom-nav', ['active' => 'wallet'])
 </div>
 
 <div id="add-money-modal" class="modal-backdrop-custom d-none">

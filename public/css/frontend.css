@@ -1382,14 +1382,16 @@ body.bg-light.text-dark {
 .rider-status-closed { background: var(--ds-surface-subtle); color: var(--ds-text-secondary); }
 
 .rider-bottom-nav {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
     z-index: 1030;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 0.2rem;
-    padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--ds-border);
@@ -1445,6 +1447,59 @@ body.bg-light.text-dark {
 
 .rider-nav-item.is-active,
 .rider-nav-item:hover {
+    color: #3d4508;
+    background: var(--ds-brand-soft);
+}
+
+/* Partner bar on public pages (driver dashboard keeps its own stylesheet) */
+.driver-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    padding: 0.35rem 0.35rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--ds-border);
+    box-shadow: 0 -8px 24px rgba(11, 13, 16, 0.08);
+}
+
+.driver-bottom-nav-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.15rem;
+}
+
+.driver-nav-item {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ds-text-muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.35rem 0.2rem;
+    border-radius: 12px;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+}
+
+.driver-nav-item i {
+    font-size: 1.25rem;
+}
+
+.driver-nav-item.is-active,
+.driver-nav-item:hover {
     color: #3d4508;
     background: var(--ds-brand-soft);
 }
@@ -1586,9 +1641,86 @@ body.bg-light.text-dark {
 /* Phase 6 — Public / rider polish                                      */
 /* ================================================================== */
 
-/* Pages that include sticky rider bottom nav */
-body:has(.rider-bottom-nav) {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+/* Keep page content, forms, and the open hamburger menu above the fixed bar */
+body.has-apk-nav {
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+body.has-apk-nav .login-container {
+    min-height: calc(100dvh - 7.5rem - env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.has-apk-nav .app-container {
+    height: calc(100dvh - 5.75rem - env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.has-apk-nav:has(.app-container) {
+    padding-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+    body.has-apk-nav .public-nav .navbar-collapse {
+        padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+#appDrawer {
+    z-index: 1080;
+    width: min(20rem, 86vw);
+}
+
+#appDrawer .offcanvas-body {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.app-drawer-link,
+.app-drawer-link--button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.85rem 0.9rem;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: #1c2208;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+}
+
+.app-drawer-link:hover,
+.app-drawer-link.is-active {
+    background: #cddc29;
+    color: #1c2208;
+}
+
+.app-drawer-toggle {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    body:not(:has(.public-nav)) .app-drawer-toggle {
+        display: inline-flex;
+        position: fixed;
+        top: calc(0.7rem + env(safe-area-inset-top, 0px));
+        right: 0.75rem;
+        z-index: 1035;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 50%;
+        background: #fff;
+        color: #1c2208;
+        box-shadow: 0 4px 16px rgba(11, 13, 16, 0.15);
+    }
+
+    body:not(:has(.public-nav)) .rider-topbar,
+    body:not(:has(.public-nav)) .rider-app-header {
+        padding-right: 3.6rem;
+    }
 }
 
 body:has(.rider-bottom-nav) > .container,
