@@ -26,12 +26,15 @@ class ClientRequirementsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_dehradun_local_rates_follow_admin_settings_and_stop_at_the_distance_limit(): void
+    public function test_dehradun_local_and_intercity_rates_follow_admin_settings(): void
     {
         $settings = [
             'dehradun_bike_rate_per_km' => 8,
             'dehradun_auto_rate_per_km' => 12,
             'dehradun_car_rate_per_km' => 20,
+            'dehradun_bike_intercity_rate_per_km' => 5,
+            'dehradun_auto_intercity_rate_per_km' => 8,
+            'dehradun_car_intercity_rate_per_km' => 12,
             'dehradun_max_local_km' => 40,
         ];
         $bike = $this->category('Bike', 25, 99);
@@ -41,10 +44,28 @@ class ClientRequirementsTest extends TestCase
         $this->assertSame(105.0, RideFare::calculate($bike, 10, $this->dehradun(10) + ['settings' => $settings]));
         $this->assertSame(160.0, RideFare::calculate($auto, 10, $this->dehradun(10) + ['settings' => $settings]));
         $this->assertSame(260.0, RideFare::calculate($car, 10, $this->dehradun(10) + ['settings' => $settings]));
+        $this->assertSame(860.0, RideFare::calculate($car, 40, $this->dehradun(40) + ['settings' => $settings]));
+        $this->assertSame(552.0, RideFare::calculate($car, 41, $this->dehradun(41) + ['settings' => $settings]));
+        $this->assertSame(230.0, RideFare::calculate($bike, 41, $this->dehradun(41) + ['settings' => $settings]));
+        $this->assertSame(368.0, RideFare::calculate($auto, 41, $this->dehradun(41) + ['settings' => $settings]));
+
+        $local = RideFare::dehradunTripPricing($car, 40, $this->dehradun(40) + ['settings' => $settings]);
+        $intercity = RideFare::dehradunTripPricing($car, 50, $this->dehradun(50) + ['settings' => $settings]);
+        $this->assertSame('local', $local['trip_type']);
+        $this->assertSame(20.0, $local['rate']);
+        $this->assertSame('intercity', $intercity['trip_type']);
+        $this->assertSame(12.0, $intercity['rate']);
 
         $changed = $settings;
         $changed['dehradun_bike_rate_per_km'] = 9;
+        $changed['dehradun_car_intercity_rate_per_km'] = 11;
         $this->assertSame(115.0, RideFare::calculate($bike, 10, $this->dehradun(10) + ['settings' => $changed]));
+        $this->assertSame(511.0, RideFare::calculate($car, 41, $this->dehradun(41) + ['settings' => $changed]));
+
+        $missing = $settings;
+        $missing['dehradun_car_intercity_rate_per_km'] = 0;
+        $this->assertSame(0.0, RideFare::calculate($car, 50, $this->dehradun(50) + ['settings' => $missing]));
+        $this->assertStringContainsString('Intercity pricing', (string) RideFare::dehradunLimitMessage($car, 50, $this->dehradun(50) + ['settings' => $missing]));
 
         $delhi = RideFare::calculate($car, 4, [
             'settings' => $settings,
@@ -59,10 +80,10 @@ class ClientRequirementsTest extends TestCase
         $this->actingAs($user)->postJson(route('rider.bookings.store'), $this->payload($car, 10, 1))->assertOk();
         $this->assertSame(260.0, (float) Booking::first()->fare);
 
-        $blocked = $this->actingAs($user)->postJson(route('rider.bookings.store'), $this->payload($car, 41, 2));
-        $blocked->assertStatus(422);
-        $this->assertStringContainsString('40 km Dehradun local limit', $blocked->json('message'));
-        $this->assertSame(1, Booking::count());
+        $long = $this->actingAs($user)->postJson(route('rider.bookings.store'), $this->payload($car, 41, 2));
+        $long->assertOk();
+        $this->assertSame(552.0, (float) Booking::orderByDesc('id')->first()->fare);
+        $this->assertSame(2, Booking::count());
 
         $shrunk = $this->actingAs(User::factory()->create())->postJson(route('rider.bookings.store'), [
             'pickup_location' => 'Clock Tower, Dehradun',
@@ -77,8 +98,15 @@ class ClientRequirementsTest extends TestCase
             'dropoff_lng' => 78.0322,
             'distance' => 5,
         ]);
-        $shrunk->assertStatus(422);
-        $this->assertSame(1, Booking::count());
+        $shrunk->assertOk();
+        $measured = RideFare::measuredDistance(5, [
+            'pickup_lat' => 30.3165,
+            'pickup_lng' => 78.0322,
+            'dropoff_lat' => 30.80,
+            'dropoff_lng' => 78.0322,
+        ]);
+        $this->assertGreaterThan(40, $measured);
+        $this->assertSame(round(60 + ($measured * 12), 2), (float) Booking::orderByDesc('id')->first()->fare);
 
         $parts = RideFare::breakdown(260);
         $this->assertSame(0.0, $parts['tax']);

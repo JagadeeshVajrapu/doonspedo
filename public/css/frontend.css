@@ -1650,6 +1650,11 @@ body.has-apk-nav .login-container {
     min-height: calc(100dvh - 7.5rem - env(safe-area-inset-bottom, 0px)) !important;
 }
 
+body.login-no-chrome .app-drawer-toggle,
+body.login-no-chrome #appDrawer {
+    display: none !important;
+}
+
 body.has-apk-nav .app-container {
     height: calc(100dvh - 5.75rem - env(safe-area-inset-bottom, 0px)) !important;
 }

@@ -23,10 +23,6 @@
 @endphp
 <nav class="rider-bottom-nav apk-bottom-nav" aria-label="Customer navigation">
     <div class="rider-bottom-nav-row">
-        <a href="{{ url('/') }}" class="rider-nav-item {{ $active === 'home' ? 'is-active' : '' }}" @if($active === 'home') aria-current="page" @endif>
-            <i class="bi bi-house-door{{ $active === 'home' ? '-fill' : '' }}" aria-hidden="true"></i>
-            <span>Home</span>
-        </a>
         <a href="{{ route('rider.app') }}" class="rider-nav-item {{ $active === 'book' ? 'is-active' : '' }}" @if($active === 'book') aria-current="page" @endif>
             <i class="bi bi-geo-alt{{ $active === 'book' ? '-fill' : '' }}" aria-hidden="true"></i>
             <span>Book Ride</span>

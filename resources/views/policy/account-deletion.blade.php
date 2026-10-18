@@ -57,29 +57,11 @@
 <p>Any retained information will be handled in accordance with applicable laws and our Privacy Policy.</p>
 <ul class='policy-list'>
 <li>How to Request Account Deletion</li>
-<li>To request account deletion, please send an email to:</li>
 </ul>
-<p>Email: <a href='mailto:support@doonspedo.com' style='color: var(--primary-color, #cddc29); text-decoration: none; font-weight: bold;'>support@doonspedo.com</a></p>
-<ul class='policy-list'>
-<li>Include the Following Information:</li>
-<li>Full Name</li>
-<li>Registered Mobile Number</li>
-<li>Registered Email Address (if applicable)</li>
-<li>User Type (Passenger or Driver)</li>
-<li>Subject Line: “Account Deletion Request”</li>
-<li>Sample Email Format</li>
-<li>Subject: Account Deletion Request</li>
-<li>Dear Doonspedo Support,</li>
-</ul>
-<p>I would like to request the permanent deletion of my Doonspedo account and associated personal data.</p>
-<ul class='policy-list'>
-<li>Name: __________</li>
-<li>Registered Mobile Number: __________</li>
-<li>Registered Email Address: __________</li>
-<li>User Type: Passenger / Driver</li>
-</ul>
-<p>I confirm that I am the owner of this account and request its deletion in accordance with the Doonspedo Privacy Policy.</p>
-<p>Thank you.</p>
+<p>Use the online form (recommended): <a href="{{ route('account.deletion.show') }}" style="color: var(--primary-color, #cddc29); text-decoration: none; font-weight: bold;">Request Account Deletion</a></p>
+<p>Or email support at <a href='mailto:support@doonspedo.com' style='color: var(--primary-color, #cddc29); text-decoration: none; font-weight: bold;'>support@doonspedo.com</a> with your registered mobile/email and whether you are a Customer or Partner.</p>
+<p><strong>Submitting a request does not mean deletion is already complete.</strong> We verify identity (OTP when SMS is available, otherwise administrator review), then an administrator approves and completes anonymization. Typical processing time is up to 30 days after successful verification.</p>
+<p>Personal profile data is deleted or anonymized. Ride history, payments, and other records required for legal, accounting, fraud-prevention, or dispute purposes may be retained with restricted access (typically up to 7 years where required by law).</p>
 <ul class='policy-list'>
 <li>Identity Verification</li>
 </ul>

@@ -14,7 +14,7 @@
                         @include('partials.ui.brand-logo', ['size' => 'md'])
                     </div>
                     <h1 class="h2 text-dark-custom fw-bold mb-1">Partner Login</h1>
-                    <p class="text-muted small">Enter your registered mobile number to continue</p>
+                    <p class="text-muted small mb-0">Sign in with OTP or your password</p>
                 </div>
 
                 @if(session('error'))
@@ -23,7 +23,19 @@
                     </div>
                 @endif
 
-                <form action="{{ route('driver.login.sendOtp') }}" method="POST">
+                @if(session('success'))
+                    <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 small mb-3" role="alert">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @php $showPasswordLogin = $errors->has('email') || $errors->has('password') || old('email'); @endphp
+                <div class="rider-auth-tabs" role="tablist" aria-label="Login method">
+                    <button type="button" onclick="toggleDriverForm('otp')" id="otp-toggle" class="btn {{ $showPasswordLogin ? 'btn-light text-muted border-0' : 'btn-clean' }} flex-grow-1 py-2" role="tab" aria-selected="{{ $showPasswordLogin ? 'false' : 'true' }}" aria-controls="otp-form">Mobile OTP</button>
+                    <button type="button" onclick="toggleDriverForm('password')" id="password-toggle" class="btn {{ $showPasswordLogin ? 'btn-clean' : 'btn-light text-muted border-0' }} flex-grow-1 py-2" role="tab" aria-selected="{{ $showPasswordLogin ? 'true' : 'false' }}" aria-controls="password-form">Password</button>
+                </div>
+
+                <form id="otp-form" action="{{ route('driver.login.sendOtp') }}" method="POST" role="tabpanel" aria-labelledby="otp-toggle" @if($showPasswordLogin) style="display: none;" hidden @endif>
                     @csrf
                     <div class="mb-3">
                         <label class="form-label text-dark-custom small fw-bold" for="driver-branch">Select Branch</label>
@@ -45,6 +57,37 @@
 
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-clean py-3 shadow active-scale">
+                            Send OTP <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <form id="password-form" action="{{ route('driver.login.submit') }}" method="POST" role="tabpanel" aria-labelledby="password-toggle" @unless($showPasswordLogin) style="display: none;" hidden @endunless>
+                    @csrf
+                    @error('email')
+                        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 small mb-3" role="alert">{{ $message }}</div>
+                    @enderror
+                    <div class="mb-3">
+                        <label class="form-label text-dark-custom small fw-bold" for="driver-password-branch">Select Branch</label>
+                        <select id="driver-password-branch" name="branch_id" class="form-select clean-input" required>
+                            <option value="" disabled {{ old('branch_id') ? '' : 'selected' }}>Choose Branch</option>
+                            @forelse($branches as $branch)
+                                <option value="{{ $branch->id }}" @selected((string) old('branch_id') === (string) $branch->id)>{{ $branch->name }}</option>
+                            @empty
+                                <option value="" disabled>No branches available yet</option>
+                            @endforelse
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-dark-custom small fw-bold" for="driver-email">Email Address</label>
+                        <input type="email" id="driver-email" name="email" class="form-control clean-input" placeholder="you@example.com" required autocomplete="email" value="{{ old('email') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-dark-custom small fw-bold" for="driver-password">Password</label>
+                        <input type="password" id="driver-password" name="password" class="form-control clean-input" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-clean py-3 shadow active-scale">
                             Partner Login <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -57,4 +100,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleDriverForm(type) {
+        const otpForm = document.getElementById('otp-form');
+        const passwordForm = document.getElementById('password-form');
+        const otpToggle = document.getElementById('otp-toggle');
+        const passwordToggle = document.getElementById('password-toggle');
+
+        const showPassword = type === 'password';
+        otpForm.style.display = showPassword ? 'none' : 'block';
+        otpForm.hidden = showPassword;
+        passwordForm.style.display = showPassword ? 'block' : 'none';
+        passwordForm.hidden = !showPassword;
+
+        otpToggle.className = 'btn flex-grow-1 py-2 ' + (showPassword ? 'btn-light text-muted border-0' : 'btn-clean');
+        passwordToggle.className = 'btn flex-grow-1 py-2 ' + (showPassword ? 'btn-clean' : 'btn-light text-muted border-0');
+        otpToggle.setAttribute('aria-selected', showPassword ? 'false' : 'true');
+        passwordToggle.setAttribute('aria-selected', showPassword ? 'true' : 'false');
+    }
+</script>
 @endsection

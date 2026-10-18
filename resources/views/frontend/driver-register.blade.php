@@ -49,7 +49,23 @@
 
                         <div class="col-12">
                             <label class="form-label text-dark-custom small fw-bold">Email Address</label>
-                            <input type="email" name="email" class="form-control clean-input" placeholder="you@example.com" required>
+                            <input type="email" name="email" class="form-control clean-input" placeholder="you@example.com" required value="{{ old('email') }}">
+                            @error('email')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom small fw-bold" for="driver-register-password">Password</label>
+                            <input type="password" id="driver-register-password" name="password" class="form-control clean-input" placeholder="Min. 8 characters" required autocomplete="new-password">
+                            @error('password')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom small fw-bold" for="driver-register-password-confirm">Confirm Password</label>
+                            <input type="password" id="driver-register-password-confirm" name="password_confirmation" class="form-control clean-input" placeholder="Re-enter password" required autocomplete="new-password">
                         </div>
 
                         <div class="col-md-6">

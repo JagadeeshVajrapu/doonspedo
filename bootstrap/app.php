@@ -30,5 +30,35 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $redirectExpiredSession = function ($request) {
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return redirect()->route('admin.login')
+                    ->with('error', 'Your session expired. Please login again.');
+            }
+
+            if ($request->is('branch') || $request->is('branch/*')) {
+                return redirect()->route('branch.login')
+                    ->with('error', 'Your session expired. Please login again.');
+            }
+
+            if ($request->is('driver') || $request->is('driver/*')) {
+                return redirect()->route('driver.login')
+                    ->with('error', 'Your session expired. Please login again.');
+            }
+
+            return redirect()->route('login')
+                ->with('error', 'Your session expired. Please login again.');
+        };
+
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) use ($redirectExpiredSession) {
+            return $redirectExpiredSession($request);
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) use ($redirectExpiredSession) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
+            return $redirectExpiredSession($request);
+        });
     })->create();

@@ -98,24 +98,42 @@
                             </div>
 
                             <div class="mt-4 p-4 bg-light rounded-4 border">
-                                <h5 class="fw-bold mb-1 text-dark">Dehradun Local Fare</h5>
-                                <p class="small text-muted">These rates apply only to rides that start in Dehradun and stay within the maximum local distance. Trips farther than that limit cannot be booked on the local rate. Other cities keep their existing vehicle rates.</p>
+                                <h5 class="fw-bold mb-1 text-dark">Dehradun Local &amp; Intercity Fare</h5>
+                                <p class="small text-muted mb-3">Rides that start in Dehradun use Local rates up to the maximum local distance. Longer trips (for example Dehradun to Haridwar or Rishikesh) use the Intercity rates below. This limit is not the driver acceptance radius.</p>
                                 <div class="row g-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-bold" for="dehradun-bike-rate">Bike rate per KM</label>
-                                        <input type="number" id="dehradun-bike-rate" name="dehradun_bike_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_bike_rate_per_km'] ?? 8 }}" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-bold" for="dehradun-auto-rate">Auto rate per KM</label>
-                                        <input type="number" id="dehradun-auto-rate" name="dehradun_auto_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_auto_rate_per_km'] ?? 12 }}" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-bold" for="dehradun-car-rate">Car rate per KM</label>
-                                        <input type="number" id="dehradun-car-rate" name="dehradun_car_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_car_rate_per_km'] ?? 20 }}" required>
-                                    </div>
                                     <div class="col-md-3">
                                         <label class="form-label small fw-bold" for="dehradun-max-km">Maximum local distance (KM)</label>
                                         <input type="number" id="dehradun-max-km" name="dehradun_max_local_km" class="form-control" min="0.1" max="500" step="0.1" value="{{ $settings['dehradun_max_local_km'] ?? 40 }}" required>
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold mt-4 mb-2 text-dark">Local rate per KM</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-bike-rate">Bike</label>
+                                        <input type="number" id="dehradun-bike-rate" name="dehradun_bike_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_bike_rate_per_km'] ?? 8 }}" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-auto-rate">Auto</label>
+                                        <input type="number" id="dehradun-auto-rate" name="dehradun_auto_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_auto_rate_per_km'] ?? 12 }}" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-car-rate">Car</label>
+                                        <input type="number" id="dehradun-car-rate" name="dehradun_car_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_car_rate_per_km'] ?? 20 }}" required>
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold mt-4 mb-2 text-dark">Intercity rate per KM</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-bike-intercity-rate">Bike</label>
+                                        <input type="number" id="dehradun-bike-intercity-rate" name="dehradun_bike_intercity_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_bike_intercity_rate_per_km'] ?? 5 }}" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-auto-intercity-rate">Auto</label>
+                                        <input type="number" id="dehradun-auto-intercity-rate" name="dehradun_auto_intercity_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_auto_intercity_rate_per_km'] ?? 8 }}" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold" for="dehradun-car-intercity-rate">Car</label>
+                                        <input type="number" id="dehradun-car-intercity-rate" name="dehradun_car_intercity_rate_per_km" class="form-control" min="0" max="10000" step="0.01" value="{{ $settings['dehradun_car_intercity_rate_per_km'] ?? 12 }}" required>
                                     </div>
                                 </div>
                                 <div class="form-check mt-3">

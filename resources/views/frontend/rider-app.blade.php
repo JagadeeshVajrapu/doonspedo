@@ -415,6 +415,14 @@
                 <!-- Price Breakdown Section (New) -->
                 <div id="price-breakdown" class="mb-3 p-3 bg-light rounded-4" style="font-size: 0.85rem;">
                     <div class="d-flex justify-content-between mb-1">
+                        <span class="text-secondary">Trip type</span>
+                        <span class="text-dark fw-bold" id="breakdown-trip-type">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-secondary">Rate per km</span>
+                        <span class="text-dark fw-bold" id="breakdown-rate">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary">Base Fare</span>
                         <span class="text-dark fw-bold" id="breakdown-base">Rs. 0.00</span>
                     </div>
@@ -882,10 +890,13 @@ const pricingSettings = {
     dehradun_bike_rate_per_km: parseFloat("{{ $sys_settings['dehradun_bike_rate_per_km'] ?? '8' }}"),
     dehradun_auto_rate_per_km: parseFloat("{{ $sys_settings['dehradun_auto_rate_per_km'] ?? '12' }}"),
     dehradun_car_rate_per_km: parseFloat("{{ $sys_settings['dehradun_car_rate_per_km'] ?? '20' }}"),
+    dehradun_bike_intercity_rate_per_km: parseFloat("{{ $sys_settings['dehradun_bike_intercity_rate_per_km'] ?? '5' }}"),
+    dehradun_auto_intercity_rate_per_km: parseFloat("{{ $sys_settings['dehradun_auto_intercity_rate_per_km'] ?? '8' }}"),
+    dehradun_car_intercity_rate_per_km: parseFloat("{{ $sys_settings['dehradun_car_intercity_rate_per_km'] ?? '12' }}"),
     dehradun_max_local_km: parseFloat("{{ $sys_settings['dehradun_max_local_km'] ?? '40' }}")
 };
 
-function dehradunLocalRate(catName) {
+function dehradunTripPricing(catName, km) {
     if (currentService !== 'ride') return null;
     const pickup = (document.getElementById('pickup-location')?.value || '');
     const point = (typeof toPlainLatLng === 'function' && pickupLatLng) ? toPlainLatLng(pickupLatLng) : null;
@@ -893,10 +904,26 @@ function dehradunLocalRate(catName) {
     if (point && !inBox) return null;
     if (!inBox && !/\bdehradun\b/i.test(pickup)) return null;
     const name = (catName || '').toLowerCase();
-    if (name.includes('bike') || name.includes('cycle') || name.includes('moto')) return pricingSettings.dehradun_bike_rate_per_km;
-    if (name.includes('auto')) return pricingSettings.dehradun_auto_rate_per_km;
-    if (name.includes('cab') || name.includes('car') || name.includes('suv') || name.includes('sedan')) return pricingSettings.dehradun_car_rate_per_km;
-    return null;
+    let vehicle = null;
+    if (name.includes('bike') || name.includes('cycle') || name.includes('moto')) vehicle = 'bike';
+    else if (name.includes('auto')) vehicle = 'auto';
+    else if (name.includes('cab') || name.includes('car') || name.includes('suv') || name.includes('sedan') || name.includes('taxi')) vehicle = 'car';
+    if (!vehicle) return null;
+    const distance = Number.isFinite(km) ? km : (lastCalculatedDistance || 0);
+    const isLocal = distance <= (pricingSettings.dehradun_max_local_km + 0.000001);
+    const rate = isLocal
+        ? pricingSettings['dehradun_' + vehicle + '_rate_per_km']
+        : pricingSettings['dehradun_' + vehicle + '_intercity_rate_per_km'];
+    if (!isLocal && (!(rate > 0))) {
+        return { tripType: 'intercity', rate: 0, error: 'Intercity pricing is not configured for this vehicle.' };
+    }
+    return { tripType: isLocal ? 'local' : 'intercity', rate: rate, error: null };
+}
+
+function dehradunLocalRate(catName) {
+    const pricing = dehradunTripPricing(catName, lastCalculatedDistance || 0);
+    if (!pricing || pricing.error) return null;
+    return pricing.rate;
 }
 let acPreference = 'ac';
 
@@ -1785,8 +1812,17 @@ function updateFareByDistance(km) {
         const nameNode = option.querySelector('h6');
         const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
-        const localRate = dehradunLocalRate(catName);
-        if (localRate !== null) rate = localRate;
+        const tripPricing = dehradunTripPricing(catName, km);
+        if (tripPricing) {
+            if (tripPricing.error) {
+                const fareDisplayBlocked = option.querySelector('.fare-display-item');
+                if (fareDisplayBlocked) fareDisplayBlocked.innerText = '—';
+                const rateDisplayBlocked = option.querySelector('.rate-per-km-text');
+                if (rateDisplayBlocked) rateDisplayBlocked.innerText = 'N/A';
+                return;
+            }
+            rate = tripPricing.rate;
+        }
         
         // Removing global overrides to use the rate specific to the vehicle category
         if (!isBikeOrAuto) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
@@ -2005,24 +2041,46 @@ function updateTotal() {
         const nameNode = activeOption.querySelector('h6');
         const catName = nameNode ? nameNode.innerText.toLowerCase() : '';
         const isBikeOrAuto = catName.includes('bike') || catName.includes('auto') || catName.includes('cycle') || catName.includes('moto');
-        const localRate = dehradunLocalRate(catName);
-        if (localRate !== null) rate = localRate;
+        const tripPricing = dehradunTripPricing(catName, distanceKm);
+        if (tripPricing) {
+            if (tripPricing.error) {
+                rate = NaN;
+            } else {
+                rate = tripPricing.rate;
+            }
+        }
+        window.__activeTripPricing = tripPricing;
         
-        if (!isBikeOrAuto) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
+        if (!isBikeOrAuto && Number.isFinite(rate)) { if (acPreference === 'ac' && pricingSettings.ac_rate_per_km > 0) rate += pricingSettings.ac_rate_per_km; else if (acPreference === 'non-ac' && pricingSettings.non_ac_rate_per_km > 0) rate += pricingSettings.non_ac_rate_per_km; }
         ratePerKm = rate;
     }
 
-    const distFare = distanceKm * ratePerKm;
-    const subTotal = finalBase + distFare;
+    const distFare = Number.isFinite(ratePerKm) ? (distanceKm * ratePerKm) : NaN;
+    const subTotal = Number.isFinite(distFare) ? (finalBase + distFare) : NaN;
 
     // Update Breakdown UI
+    const tripTypeEl = document.getElementById('breakdown-trip-type');
+    const rateEl = document.getElementById('breakdown-rate');
+    if (tripTypeEl) {
+        tripTypeEl.innerText = window.__activeTripPricing
+            ? (window.__activeTripPricing.tripType === 'intercity' ? 'Intercity' : 'Local')
+            : 'Standard';
+    }
+    if (rateEl) {
+        rateEl.innerText = Number.isFinite(ratePerKm) ? (`Rs. ${ratePerKm.toFixed(2)}`) : '—';
+    }
     document.getElementById('breakdown-base').innerText = `Rs. ${finalBase.toFixed(2)}`;
     document.getElementById('breakdown-km').innerText = distanceKm.toFixed(1);
-    document.getElementById('breakdown-dist-fare').innerText = `Rs. ${distFare.toFixed(2)}`;
-    document.getElementById('breakdown-total').innerText = `Rs. ${subTotal.toFixed(2)}`;
+    document.getElementById('breakdown-dist-fare').innerText = Number.isFinite(distFare) ? `Rs. ${distFare.toFixed(2)}` : '—';
+    document.getElementById('breakdown-total').innerText = Number.isFinite(subTotal) ? `Rs. ${subTotal.toFixed(2)}` : '—';
     
     // Update the "Math" breakdown next to Best Price - Showing the full formula
-    document.getElementById('calculation-breakdown').innerHTML = `Rs. ${finalBase.toFixed(0)} + (${distanceKm.toFixed(1)}km &times; Rs. ${ratePerKm.toFixed(0)}) = <span class="text-brand">Rs. ${subTotal.toFixed(2)}</span>`;
+    const tripLabel = window.__activeTripPricing
+        ? (window.__activeTripPricing.tripType === 'intercity' ? 'Intercity' : 'Local')
+        : 'Standard';
+    document.getElementById('calculation-breakdown').innerHTML = Number.isFinite(subTotal)
+        ? `${tripLabel}: Rs. ${finalBase.toFixed(0)} + (${distanceKm.toFixed(1)}km &times; Rs. ${ratePerKm.toFixed(0)}) = <span class="text-brand">Rs. ${subTotal.toFixed(2)}</span>`
+        : (window.__activeTripPricing && window.__activeTripPricing.error ? window.__activeTripPricing.error : 'Fare unavailable');
 
     if (currentService === 'parcel') {
         const weight = parseFloat(document.getElementById('parcel-weight').value) || 0;
@@ -2768,8 +2826,9 @@ function confirmBooking() {
             return;
         }
         const localCategory = activeCategory ? (activeCategory.querySelector('h6')?.innerText || '') : '';
-        if (dehradunLocalRate(localCategory) !== null && lastCalculatedDistance > pricingSettings.dehradun_max_local_km) {
-            alert('This trip is beyond the ' + pricingSettings.dehradun_max_local_km + ' km Dehradun local limit. Local rates cannot be used for this trip.');
+        const tripPricing = dehradunTripPricing(localCategory, lastCalculatedDistance);
+        if (tripPricing && tripPricing.error) {
+            alert(tripPricing.error);
             return;
         }
     }

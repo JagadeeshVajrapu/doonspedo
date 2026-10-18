@@ -14,6 +14,7 @@ class DriverRegistration extends Model
         'name',
         'mobile',
         'email',
+        'password',
         'vehicle_type',
         'vehicle_number',
         'min_price',
@@ -35,6 +36,10 @@ class DriverRegistration extends Model
         'locale',
         'currency_code',
         'theme',
+    ];
+
+    protected $hidden = [
+        'password',
     ];
 
     public function bookings()
@@ -155,6 +160,7 @@ class DriverRegistration extends Model
     }
 
     protected $casts = [
+        'password' => 'hashed',
         'working_hours' => 'array',
         'ride_preferences' => 'array',
         'is_online' => 'boolean',

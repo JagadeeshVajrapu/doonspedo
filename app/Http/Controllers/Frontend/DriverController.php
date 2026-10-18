@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\DriverRegistration;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DriverController extends Controller
 {
@@ -94,6 +95,40 @@ class DriverController extends Controller
         return back()->with('error', 'Invalid OTP. Please try again.');
     }
 
+    public function loginWithPassword(Request $request)
+    {
+        if (Auth::guard('admin')->check() || Auth::check()) {
+            return redirect('/')->with('error', 'Please logout from your active account before logging in as a driver.');
+        }
+
+        $credentials = $request->validate([
+            'branch_id' => 'required|exists:branches,id',
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $driver = DriverRegistration::where('email', $credentials['email'])
+            ->where('branch_id', $credentials['branch_id'])
+            ->first();
+
+        if (!$driver || empty($driver->password) || !Hash::check($credentials['password'], $driver->password)) {
+            return back()
+                ->withErrors(['email' => 'The provided credentials do not match our records.'])
+                ->onlyInput('email', 'branch_id');
+        }
+
+        session([
+            'driver_id' => $driver->id,
+            'driver_name' => $driver->name,
+            'branch_id' => $driver->branch_id,
+        ]);
+        $request->session()->regenerate();
+        session()->forget('otp');
+        session()->save();
+
+        return redirect()->route('driver.dashboard')->with('success', 'Logged in successfully!');
+    }
+
     public function register(Request $request)
     {
         $request->validate([
@@ -101,16 +136,24 @@ class DriverController extends Controller
             'name'           => 'required|string|max:255',
             'mobile'         => 'required|string|max:15|unique:driver_registrations,mobile',
             'email'          => 'required|email|max:255|unique:driver_registrations,email',
+            'password'       => 'required|string|min:8|confirmed',
             'vehicle_type'   => 'required|string',
             'vehicle_number' => 'required|string|max:50',
             'license_number' => 'required|string|max:50',
             'city'           => 'required|string|max:100',
         ]);
 
-        $driver = DriverRegistration::create($request->only([
-            'branch_id', 'name', 'mobile', 'email', 'vehicle_type',
-            'vehicle_number', 'license_number', 'city'
-        ]));
+        $driver = DriverRegistration::create([
+            'branch_id' => $request->branch_id,
+            'name' => $request->name,
+            'mobile' => $request->mobile,
+            'email' => $request->email,
+            'password' => $request->password,
+            'vehicle_type' => $request->vehicle_type,
+            'vehicle_number' => $request->vehicle_number,
+            'license_number' => $request->license_number,
+            'city' => $request->city,
+        ]);
 
         // Send Registration OTP
         $otp = rand(100000, 999999);

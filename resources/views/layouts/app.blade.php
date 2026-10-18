@@ -90,9 +90,22 @@
 @php
     $guestCustomerLogin = !session()->has('driver_id') && !auth()->check() && request()->routeIs('login');
     $guestPartnerLogin = !session()->has('driver_id') && !auth()->check() && request()->routeIs('driver.login');
+    $hideLoginMenu = !session()->has('driver_id') && !auth()->check() && request()->routeIs(
+        'login.choose',
+        'login',
+        'login.verifyOtpForm',
+        'register',
+        'password.request',
+        'password.reset',
+        'driver.login',
+        'driver.login.verifyOtpForm',
+        'driver.register'
+    );
 @endphp
-<body class="@yield('body_class'){{ (session()->has('driver_id') || auth()->check() || $guestCustomerLogin || $guestPartnerLogin) ? ' has-apk-nav' : '' }}">
-    @include('partials.ui.app-drawer')
+<body class="@yield('body_class'){{ (session()->has('driver_id') || auth()->check() || $guestCustomerLogin || $guestPartnerLogin) ? ' has-apk-nav' : '' }}{{ $hideLoginMenu ? ' login-no-chrome' : '' }}">
+    @unless($hideLoginMenu)
+        @include('partials.ui.app-drawer')
+    @endunless
     <a class="ds-skip-link" href="#main-content">Skip to main content</a>
     @yield('content')
 

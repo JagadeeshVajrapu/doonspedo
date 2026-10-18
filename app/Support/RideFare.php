@@ -15,9 +15,14 @@ class RideFare
     {
         $settings = $context['settings'] ?? load_sys_settings();
         $rate = (float) $category->rate_per_km;
-        $localRate = self::dehradunRate($category, $distance, $context, $settings);
-        if ($localRate !== null) {
-            $rate = $localRate;
+        $billableDistance = max(0, $distance);
+        $pricing = self::dehradunTripPricing($category, $distance, $context + ['settings' => $settings]);
+        if ($pricing !== null) {
+            if (!empty($pricing['error'])) {
+                return 0.0;
+            }
+            $rate = (float) $pricing['rate'];
+            $billableDistance = (float) $pricing['distance'];
         }
         $preference = self::normalizePreference($context['ac_preference'] ?? null);
 
@@ -29,7 +34,7 @@ class RideFare
             }
         }
 
-        $fare = (float) $category->base_fare + ($distance * $rate);
+        $fare = (float) $category->base_fare + ($billableDistance * $rate);
 
         $weight = (float) ($context['parcel_weight'] ?? 0);
         if (($context['service_type'] ?? '') === 'parcel' && $weight > 0) {
@@ -66,11 +71,17 @@ class RideFare
         $auto = $settings['dehradun_auto_rate_per_km'] ?? 12;
         $car = $settings['dehradun_car_rate_per_km'] ?? 20;
         $max = $settings['dehradun_max_local_km'] ?? 40;
+        $bikeIntercity = $settings['dehradun_bike_intercity_rate_per_km'] ?? 5;
+        $autoIntercity = $settings['dehradun_auto_intercity_rate_per_km'] ?? 8;
+        $carIntercity = $settings['dehradun_car_intercity_rate_per_km'] ?? 12;
 
         return [
             'bike' => max(0, (float) $bike),
             'auto' => max(0, (float) $auto),
             'car' => max(0, (float) $car),
+            'bike_intercity' => max(0, (float) $bikeIntercity),
+            'auto_intercity' => max(0, (float) $autoIntercity),
+            'car_intercity' => max(0, (float) $carIntercity),
             'max_km' => max(0.1, (float) $max),
         ];
     }
@@ -89,12 +100,13 @@ class RideFare
     }
 
     /**
-     * Local Dehradun rides use the admin per-km rate. Trips past the configured
-     * distance are refused by the booking controller and are not given another rate.
+     * Resolve Local vs Intercity pricing for a Dehradun ride.
+     * Returns null when Dehradun pricing does not apply.
+     *
+     * @return array{trip_type:string,rate:float,max_km:float,distance:float,class:string,error:?string}|null
      */
-    public static function dehradunLimitMessage(VehicleCategory $category, float $distance, array $context = []): ?string
+    public static function dehradunTripPricing(VehicleCategory $category, float $distance, array $context = []): ?array
     {
-        unset($category);
         $settings = $context['settings'] ?? load_sys_settings();
         if (($context['service_type'] ?? 'ride') !== 'ride' || !empty($context['is_rental'])) {
             return null;
@@ -103,13 +115,42 @@ class RideFare
             return null;
         }
 
-        $measured = self::measuredDistance($distance, $context);
-        $max = self::dehradunRates($settings)['max_km'];
-        if ($measured <= $max + 0.000001) {
+        $class = self::dehradunVehicleClass($category->name);
+        if ($class === null) {
             return null;
         }
 
-        return 'This trip is '.number_format($measured, 1).' km, beyond the '.number_format($max, 0).' km Dehradun local limit. Local rates cannot be used for this trip.';
+        $rates = self::dehradunRates($settings);
+        $measured = self::measuredDistance($distance, $context);
+        $isLocal = $measured <= $rates['max_km'] + 0.000001;
+        $tripType = $isLocal ? 'local' : 'intercity';
+        $rateKey = $isLocal ? $class : ($class.'_intercity');
+        $rate = (float) ($rates[$rateKey] ?? 0);
+
+        $error = null;
+        if (!$isLocal && $rate <= 0) {
+            $error = 'Intercity pricing is not configured for this vehicle. Ask the administrator to set the Intercity rate per km.';
+        }
+
+        return [
+            'trip_type' => $tripType,
+            'rate' => $rate,
+            'max_km' => $rates['max_km'],
+            'distance' => $measured,
+            'class' => $class,
+            'error' => $error,
+        ];
+    }
+
+    /**
+     * Kept for callers that still check the old limit helper.
+     * Intercity trips are priced separately; this only reports missing Intercity rates.
+     */
+    public static function dehradunLimitMessage(VehicleCategory $category, float $distance, array $context = []): ?string
+    {
+        $pricing = self::dehradunTripPricing($category, $distance, $context);
+
+        return $pricing['error'] ?? null;
     }
 
     public static function measuredDistance(float $distance, array $context): float
@@ -126,26 +167,6 @@ class RideFare
         $straight = Geo::kilometers((float) $pickupLat, (float) $pickupLng, (float) $dropLat, (float) $dropLng);
 
         return round(max($distance, $straight), 2);
-    }
-
-    private static function dehradunRate(VehicleCategory $category, float $distance, array $context, array $settings): ?float
-    {
-        if (self::dehradunLimitMessage($category, $distance, $context + ['settings' => $settings])) {
-            return null;
-        }
-        if (($context['service_type'] ?? 'ride') !== 'ride' || !empty($context['is_rental'])) {
-            return null;
-        }
-        if (!self::isDehradunPickup($context['pickup_location'] ?? null, $context['pickup_lat'] ?? null, $context['pickup_lng'] ?? null)) {
-            return null;
-        }
-
-        $class = self::dehradunVehicleClass($category->name);
-        if ($class === null) {
-            return null;
-        }
-
-        return self::dehradunRates($settings)[$class];
     }
 
     public static function dehradunVehicleClass(?string $name): ?string

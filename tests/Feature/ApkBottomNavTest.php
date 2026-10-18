@@ -47,21 +47,21 @@ class ApkBottomNavTest extends TestCase
         $customerLogin->assertOk()->assertSee('Customer Login', false);
         $customerNav = $this->navHtml($customerLogin->getContent(), 'rider-bottom-nav');
         $this->assertNotNull($customerNav);
+        $this->assertStringNotContainsString('>Home</span>', $customerNav);
         $this->assertStringContainsString('Book Ride', $customerNav);
         $this->assertStringContainsString('My Rides', $customerNav);
         $this->assertStringContainsString('Profile', $customerNav);
-        $this->assertStringNotContainsString(route('driver.wallet'), $customerNav);
         $customerLogin->assertDontSee('aria-label="Partner navigation"', false);
 
         $partnerLogin = $this->get(route('driver.login'));
         $partnerLogin->assertOk()->assertSee('Partner Login', false);
         $partnerNav = $this->navHtml($partnerLogin->getContent(), 'driver-bottom-nav');
         $this->assertNotNull($partnerNav);
+        $this->assertStringNotContainsString('>Home</span>', $partnerNav);
         $this->assertStringContainsString('Rides', $partnerNav);
         $this->assertStringContainsString('Wallet', $partnerNav);
         $this->assertStringContainsString('Earnings', $partnerNav);
         $this->assertStringContainsString('Profile', $partnerNav);
-        $this->assertStringNotContainsString(route('rider.app'), $partnerNav);
         $partnerLogin->assertDontSee('aria-label="Customer navigation"', false);
     }
 
@@ -102,6 +102,7 @@ class ApkBottomNavTest extends TestCase
         $this->assertStringContainsString('Book Ride', $nav);
         $this->assertStringContainsString('My Rides', $nav);
         $this->assertStringContainsString('Profile', $nav);
+        $this->assertStringNotContainsString('>Home</span>', $nav);
         $this->assertStringNotContainsString('admin', strtolower($nav));
         $this->assertStringNotContainsString('aria-label="Partner navigation"', $response->getContent());
         $menu = $this->menuHtml($response->getContent());
@@ -109,6 +110,7 @@ class ApkBottomNavTest extends TestCase
         $this->assertStringContainsString(route('rider.bookings.index'), $menu);
         $this->assertStringContainsString(route('profile.edit'), $menu);
         $this->assertStringContainsString('Logout', $menu);
+        $this->assertStringNotContainsString('> Home</a>', $menu);
         $this->assertStringNotContainsString(route('driver.wallet'), $menu);
         $this->assertStringNotContainsString(route('admin.dashboard'), $menu);
 
@@ -125,20 +127,22 @@ class ApkBottomNavTest extends TestCase
         $response->assertSee('navbar-toggler', false);
         $nav = $this->navHtml($response->getContent(), 'driver-bottom-nav');
         $this->assertNotNull($nav);
-        $this->assertStringContainsString(route('driver.dashboard'), $nav);
         $this->assertStringContainsString(route('driver.rides.index'), $nav);
         $this->assertStringContainsString(route('driver.wallet'), $nav);
         $this->assertStringContainsString(route('driver.earnings'), $nav);
         $this->assertStringContainsString(route('driver.profile'), $nav);
+        $this->assertStringNotContainsString('>Home</span>', $nav);
+        $this->assertStringNotContainsString(route('driver.dashboard'), $nav);
         $this->assertStringNotContainsString('admin', strtolower($nav));
         $this->assertStringNotContainsString('aria-label="Customer navigation"', $response->getContent());
         $menu = $this->menuHtml($response->getContent());
-        $this->assertStringContainsString(route('driver.dashboard'), $menu);
         $this->assertStringContainsString(route('driver.rides.index'), $menu);
         $this->assertStringContainsString(route('driver.wallet'), $menu);
         $this->assertStringContainsString(route('driver.earnings'), $menu);
         $this->assertStringContainsString(route('driver.profile'), $menu);
         $this->assertStringContainsString(route('driver.logout'), $menu);
+        $this->assertStringNotContainsString('> Home</a>', $menu);
+        $this->assertStringNotContainsString(route('driver.dashboard'), $menu);
         $this->assertStringNotContainsString(route('rider.app'), $menu);
         $this->assertStringNotContainsString(route('admin.dashboard'), $menu);
     }

@@ -40,7 +40,7 @@
                     <li><a href="{{ route('policy.privacy') }}" class="footer-link">Privacy Policy</a></li>
                     <li><a href="{{ route('policy.refund') }}" class="footer-link">Refund &amp; Cancellation</a></li>
                     <li><a href="{{ route('policy.data-deletion') }}" class="footer-link">Data Deletion Policy</a></li>
-                    <li><a href="{{ route('policy.account-deletion') }}" class="footer-link">Account Deletion Request</a></li>
+                    <li><a href="{{ route('account.deletion.show') }}" class="footer-link">Account Deletion Request</a></li>
                 </ul>
             </div>
 

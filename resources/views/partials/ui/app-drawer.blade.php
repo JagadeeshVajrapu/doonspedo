@@ -10,7 +10,6 @@
     <nav class="offcanvas-body" aria-label="App menu">
         <ul class="list-unstyled d-grid gap-1 mb-0">
             @if(session()->has('driver_id'))
-                <li><a class="app-drawer-link {{ request()->routeIs('driver.dashboard') ? 'is-active' : '' }}" href="{{ route('driver.dashboard') }}"><i class="bi bi-house" aria-hidden="true"></i> Home</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('driver.rides.*') ? 'is-active' : '' }}" href="{{ route('driver.rides.index') }}"><i class="bi bi-briefcase" aria-hidden="true"></i> Rides</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('driver.wallet*') ? 'is-active' : '' }}" href="{{ route('driver.wallet') }}"><i class="bi bi-wallet2" aria-hidden="true"></i> Wallet</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('driver.earnings') ? 'is-active' : '' }}" href="{{ route('driver.earnings') }}"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Earnings</a></li>
@@ -22,7 +21,6 @@
                     </form>
                 </li>
             @elseif(auth()->check())
-                <li><a class="app-drawer-link {{ request()->is('/') ? 'is-active' : '' }}" href="{{ url('/') }}"><i class="bi bi-house" aria-hidden="true"></i> Home</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('rider.app') ? 'is-active' : '' }}" href="{{ route('rider.app') }}"><i class="bi bi-geo-alt" aria-hidden="true"></i> Book Ride</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('rider.bookings.*') ? 'is-active' : '' }}" href="{{ route('rider.bookings.index') }}"><i class="bi bi-clock-history" aria-hidden="true"></i> My Rides</a></li>
                 <li><a class="app-drawer-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}" href="{{ route('profile.edit') }}"><i class="bi bi-person" aria-hidden="true"></i> Profile</a></li>

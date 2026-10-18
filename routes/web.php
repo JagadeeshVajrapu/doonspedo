@@ -15,6 +15,19 @@ Route::get('/policy/community-guidelines', function () { return view('policy.com
 Route::get('/policy/driver-terms', function () { return view('policy.driver-terms'); })->name('policy.driver-terms');
 Route::get('/policy/terms', function () { return view('policy.terms'); })->name('policy.terms');
 
+// Public account deletion request (Google Play Store requirement) — no login required
+Route::get('/account-deletion', [\App\Http\Controllers\Frontend\AccountDeletionController::class, 'show'])->name('account.deletion.show');
+Route::post('/account-deletion', [\App\Http\Controllers\Frontend\AccountDeletionController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('account.deletion.store');
+Route::get('/account-deletion/verify/{reference}', [\App\Http\Controllers\Frontend\AccountDeletionController::class, 'showVerify'])
+    ->name('account.deletion.verify');
+Route::post('/account-deletion/verify/{reference}', [\App\Http\Controllers\Frontend\AccountDeletionController::class, 'verify'])
+    ->middleware('throttle:10,1')
+    ->name('account.deletion.verify.submit');
+Route::get('/account-deletion/success/{reference}', [\App\Http\Controllers\Frontend\AccountDeletionController::class, 'success'])
+    ->name('account.deletion.success');
+
 use Illuminate\Support\Facades\DB;
 use App\Models\VehicleCategory;
 
@@ -219,6 +232,14 @@ Route::middleware('auth:admin')->prefix('admin/customer-kyc')->name('admin.custo
     Route::post('/{submission}/reject', [\App\Http\Controllers\Admin\CustomerKycController::class, 'reject'])->name('reject');
 });
 
+Route::middleware('auth:admin')->prefix('admin/account-deletions')->name('admin.account-deletions.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\AccountDeletionController::class, 'index'])->name('index');
+    Route::get('/{id}', [\App\Http\Controllers\Admin\AccountDeletionController::class, 'show'])->name('show');
+    Route::post('/{id}/approve', [\App\Http\Controllers\Admin\AccountDeletionController::class, 'approve'])->name('approve');
+    Route::post('/{id}/reject', [\App\Http\Controllers\Admin\AccountDeletionController::class, 'reject'])->name('reject');
+    Route::post('/{id}/complete', [\App\Http\Controllers\Admin\AccountDeletionController::class, 'complete'])->name('complete');
+});
+
 // Admin Driver Management
 Route::group(['prefix' => 'admin/drivers', 'as' => 'admin.drivers.'], function () {
     Route::get('/', [\App\Http\Controllers\Admin\DriverController::class, 'index'])->name('index');
@@ -382,6 +403,7 @@ Route::group(['prefix' => 'driver', 'as' => 'driver.'], function () {
     Route::post('/register', [\App\Http\Controllers\Frontend\DriverController::class, 'register'])->name('register.submit');
     
     Route::get('/login', [\App\Http\Controllers\Frontend\DriverController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\Frontend\DriverController::class, 'loginWithPassword'])->name('login.submit');
     Route::get('/login/verify-otp', function () { 
         if (session()->has('mobile')) return view('frontend.driver-verify-otp');
         return redirect()->route('driver.login'); 

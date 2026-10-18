@@ -5,10 +5,6 @@
 @php $active = $active ?? ''; @endphp
 <nav class="driver-bottom-nav apk-bottom-nav" aria-label="Partner navigation">
     <div class="driver-bottom-nav-row">
-    <a href="{{ route('driver.dashboard') }}" class="driver-nav-item {{ $active === 'home' || request()->routeIs('driver.dashboard') ? 'is-active' : '' }}" @if($active === 'home' || request()->routeIs('driver.dashboard')) aria-current="page" @endif>
-        <i class="bi bi-house-door{{ ($active === 'home' || request()->routeIs('driver.dashboard')) ? '-fill' : '' }}" aria-hidden="true"></i>
-        <span>Home</span>
-    </a>
     <a href="{{ route('driver.rides.index') }}" class="driver-nav-item {{ $active === 'rides' || request()->routeIs('driver.rides.*') ? 'is-active' : '' }}" @if($active === 'rides' || request()->routeIs('driver.rides.*')) aria-current="page" @endif>
         <i class="bi bi-briefcase{{ ($active === 'rides' || request()->routeIs('driver.rides.*')) ? '-fill' : '' }}" aria-hidden="true"></i>
         <span>Rides</span>

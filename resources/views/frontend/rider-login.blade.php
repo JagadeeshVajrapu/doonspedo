@@ -22,6 +22,12 @@
                     </div>
                 @endif
 
+                @if(session('success'))
+                    <div class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 small mb-3" role="alert">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 @php $showPasswordLogin = $errors->has('email') || $errors->has('password') || old('email'); @endphp
                 <div class="rider-auth-tabs" role="tablist" aria-label="Login method">
                     <button type="button" onclick="toggleForm('otp')" id="otp-toggle" class="btn {{ $showPasswordLogin ? 'btn-light text-muted border-0' : 'btn-clean' }} flex-grow-1 py-2" role="tab" aria-selected="{{ $showPasswordLogin ? 'false' : 'true' }}" aria-controls="otp-form">Mobile OTP</button>
